@@ -1,0 +1,49 @@
+<resources>
+    <string name="app_name">BaseProject</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="notification_content_1" translatable="false">Notification 1</string>
+    <string name="notification_content_2" translatable="false">Notification 2</string>
+    <string name="notification_content_3" translatable="false">Notification 3</string>
+    <string name="notification_content_4" translatable="false">Notification 4</string>
+    <string name="notification_content_5" translatable="false">Notification 5</string>
+    <string name="notification_content_6" translatable="false">Notification 6</string>
+    <string name="notification_content_7" translatable="false">Notification 7</string>
+    <string name="notification_content_8" translatable="false">Notification 8</string>
+    <string name="notification_content_9" translatable="false">Notification 9</string>
+
+    <string name="channel_name" translatable="false">Notifications app_name</string>
+    <string name="channel_desc" translatable="false">Notifications app_name</string>
+
+    <!--    month-->
+    <string name="month_1">Jan</string>
+    <string name="month_2">Feb</string>
+    <string name="month_3">Mar</string>
+    <string name="month_4">Apr</string>
+    <string name="month_5">May</string>
+    <string name="month_6">Jun</string>
+    <string name="month_7">Jul</string>
+    <string name="month_8">Aug</string>
+    <string name="month_9">Sep</string>
+    <string name="month_10">Oct</string>
+    <string name="month_11">Nov</string>
+    <string name="month_12">Dec</string>
+
+    <!--    week title-->
+    <string name="monday">Mon</string>
+    <string name="tuesday">Tus</string>
+    <string name="wednesday">Wed</string>
+    <string name="thursday">Thu</string>
+    <string name="friday">Fri</string>
+    <string name="saturday">Sat</string>
+    <string name="sunday">Sun</string>
+
+    <string name="monday_full">Monday</string>
+    <string name="tuesday_full">Tuesday</string>
+    <string name="wednesday_full">Wednesday</string>
+    <string name="thursday_full">Thursday</string>
+    <string name="friday_full">Friday</string>
+    <string name="saturday_full">Saturday</string>
+    <string name="sunday_full">Sunday</string>
+</resources>

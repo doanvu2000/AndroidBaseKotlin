@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tool="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:background="@drawable/layout_round"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <TextView
+        android:id="@+id/dialog_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:text="Thông báo"
+        android:textColor="@color/black"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <ImageView
+        android:id="@+id/image_alert"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_gravity="center"
+        android:src="@mipmap/ic_launcher" />
+
+    <TextView
+        android:id="@+id/dialog_msg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="15dp"
+        android:gravity="center"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        tool:text="Nội dung................" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="27dp"
+        android:gravity="center"
+        android:paddingBottom="15dp">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_submit_cancel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginEnd="11dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_button_cancel"
+            android:gravity="center"
+            android:paddingLeft="37dp"
+            android:paddingTop="5dp"
+            android:paddingEnd="37dp"
+            android:paddingBottom="5dp"
+            android:text="Cancel"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_submit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:background="@drawable/bg_button_blue"
+            android:gravity="center"
+            android:paddingLeft="37dp"
+            android:paddingTop="5dp"
+            android:paddingEnd="37dp"
+            android:paddingBottom="5dp"
+            android:text="Confirm"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+    </LinearLayout>
+</LinearLayout>
