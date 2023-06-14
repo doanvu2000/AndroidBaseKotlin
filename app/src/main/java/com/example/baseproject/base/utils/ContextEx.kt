@@ -23,6 +23,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
@@ -45,6 +48,36 @@ fun Context.checkPermission(permission: String): Boolean {
 
 fun Fragment.checkPermission(permission: String): Boolean {
     return requireContext().checkPermission(permission)
+}
+
+fun Context.hasReadStoragePermission() = checkPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+fun Fragment.hasReadStoragePermission() = requireContext().hasReadStoragePermission()
+fun Fragment.getActivityResultLauncher(callBack: (Map<String, Boolean>) -> Unit): ActivityResultLauncher<Array<String>> {
+    return registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+        callBack.invoke(permissions)
+    }
+}
+
+fun ComponentActivity.getActivityResultLauncher(callBack: (Map<String, Boolean>) -> Unit): ActivityResultLauncher<Array<String>> {
+    return registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+        callBack.invoke(permissions)
+    }
+}
+
+fun Context.requestPermissionReadStorage(permissionLauncher: ActivityResultLauncher<Array<String>>) {
+    val isReadPermissionGranted = hasReadStoragePermission()
+
+    val permissionRequest = mutableListOf<String>()
+    if (!isReadPermissionGranted) {
+        permissionRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+    }
+    if (permissionRequest.isNotEmpty()) {
+        permissionLauncher.launch(permissionRequest.toTypedArray())
+    }
+}
+
+fun Fragment.requestPermissionReadStorage(permissionLauncher: ActivityResultLauncher<Array<String>>) {
+    requireContext().requestPermissionReadStorage(permissionLauncher)
 }
 
 fun Context.openActivity(pClass: Class<out Activity>, bundle: Bundle?) {
