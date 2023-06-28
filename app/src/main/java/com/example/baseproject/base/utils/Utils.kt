@@ -1,5 +1,6 @@
 package com.example.baseproject.base.utils
 
+import android.app.PendingIntent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Matrix
@@ -10,6 +11,8 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.Serializable
+import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
 import java.util.*
 import kotlin.math.pow
 import kotlin.math.roundToInt
@@ -45,6 +48,23 @@ fun Boolean.invert(): Boolean {
 fun String.upperFirstCase(): String {
     val firstCase = this.first().toString().uppercase()
     return firstCase + this.substring(1)
+}
+
+fun String?.containsIgnoreCase(regex: String): Boolean {
+    return this?.contains(regex, true) == true
+}
+
+fun String.encryptStringToLong(): Long {
+    val digest = MessageDigest.getInstance("SHA-256")
+    val hashBytes = digest.digest(this.toByteArray(StandardCharsets.UTF_8))
+
+    // Convert the hash bytes to a long value
+    var result: Long = 0
+    for (i in 0 until 8) {
+        result = (result shl 8) or (hashBytes[i].toLong() and 0xff)
+    }
+
+    return result
 }
 
 /**
@@ -159,4 +179,11 @@ fun <T> pushBundle(key: String, data: T): Bundle {
         else -> bundle.putString(key, data.toString())
     }
     return bundle
+}
+fun Int.getFlagPendingIntent(): Int {
+    return if (isMinSdk23) {
+        PendingIntent.FLAG_IMMUTABLE or this
+    } else {
+        this
+    }
 }

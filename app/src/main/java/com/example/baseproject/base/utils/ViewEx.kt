@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Rect
 import android.os.Build
 import android.text.Html
 import android.view.View
@@ -147,6 +149,16 @@ fun TextView.setTextHtml(content: String) {
     }
 }
 
+fun TextView.showStrikeThrough(show: Boolean = true) {
+    paintFlags =
+        if (show) paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+        else paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
+}
+
+fun TextView.setUnderLine() {
+    paintFlags = paintFlags or Paint.UNDERLINE_TEXT_FLAG
+}
+
 fun View.loadBitmapFromView(done: (Bitmap) -> Unit) {
     post {
         val b = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
@@ -196,4 +208,12 @@ fun ScrollView.scrollToTop() {
 fun NestedScrollView.scrollToTop() {
     fullScroll(ScrollView.FOCUS_UP)
     smoothScrollTo(0, 0)
+}
+fun View.isSoftKeyboardVisible(): Boolean {
+    val rect = Rect()
+    rootView.getWindowVisibleDisplayFrame(rect)
+    val screenHeight = rootView.height
+    val keyboardHeight = screenHeight - rect.bottom
+    val threshold = screenHeight * 0.15 // Adjust this value as per your requirements
+    return keyboardHeight > threshold
 }

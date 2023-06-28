@@ -2,6 +2,7 @@ package com.example.baseproject.base.utils
 
 import android.Manifest
 import android.app.Activity
+import android.app.ActivityManager
 import android.app.Service
 import android.content.ActivityNotFoundException
 import android.content.ComponentName
@@ -111,7 +112,7 @@ fun Fragment.findChildFragment(TAG: String): Fragment? {
 }
 
 fun Context.loadImage(
-    imageView: ImageView,url: String,
+    imageView: ImageView, url: String,
     error: Int = R.drawable.ic_launcher_background
 ) {
     Glide.with(this).load(url)
@@ -122,7 +123,7 @@ fun Context.loadImage(
 }
 
 fun Context.loadImage(
-    imageView: ImageView,url: Int,
+    imageView: ImageView, url: Int,
     error: Int = R.drawable.ic_launcher_background
 ) {
     Glide.with(this).load(url)
@@ -410,4 +411,16 @@ fun Context.loadJsonFromAsset(path: String): String? {
         e.printStackTrace()
     }
     return json
+}
+
+fun Context.getColorById(colorSource: Int): Int {
+    return ContextCompat.getColor(this, colorSource)
+}
+
+fun Context.serviceIsRunning(serviceClass: Class<*>): Boolean {
+    val manager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+    @Suppress("DEPRECATION")
+    for (service in manager.getRunningServices(Int.MAX_VALUE))
+        if (serviceClass.name == service.service.className) return true
+    return false
 }
