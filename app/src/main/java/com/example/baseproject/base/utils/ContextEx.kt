@@ -8,10 +8,13 @@ import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.media.Ringtone
 import android.media.RingtoneManager
+import android.media.audiofx.AudioEffect
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
@@ -424,3 +427,43 @@ fun Context.serviceIsRunning(serviceClass: Class<*>): Boolean {
         if (serviceClass.name == service.service.className) return true
     return false
 }
+fun Context.getVersionName(): String {
+    return try {
+        val packageInfo: PackageInfo = packageManager.getPackageInfo(packageName, 0)
+        packageInfo.versionName
+    } catch (e: Exception) {
+        Build.VERSION.RELEASE
+    }
+}
+
+fun Fragment.getVersionName(): String {
+    return requireContext().getVersionName()
+}
+
+fun Fragment.openEqualizerSetting(audioSessionId: Int) {
+    try {
+        val equalizerIntent = Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL)
+        equalizerIntent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, audioSessionId)
+        equalizerIntent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, requireContext().packageName)
+        equalizerIntent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC)
+        startActivityForResult(equalizerIntent, 133)
+    } catch (e: Exception) {
+        showToast("Equalizer feature not supported!")
+    }
+}
+
+fun Context.getDrawableById(drawableId: Int): Drawable? {
+    return ContextCompat.getDrawable(this, drawableId)
+}
+
+fun Context.shareText(value: String) {
+    val sendIntent: Intent = Intent().apply {
+        action = Intent.ACTION_SEND
+        putExtra(Intent.EXTRA_TEXT, value)
+        type = "text/plain"
+    }
+    val shareIntent = Intent.createChooser(sendIntent, null)
+    startActivity(shareIntent)
+}
+
+fun Context.getLinkApp() = "https://play.google.com/store/apps/details?id=$packageName"

@@ -18,7 +18,6 @@ import android.widget.EditText
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.content.ContextCompat
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
@@ -187,11 +186,25 @@ fun View.goneWithAnimation() {
     this.startAnimation(AnimationUtils.loadAnimation(this.context, R.anim.slide_out_bottom))
 }
 
-fun EditText.setDrawableEnd(context: Context, drawableId: Int) {
+fun EditText.setDrawableEnd(drawableId: Int) {
     val drawable = if (drawableId == 0) {
         null
     } else {
-        ContextCompat.getDrawable(context, drawableId)
+        context.getDrawableById(drawableId)
+    }
+    this.setCompoundDrawablesWithIntrinsicBounds(
+        null,
+        null,
+        drawable,
+        null
+    )
+}
+
+fun TextView.setDrawableEnd(drawableId: Int) {
+    val drawable = if (drawableId == 0) {
+        null
+    } else {
+        context.getDrawableById(drawableId)
     }
     this.setCompoundDrawablesWithIntrinsicBounds(
         null,
@@ -209,6 +222,7 @@ fun NestedScrollView.scrollToTop() {
     fullScroll(ScrollView.FOCUS_UP)
     smoothScrollTo(0, 0)
 }
+
 fun View.isSoftKeyboardVisible(): Boolean {
     val rect = Rect()
     rootView.getWindowVisibleDisplayFrame(rect)
