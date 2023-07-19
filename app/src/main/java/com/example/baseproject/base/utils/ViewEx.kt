@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.baseproject.R
+import com.google.android.material.snackbar.Snackbar
 
 @Suppress("DEPRECATION")
 fun Activity.setFullScreenMode(isFullScreen: Boolean = false) {
@@ -230,4 +231,24 @@ fun View.isSoftKeyboardVisible(): Boolean {
     val keyboardHeight = screenHeight - rect.bottom
     val threshold = screenHeight * 0.15 // Adjust this value as per your requirements
     return keyboardHeight > threshold
+}
+fun Fragment.showSnackBar(msg: String, duration: Int = 280) {
+    view?.let {
+        val snackBar = Snackbar.make(it, msg, duration)
+//            .setTextColor(getColorById(R.color.text_selected))
+        val snackView = snackBar.view
+//        snackView.setBackgroundColor(getColorById(R.color.color_app))
+        snackBar.show()
+    }
+}
+
+fun Activity.showSnackBar(msg: String, duration: Int = 280) {
+    val view = window.decorView.findViewById<View>(android.R.id.content)
+    view?.let {
+        val snackBar = Snackbar.make(it, msg, duration)
+//            .setTextColor(getColorById(R.color.text_selected))
+//        val snackView = snackBar.view
+//        snackView.setBackgroundColor(getColorById(R.color.color_app))
+        snackBar.show()
+    }
 }
