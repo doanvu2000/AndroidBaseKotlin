@@ -22,6 +22,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -418,6 +419,12 @@ fun Context.loadJsonFromAsset(path: String): String? {
 
 fun Context.getColorById(colorSource: Int): Int {
     return ContextCompat.getColor(this, colorSource)
+}
+
+fun Context.getColorByIdWithTheme(colorAttr: Int): Int {
+    val typedValue = TypedValue()
+    theme.resolveAttribute(colorAttr, typedValue, true)
+    return typedValue.data
 }
 
 fun Context.serviceIsRunning(serviceClass: Class<*>): Boolean {

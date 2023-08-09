@@ -7,6 +7,7 @@ import android.graphics.Matrix
 import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
+import androidx.appcompat.app.AppCompatDelegate
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -180,10 +181,22 @@ fun <T> pushBundle(key: String, data: T): Bundle {
     }
     return bundle
 }
+
 fun Int.getFlagPendingIntent(): Int {
     return if (isMinSdk23) {
         PendingIntent.FLAG_IMMUTABLE or this
     } else {
         this
     }
+}
+
+//"JIN VU di hOC" => "Jin Vu Di Hoc"
+fun String.capitalizeWord(): String {
+    return this.lowercase().split(" ")
+        .joinToString(separator = " ", transform = String::capitalize)
+}
+
+fun setDarkMode(enable: Boolean = false) {
+    val mode = if (enable) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+    AppCompatDelegate.setDefaultNightMode(mode)
 }

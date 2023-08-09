@@ -17,7 +17,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ScrollView
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
@@ -51,12 +50,6 @@ fun Activity.setFullScreenMode(isFullScreen: Boolean = false) {
             window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
         }
     }
-}
-
-fun Activity.setDarkMode(enable: Boolean = false) {
-    val mode = if (enable) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
-    AppCompatDelegate.setDefaultNightMode(mode)
-    recreate()
 }
 
 fun Fragment.hideKeyboard() {
