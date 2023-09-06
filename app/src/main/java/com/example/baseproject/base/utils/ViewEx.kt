@@ -4,10 +4,8 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Paint
 import android.graphics.Rect
 import android.os.Build
-import android.text.Html
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
@@ -16,7 +14,6 @@ import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ScrollView
-import android.widget.TextView
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
@@ -119,9 +116,7 @@ fun RecyclerView.setGridManager(
 }
 
 fun RecyclerView.setLinearLayoutManager(
-    context: Context,
-    adapter: RecyclerView.Adapter<*>,
-    orientation: Int = RecyclerView.VERTICAL
+    context: Context, adapter: RecyclerView.Adapter<*>, orientation: Int = RecyclerView.VERTICAL
 ) {
     val manager = LinearLayoutManager(context)
     manager.orientation = orientation
@@ -129,30 +124,8 @@ fun RecyclerView.setLinearLayoutManager(
     this.adapter = adapter
 }
 
-fun TextView.clear() {
-    this.text = ""
-}
 
-fun TextView.setTextHtml(content: String) {
-    this.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        Html.fromHtml(content, Html.FROM_HTML_MODE_COMPACT)
-    } else {
-        @Suppress("DEPRECATION")
-        Html.fromHtml(content)
-    }
-}
-
-fun TextView.showStrikeThrough(show: Boolean = true) {
-    paintFlags =
-        if (show) paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-        else paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
-}
-
-fun TextView.setUnderLine() {
-    paintFlags = paintFlags or Paint.UNDERLINE_TEXT_FLAG
-}
-
-fun View.loadBitmapFromView(done: (Bitmap) -> Unit) {
+fun View.getBitmapFromView(done: (Bitmap) -> Unit) {
     post {
         val b = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val c = Canvas(b)
@@ -187,26 +160,11 @@ fun EditText.setDrawableEnd(drawableId: Int) {
         context.getDrawableById(drawableId)
     }
     this.setCompoundDrawablesWithIntrinsicBounds(
-        null,
-        null,
-        drawable,
-        null
+        null, null, drawable, null
     )
 }
 
-fun TextView.setDrawableEnd(drawableId: Int) {
-    val drawable = if (drawableId == 0) {
-        null
-    } else {
-        context.getDrawableById(drawableId)
-    }
-    this.setCompoundDrawablesWithIntrinsicBounds(
-        null,
-        null,
-        drawable,
-        null
-    )
-}
+
 
 fun ScrollView.scrollToTop() {
     this.fullScroll(ScrollView.FOCUS_UP)
@@ -225,7 +183,8 @@ fun View.isSoftKeyboardVisible(): Boolean {
     val threshold = screenHeight * 0.15 // Adjust this value as per your requirements
     return keyboardHeight > threshold
 }
-fun Fragment.showSnackBar(msg: String, duration: Int = 280) {
+
+fun Fragment.showSnackBar(msg: String, duration: Int = 500) {
     view?.let {
         val snackBar = Snackbar.make(it, msg, duration)
 //            .setTextColor(getColorById(R.color.text_selected))
@@ -235,7 +194,7 @@ fun Fragment.showSnackBar(msg: String, duration: Int = 280) {
     }
 }
 
-fun Activity.showSnackBar(msg: String, duration: Int = 280) {
+fun Activity.showSnackBar(msg: String, duration: Int = 500) {
     val view = window.decorView.findViewById<View>(android.R.id.content)
     view?.let {
         val snackBar = Snackbar.make(it, msg, duration)

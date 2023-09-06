@@ -4,12 +4,12 @@ plugins {
 }
 
 android {
-    compileSdk 32
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.example.baseproject"
         minSdk 21
-        targetSdk 32
+        targetSdk 33
         versionCode 1
         versionName "1.0"
 
@@ -29,20 +29,21 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
-    buildFeatures{
+    buildFeatures {
         viewBinding true
     }
+    namespace 'com.example.baseproject'
 }
 
 dependencies {
 
-    implementation 'androidx.core:core-ktx:1.7.0'
-    implementation 'androidx.appcompat:appcompat:1.5.1'
-    implementation 'com.google.android.material:material:1.7.0'
+    implementation 'androidx.core:core-ktx:1.8.22'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.4'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
 
     //retrofit
@@ -53,8 +54,7 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:$gson_version")
 
 
-    def lifecycle_version = "2.5.1"
-    def arch_version = "2.1.0"
+    def lifecycle_version = "2.6.1"
     // ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version")
     // LiveData
@@ -67,11 +67,11 @@ dependencies {
     //logging
     implementation 'com.squareup.okhttp3:logging-interceptor:4.9.2'
     //MMKV
-    implementation 'com.tencent:mmkv-static:1.2.12'
+    implementation 'com.tencent:mmkv-static:1.2.14'
 
     //glide
     implementation 'com.github.bumptech.glide:glide:4.15.1'
 
     //biometric - authenticator with fingerprint
-    implementation "androidx.biometric:biometric-ktx:1.2.0-alpha04"
+    implementation "androidx.biometric:biometric-ktx:1.2.0-alpha05"
 }

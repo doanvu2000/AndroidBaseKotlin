@@ -14,7 +14,7 @@ import retrofit2.Response
 import java.io.Serializable
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
-import java.util.*
+import java.util.Calendar
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
@@ -164,21 +164,6 @@ fun <K : Serializable> pushParcelableBundle(k: K): Bundle {
 fun <K : Parcelable> pushParcelableBundle(k: K): Bundle {
     val bundle = Bundle()
     bundle.putParcelable(k.javaClass.name, k)
-    return bundle
-}
-
-fun <T> pushBundle(key: String, data: T): Bundle {
-    val bundle = Bundle()
-    when (data) {
-        is Long -> bundle.putLong(key, data)
-        is Int -> bundle.putInt(key, data)
-        is Float -> bundle.putFloat(key, data)
-        is Boolean -> bundle.putBoolean(key, data)
-        is String -> bundle.putString(key, data.toString())
-        is Parcelable -> bundle.putParcelable(key, data)
-        is Serializable -> bundle.putSerializable(key, data)
-        else -> bundle.putString(key, data.toString())
-    }
     return bundle
 }
 

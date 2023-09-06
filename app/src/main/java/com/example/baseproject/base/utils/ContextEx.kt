@@ -35,10 +35,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.bumptech.glide.Glide
+import com.example.baseproject.BuildConfig
 import com.example.baseproject.R
+import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.util.*
@@ -83,6 +87,12 @@ fun Context.requestPermissionReadStorage(permissionLauncher: ActivityResultLaunc
 
 fun Fragment.requestPermissionReadStorage(permissionLauncher: ActivityResultLauncher<Array<String>>) {
     requireContext().requestPermissionReadStorage(permissionLauncher)
+}
+
+fun AppCompatActivity.requestMultiplePermission(permission: List<String>) {
+    registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+
+    }.launch(permission.toTypedArray())
 }
 
 fun Context.openActivity(pClass: Class<out Activity>, bundle: Bundle?) {
@@ -320,14 +330,17 @@ fun Activity.checkDeviceHasFingerprint(): Boolean {
             Log.d(Constant.TAG, "App can authenticate using biometrics.")
             return true
         }
+
         BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> {
             Log.d(Constant.TAG, "No biometric features available on this device.")
             return false
         }
+
         BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> {
             Log.d(Constant.TAG, "Biometric features are currently unavailable.")
             return false
         }
+
         BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
             Log.d(Constant.TAG, "Device has fingerprint but not set.")
             /*
@@ -434,6 +447,7 @@ fun Context.serviceIsRunning(serviceClass: Class<*>): Boolean {
         if (serviceClass.name == service.service.className) return true
     return false
 }
+
 fun Context.getVersionName(): String {
     return try {
         val packageInfo: PackageInfo = packageManager.getPackageInfo(packageName, 0)
@@ -474,3 +488,32 @@ fun Context.shareText(value: String) {
 }
 
 fun Context.getLinkApp() = "https://play.google.com/store/apps/details?id=$packageName"
+
+private fun saveStringToFile(context: Context, content: String, fileName: String): File? {
+    if (context.isWritePermissionGranted()) {
+        // Handle the case when the permission is not granted
+        return null
+    }
+
+    val fileDir = File(context.getExternalFilesDir(null), "YourDirectory")
+    fileDir.mkdirs()
+    val file = File(fileDir, fileName)
+    try {
+        val fileOutputStream = FileOutputStream(file)
+        fileOutputStream.write(content.toByteArray())
+        fileOutputStream.close()
+        return file
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+    return null
+}
+
+private fun shareFile(context: Context, file: File) {
+    val fileUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file)
+
+    val shareIntent = Intent(Intent.ACTION_SEND)
+    shareIntent.type = "application/json"
+    shareIntent.putExtra(Intent.EXTRA_STREAM, fileUri)
+    context.startActivity(Intent.createChooser(shareIntent, "Share JSON File"))
+}
