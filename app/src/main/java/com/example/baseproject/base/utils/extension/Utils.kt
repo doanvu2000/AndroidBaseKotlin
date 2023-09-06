@@ -1,28 +1,25 @@
-package com.example.baseproject.base.utils
+package com.example.baseproject.base.utils.extension
 
 import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Matrix
-import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.FileProvider
+import com.example.baseproject.BuildConfig
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.File
+import java.io.FileOutputStream
 import java.io.Serializable
-import java.nio.charset.StandardCharsets
-import java.security.MessageDigest
 import java.util.Calendar
 import kotlin.math.pow
 import kotlin.math.roundToInt
-
-val isMinSdk23 get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-val isMinSdk26 get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-val isMinSdk29 get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-val isMinSdk30 get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
-
 
 fun Long.toCalendar(): Calendar {
     val calendar = Calendar.getInstance()
@@ -44,28 +41,6 @@ fun Double.roundTo(numFractionDigits: Int): Double {
 
 fun Boolean.invert(): Boolean {
     return !this
-}
-
-fun String.upperFirstCase(): String {
-    val firstCase = this.first().toString().uppercase()
-    return firstCase + this.substring(1)
-}
-
-fun String?.containsIgnoreCase(regex: String): Boolean {
-    return this?.contains(regex, true) == true
-}
-
-fun String.encryptStringToLong(): Long {
-    val digest = MessageDigest.getInstance("SHA-256")
-    val hashBytes = digest.digest(this.toByteArray(StandardCharsets.UTF_8))
-
-    // Convert the hash bytes to a long value
-    var result: Long = 0
-    for (i in 0 until 8) {
-        result = (result shl 8) or (hashBytes[i].toLong() and 0xff)
-    }
-
-    return result
 }
 
 /**
@@ -168,20 +143,51 @@ fun <K : Parcelable> pushParcelableBundle(k: K): Bundle {
 }
 
 fun Int.getFlagPendingIntent(): Int {
-    return if (isMinSdk23) {
+    return if (isSdk23()) {
         PendingIntent.FLAG_IMMUTABLE or this
     } else {
         this
     }
 }
 
-//"JIN VU di hOC" => "Jin Vu Di Hoc"
-fun String.capitalizeWord(): String {
-    return this.lowercase().split(" ")
-        .joinToString(separator = " ", transform = String::capitalize)
-}
-
 fun setDarkMode(enable: Boolean = false) {
     val mode = if (enable) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
     AppCompatDelegate.setDefaultNightMode(mode)
+}
+
+fun saveStringToFile(context: Context, content: String, fileName: String): File? {
+    if (context.hasWritePermission()) {
+        // Handle the case when the permission is not granted
+        return null
+    }
+
+    val fileDir = File(context.getExternalFilesDir(null), "YourDirectory")
+    fileDir.mkdirs()
+    val file = File(fileDir, fileName)
+    try {
+        val fileOutputStream = FileOutputStream(file)
+        fileOutputStream.write(content.toByteArray())
+        fileOutputStream.close()
+        return file
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+    return null
+}
+
+fun shareFile(context: Context, file: File) {
+    val fileUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file)
+
+    val shareIntent = Intent(Intent.ACTION_SEND)
+    shareIntent.type = "application/json"
+    shareIntent.putExtra(Intent.EXTRA_STREAM, fileUri)
+    context.startActivity(Intent.createChooser(shareIntent, "Share JSON File"))
+}
+
+fun <T> getValueByCondition(condition: Boolean, trueValue: T, falseValue: T): T {
+    return if (condition) {
+        trueValue
+    } else {
+        falseValue
+    }
 }

@@ -3,7 +3,6 @@ package com.example.baseproject.base.viewmodel
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.baseproject.base.entity.MessageVM
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -58,21 +57,25 @@ abstract class BaseViewModel : ViewModel(), DefaultLifecycleObserver {
                 is UnknownHostException -> {
                     onError?.invoke(it.message ?: "UnknownHostException")
                 }
+
                 is java.net.ConnectException -> {
                     onError?.invoke(it.message ?: "java.net.ConnectException")
                 }
+
                 is SocketTimeoutException -> {
                     onError?.invoke(it.message ?: "SocketTimeoutException")
                 }
+
                 is HttpException -> {
                     (it as HttpException).response()?.let { response ->
-                        when(response.code()){
-                            401 ->{
+                        when (response.code()) {
+                            401 -> {
                                 response.errorBody()?.string()?.let { errMsg ->
                                     errors?.invoke(errMsg)
                                 }
                             }
-                            else ->{
+
+                            else -> {
                                 response.errorBody()?.string()?.let { errMsg ->
                                     errors?.invoke(errMsg)
                                 }
@@ -80,6 +83,7 @@ abstract class BaseViewModel : ViewModel(), DefaultLifecycleObserver {
                         }
                     }
                 }
+
                 else -> {
                     onError?.invoke(null)
                 }

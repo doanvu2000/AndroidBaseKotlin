@@ -1,4 +1,4 @@
-package com.example.baseproject.base.utils
+package com.example.baseproject.base.utils.extension
 
 import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity

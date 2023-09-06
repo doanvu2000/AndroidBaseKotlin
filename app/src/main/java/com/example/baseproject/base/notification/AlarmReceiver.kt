@@ -24,6 +24,7 @@ class AlarmReceiver : BroadcastReceiver() {
                     Constant.NOTI_1
                 )
             }
+
             Constant.PM2 -> {
                 createNotification(
                     context,
@@ -35,6 +36,7 @@ class AlarmReceiver : BroadcastReceiver() {
                     Constant.NOTI_2
                 )
             }
+
             Constant.PM7 -> {
                 createNotification(
                     context,

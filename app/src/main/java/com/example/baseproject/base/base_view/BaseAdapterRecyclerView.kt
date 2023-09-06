@@ -33,7 +33,7 @@ abstract class BaseAdapterRecyclerView<T, VB : ViewBinding>
     private var setOnClickItem: ((item: T?, position: Int) -> Unit)? = null
     open fun bindViewClick(viewHolder: BaseViewHolder<VB>, viewType: Int) {
         viewHolder.itemView.setOnClickListener {
-            val position = viewHolder.adapterPosition
+            val position = viewHolder.bindingAdapterPosition
             if (position == RecyclerView.NO_POSITION) {
                 return@setOnClickListener
             }

@@ -6,9 +6,9 @@ import android.content.ContentUris
 import android.content.ContentValues
 import android.graphics.Bitmap
 import android.net.Uri
-import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import com.example.baseproject.base.utils.extension.isSdkQ
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -16,17 +16,11 @@ import java.io.OutputStream
 
 object ImageUtil {
     const val TYPE_JPEG = "image/jpeg"
-    private fun isSdkAfter29(): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            return true
-        }
-        return false
-    }
 
     //save to local, required permission: WRITE_EXTERNAL_STORAGE ( if sdk < 29)
     @SuppressLint("InlinedApi")
     fun savePhotoToExternalStorage(contentResolver: ContentResolver, name: String, bmp: Bitmap?): Boolean {
-        val imageCollection: Uri = if (isSdkAfter29()) {
+        val imageCollection: Uri = if (isSdkQ()) {
             MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
         } else {
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI
@@ -69,7 +63,7 @@ object ImageUtil {
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
             put(MediaStore.MediaColumns.MIME_TYPE, TYPE_JPEG)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { // this one
+            if (isSdkQ()) { // this one
                 put(
                     MediaStore.MediaColumns.RELATIVE_PATH,
                     Environment.DIRECTORY_PICTURES
@@ -83,7 +77,7 @@ object ImageUtil {
         fos?.flush()
         fos?.close()
         contentValues.clear()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (isSdkQ()) {
             contentValues.put(MediaStore.MediaColumns.IS_PENDING, 0)
             uri?.let {
                 resolver.update(it, contentValues, null, null)

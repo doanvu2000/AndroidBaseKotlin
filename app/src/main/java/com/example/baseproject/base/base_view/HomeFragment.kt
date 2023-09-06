@@ -5,19 +5,14 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
-import com.example.baseproject.base.utils.gone
-import com.example.baseproject.base.utils.setLinearLayoutManager
-import com.example.baseproject.base.utils.show
+import com.example.baseproject.base.utils.extension.gone
+import com.example.baseproject.base.utils.extension.setLinearLayoutManager
+import com.example.baseproject.base.utils.extension.show
 import com.example.baseproject.base.viewmodel.UserViewModel
 import com.example.baseproject.databinding.FragmentHomeBinding
 import com.example.baseproject.user.UserAdapter
 
 class HomeFragment : BaseFragment<FragmentHomeBinding>() {
-    //TODO
-    /**When you using viewModel,
-     * you should call function errorBeforeRunFlow to handler exception before execute run flow // fixed with exceptionHandler
-     * so, you should call in function initData
-     * */
     private val viewModel by lazy {
         ViewModelProvider(this)[UserViewModel::class.java]
     }

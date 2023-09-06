@@ -7,12 +7,13 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.util.Log
 import androidx.core.app.AlarmManagerCompat
 import androidx.core.app.NotificationCompat
 import com.example.baseproject.R
 import com.example.baseproject.base.utils.Constant
+import com.example.baseproject.base.utils.extension.getFlagPendingIntent
+import com.example.baseproject.base.utils.extension.isSdk26
 
 class AlarmReceiverV2 : BroadcastReceiver() {
     companion object {
@@ -35,11 +36,7 @@ class AlarmReceiverV2 : BroadcastReceiver() {
                     Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
                             or Intent.FLAG_ACTIVITY_SINGLE_TOP
                 )
-        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            PendingIntent.FLAG_IMMUTABLE
-        } else {
-            PendingIntent.FLAG_UPDATE_CURRENT
-        }
+        val flags = PendingIntent.FLAG_UPDATE_CURRENT.getFlagPendingIntent()
         val pendingIntent = PendingIntent.getActivity(context, 0, contentIntent, flags)
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -52,7 +49,7 @@ class AlarmReceiverV2 : BroadcastReceiver() {
                 .setContentIntent(pendingIntent)
                 .setPriority(NotificationCompat.PRIORITY_MAX)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (isSdk26()) {
             builder.setChannelId(CHANNEL_ID)
             val channel = NotificationChannel(
                 CHANNEL_ID,
@@ -71,11 +68,7 @@ fun setReminder(context: Context, title: String, content: String, time: Long) {
     val intent = Intent(context, AlarmReceiverV2::class.java)
     intent.putExtra("title", title)
     intent.putExtra("content", content)
-    val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        PendingIntent.FLAG_IMMUTABLE
-    } else {
-        PendingIntent.FLAG_UPDATE_CURRENT
-    }
+    val flags = PendingIntent.FLAG_UPDATE_CURRENT.getFlagPendingIntent()
     val pendingIntent =
         PendingIntent.getBroadcast(context, AlarmReceiverV2.NOTIFICATION_ID, intent, flags)
     AlarmManagerCompat.setExactAndAllowWhileIdle(
@@ -86,11 +79,7 @@ fun setReminder(context: Context, title: String, content: String, time: Long) {
 fun cancelReminder(context: Context?) {
     val alarmManager = context?.getSystemService(Context.ALARM_SERVICE) as AlarmManager
     val intent = Intent(context, AlarmReceiverV2::class.java)
-    val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        PendingIntent.FLAG_IMMUTABLE
-    } else {
-        PendingIntent.FLAG_UPDATE_CURRENT
-    }
+    val flags = PendingIntent.FLAG_UPDATE_CURRENT.getFlagPendingIntent()
     val pendingIntent = PendingIntent.getBroadcast(
         context,
         AlarmReceiverV2.NOTIFICATION_ID, intent, flags

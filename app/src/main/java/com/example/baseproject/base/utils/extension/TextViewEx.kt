@@ -1,17 +1,15 @@
 package com.example.baseproject.base.utils.extension
 
 import android.graphics.Paint
-import android.os.Build
 import android.text.Html
 import android.widget.TextView
-import com.example.baseproject.base.utils.getDrawableById
 
 fun TextView.clear() {
     this.text = ""
 }
 
 fun TextView.setTextHtml(content: String) {
-    this.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+    this.text = if (isSdkN()) {
         Html.fromHtml(content, Html.FROM_HTML_MODE_COMPACT)
     } else {
         @Suppress("DEPRECATION") Html.fromHtml(content)

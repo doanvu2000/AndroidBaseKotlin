@@ -1,4 +1,4 @@
-package com.example.baseproject.base.utils
+package com.example.baseproject.base.utils.extension
 
 import android.app.Activity
 import android.content.Intent

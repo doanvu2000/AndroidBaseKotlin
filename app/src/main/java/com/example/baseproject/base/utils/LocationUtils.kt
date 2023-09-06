@@ -4,17 +4,17 @@ import android.content.Context
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import android.os.Build
-import java.io.IOException
+import com.example.baseproject.base.utils.extension.isInternetAvailable
+import com.example.baseproject.base.utils.extension.isSdk33
+import com.example.baseproject.base.utils.extension.showToast
 import kotlin.math.absoluteValue
 
+//TODO: get user current location (last location)
 object LocationUtils {
-    var DIRECTION_N = "N"
-    var DIRECTION_S = "S"
-    var DIRECTION_W = "W"
-    var DIRECTION_E = "E"
+    private var DIRECTION_N = "N"
+    private var DIRECTION_S = "S"
+    private var DIRECTION_W = "W"
+    private var DIRECTION_E = "E"
     fun latitudeAsDMS(latitude: Double, decimalPlace: Int): String {
         val direction = if (latitude > 0) DIRECTION_N else DIRECTION_S
         var strLatitude = Location.convert(latitude.absoluteValue, Location.FORMAT_SECONDS)
@@ -55,57 +55,24 @@ object LocationUtils {
         context: Context,
         latitude: Double,
         longitude: Double,
-        countResult: Int = 1
-    ): MutableList<Address>? {
+        countResult: Int = 1,
+        onGetAddress: (MutableList<Address>?) -> Unit
+    ) {
         try {
             val geocoder = Geocoder(context)
-            if (!isInternetAvailable(context)) {
+            if (!context.isInternetAvailable()) {
                 context.showToast("Internet is not available")
-                return null
             }
-            return geocoder.getFromLocation(latitude, longitude, countResult)
-        } catch (ex: IOException) {
-            return null
-        }
-    }
-
-    private fun isNetworkAvailable(context: Context): Boolean {
-        val connectivityManager =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetworkInfo = connectivityManager.activeNetworkInfo
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected
-    }
-
-    private fun isInternetAvailable(context: Context): Boolean {
-        var result = false
-        val connectivityManager =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val networkCapabilities = connectivityManager.activeNetwork ?: return false
-            val actNw =
-                connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return false
-            result = when {
-                actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-                actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-                actNw.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
-                else -> false
-            }
-        } else {
-            @Suppress("DEPRECATION")
-            connectivityManager.run {
-                connectivityManager.activeNetworkInfo?.run {
-                    result = when (type) {
-                        ConnectivityManager.TYPE_WIFI -> true
-                        ConnectivityManager.TYPE_MOBILE -> true
-                        ConnectivityManager.TYPE_ETHERNET -> true
-                        else -> false
-                    }
-
+            if (isSdk33()) {
+                geocoder.getFromLocation(latitude, longitude, countResult) { address ->
+                    onGetAddress(address)
                 }
+            } else {
+                @Suppress("DEPRECATION")
+                onGetAddress(geocoder.getFromLocation(latitude, longitude, countResult))
             }
+        } catch (ex: Exception) {
+            ex.printStackTrace()
         }
-
-        return result
     }
-
 }

@@ -9,7 +9,7 @@ import android.media.MediaMetadataRetriever.METADATA_KEY_DURATION
 import android.net.Uri
 import android.provider.MediaStore
 import android.text.TextUtils
-import com.example.baseproject.base.utils.isMinSdk29
+import com.example.baseproject.base.utils.extension.isSdk29
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -53,7 +53,7 @@ object GalleryUtils {
     }
 
     private fun getImageCollectionUri(): Uri {
-        return if (isMinSdk29) MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+        return if (isSdk29()) MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
         else MediaStore.Images.Media.EXTERNAL_CONTENT_URI
     }
 

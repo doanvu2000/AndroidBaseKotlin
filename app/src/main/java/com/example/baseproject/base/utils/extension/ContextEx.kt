@@ -1,98 +1,79 @@
-package com.example.baseproject.base.utils
+package com.example.baseproject.base.utils.extension
 
-import android.Manifest
 import android.app.Activity
 import android.app.ActivityManager
 import android.app.Service
 import android.content.ActivityNotFoundException
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.media.Ringtone
 import android.media.RingtoneManager
-import android.media.audiofx.AudioEffect
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
-import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
-import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 import com.bumptech.glide.Glide
-import com.example.baseproject.BuildConfig
 import com.example.baseproject.R
-import java.io.File
-import java.io.FileOutputStream
+import com.example.baseproject.base.utils.ImageUtil
 import java.io.IOException
 import java.io.InputStream
 import java.util.*
-import java.util.concurrent.Executor
 
-fun Context.isReadPermissionGranted() = this.checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-fun Context.isWritePermissionGranted() = this.checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
 fun Context.checkPermission(permission: String): Boolean {
-    return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+    return ContextCompat.checkSelfPermission(this, permission) == PERMISSION_GRANTED
 }
 
-fun Fragment.checkPermission(permission: String): Boolean {
-    return requireContext().checkPermission(permission)
+fun Context.hasWritePermission() = this.checkPermission(WRITE_EXTERNAL_STORAGE)
+
+fun Context.hasReadStoragePermission() = if (isSdk33()) {
+    checkPermission(READ_MEDIA_IMAGE)
+} else {
+    checkPermission(READ_EXTERNAL_STORAGE)
 }
 
-fun Context.hasReadStoragePermission() = checkPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
-fun Fragment.hasReadStoragePermission() = requireContext().hasReadStoragePermission()
-fun Fragment.getActivityResultLauncher(callBack: (Map<String, Boolean>) -> Unit): ActivityResultLauncher<Array<String>> {
-    return registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-        callBack.invoke(permissions)
+fun Context.hasLocationPermission(): Boolean {
+    return checkPermission(ACCESS_COARSE_LOCATION) && checkPermission(ACCESS_FINE_LOCATION)
+}
+
+fun Context.hasNotificationPermission(): Boolean {
+    return if (!isSdk33()) {
+        true
+    } else {
+        checkPermission(POST_NOTIFICATION)
     }
 }
 
-fun ComponentActivity.getActivityResultLauncher(callBack: (Map<String, Boolean>) -> Unit): ActivityResultLauncher<Array<String>> {
-    return registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-        callBack.invoke(permissions)
-    }
-}
-
+/** Demo: if api 33, permission READ_MEDIA_IMAGE*/
 fun Context.requestPermissionReadStorage(permissionLauncher: ActivityResultLauncher<Array<String>>) {
     val isReadPermissionGranted = hasReadStoragePermission()
 
     val permissionRequest = mutableListOf<String>()
+    val permission = if (isSdk33()) {
+        READ_MEDIA_IMAGE
+    } else {
+        READ_EXTERNAL_STORAGE
+    }
     if (!isReadPermissionGranted) {
-        permissionRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+        permissionRequest.add(permission)
     }
     if (permissionRequest.isNotEmpty()) {
         permissionLauncher.launch(permissionRequest.toTypedArray())
     }
-}
-
-fun Fragment.requestPermissionReadStorage(permissionLauncher: ActivityResultLauncher<Array<String>>) {
-    requireContext().requestPermissionReadStorage(permissionLauncher)
-}
-
-fun AppCompatActivity.requestMultiplePermission(permission: List<String>) {
-    registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
-
-    }.launch(permission.toTypedArray())
 }
 
 fun Context.openActivity(pClass: Class<out Activity>, bundle: Bundle?) {
@@ -115,14 +96,6 @@ fun Context.openActivity(pClass: Class<out Activity>, isFinish: Boolean = false,
     if (isFinish) {
         (this as Activity).finish()
     }
-}
-
-fun AppCompatActivity.findFragment(TAG: String): Fragment? {
-    return supportFragmentManager.findFragmentByTag(TAG)
-}
-
-fun Fragment.findChildFragment(TAG: String): Fragment? {
-    return childFragmentManager.findFragmentByTag(TAG)
 }
 
 fun Context.loadImage(
@@ -207,33 +180,6 @@ fun Context.sendEmail(toEmail: String, feedBackString: String) {
     }
 }
 
-fun Activity.openSMS(smsBody: String, phone: String) {
-    val intent = Intent(
-        Intent.ACTION_SENDTO,
-        Uri.parse("smsto:$phone")
-    )
-    intent.putExtra("sms_body", smsBody)
-    this.startActivity(intent)
-}
-
-fun Activity.callPhone(phone: String) {
-    val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:$phone"))
-    startActivity(intent)
-}
-
-fun FragmentActivity.openNetWorkSetting() {
-    try {
-        val intent = Intent(Intent.ACTION_MAIN, null)
-        intent.addCategory(Intent.CATEGORY_LAUNCHER)
-        val cn = ComponentName("com.android.settings", "com.android.settings.wifi.WifiSettings")
-        intent.component = cn
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        startActivity(intent)
-    } catch (ignored: ActivityNotFoundException) {
-        startActivity(Intent(Settings.ACTION_WIFI_SETTINGS))
-    }
-}
-
 fun Context.getRingTone(): Ringtone {
     val defaultRingtoneUri: Uri =
         RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
@@ -247,7 +193,7 @@ fun Context.isInternetAvailable(): Boolean {
     var result = false
     val connectivityManager =
         getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+    if (isSdkM()) {
         val networkCapabilities = connectivityManager.activeNetwork ?: return false
         val actNw =
             connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return false
@@ -280,10 +226,6 @@ fun Context.showToast(msg: String, isShowDurationLong: Boolean = false) {
     Toast.makeText(this, msg, duration).show()
 }
 
-fun Fragment.showToast(msg: String, isShowDurationLong: Boolean = false) {
-    requireContext().showToast(msg, isShowDurationLong)
-}
-
 fun Context.connectService(pClass: Class<out Service>) {
     startService(Intent(this, pClass))
 }
@@ -294,6 +236,10 @@ fun Context.endService(pClass: Class<out Service>) {
 
 //required permission WRITE_EXTERNAL_STORAGE ( if sdk <= 29)
 fun Context.shareImage(bitmap: Bitmap) {
+    if (!hasWritePermission()) {
+        showToast("No have permission to write file")
+        return
+    }
     ImageUtil.insertSharingImage(contentResolver, bitmap)?.also { uri ->
         val intent = Intent(Intent.ACTION_SEND)
         intent.putExtra(Intent.EXTRA_STREAM, uri)
@@ -304,110 +250,22 @@ fun Context.shareImage(bitmap: Bitmap) {
 
 //required permission WRITE_EXTERNAL_STORAGE ( if sdk <= 29)
 fun Context.saveImageToLocal(bitmap: Bitmap, result: (Boolean) -> Unit) {
+    if (!hasWritePermission()) {
+        showToast("No have permission to write file")
+        return
+    }
     val resultSaveImage = ImageUtil.savePhotoToExternalStorage(contentResolver, UUID.randomUUID().toString(), bitmap)
     result.invoke(resultSaveImage)
 }
 
-//using finger to authentication in activity
-fun FragmentActivity.showAuthenticatorWithFinger(
-    title: String = "Title", subtitle: String = "Subtitle", negativeButtonText: String = "Cancel"
-) {
-    val biometricPrompt: BiometricPrompt
-    val executor: Executor = ContextCompat.getMainExecutor(this)
-    biometricPrompt = BiometricPrompt(this, executor, biometricCall)
-
-    val promptInfo: BiometricPrompt.PromptInfo = getPromptInfo(title, subtitle, negativeButtonText)
-    biometricPrompt.authenticate(promptInfo)
-}
-
-fun Activity.checkDeviceHasFingerprint(): Boolean {
-    val biometricManager = BiometricManager.from(this)
-    when (biometricManager.canAuthenticate(
-        BiometricManager.Authenticators.BIOMETRIC_STRONG or
-                BiometricManager.Authenticators.DEVICE_CREDENTIAL
-    )) {
-        BiometricManager.BIOMETRIC_SUCCESS -> {
-            Log.d(Constant.TAG, "App can authenticate using biometrics.")
-            return true
-        }
-
-        BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> {
-            Log.d(Constant.TAG, "No biometric features available on this device.")
-            return false
-        }
-
-        BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> {
-            Log.d(Constant.TAG, "Biometric features are currently unavailable.")
-            return false
-        }
-
-        BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
-            Log.d(Constant.TAG, "Device has fingerprint but not set.")
-            /*
-            // Prompts the user to create credentials that your app accepts.
-//            if (isMinSdk30) {
-//                val enrollIntent = Intent(Settings.ACTION_BIOMETRIC_ENROLL).apply {
-//                    putExtra(
-//                        Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
-//                        BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL
-//                    )
-//                }
-//                startActivityForResult(enrollIntent, 1234)
-//            }
-        }
-//        BiometricManager.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED -> {
-//
-//        }
-//        BiometricManager.BIOMETRIC_ERROR_UNSUPPORTED -> {
-//
-//        }
-//        BiometricManager.BIOMETRIC_STATUS_UNKNOWN -> {
-//
-//        }
-*/
-        }
-    }
-    return false
-}
-
-//using finger to authentication in fragment
-fun Fragment.showAuthenticatorWithFinger(
-    title: String = "Title", subtitle: String = "Subtitle", negativeButtonText: String = "Cancel"
-) {
-    val biometricPrompt: BiometricPrompt
-    val executor: Executor = ContextCompat.getMainExecutor(requireContext())
-    biometricPrompt = BiometricPrompt(this, executor, biometricCall)
-
-    val promptInfo: BiometricPrompt.PromptInfo = getPromptInfo(title, subtitle, negativeButtonText)
-    biometricPrompt.authenticate(promptInfo)
-}
-
-private fun getPromptInfo(title: String, subtitle: String, negativeButtonText: String) = BiometricPrompt.PromptInfo.Builder()
+fun getPromptInfo(title: String, subtitle: String, negativeButtonText: String) = BiometricPrompt.PromptInfo.Builder()
     .setTitle(title)
     .setSubtitle(subtitle)
     .setNegativeButtonText(negativeButtonText)
     .build()
 
 val biometricCall = object : BiometricPrompt.AuthenticationCallback() {
-    override fun onAuthenticationError(
-        errorCode: Int,
-        errString: CharSequence
-    ) {
-        super.onAuthenticationError(errorCode, errString)
-//                    showToast(getString(R.string.txt_authen_finger_error) + errString)
-    }
 
-    override fun onAuthenticationSucceeded(
-        result: BiometricPrompt.AuthenticationResult
-    ) {
-        super.onAuthenticationSucceeded(result)
-//                    showToast(getString(R.string.txt_authen_finger_success))
-    }
-
-    override fun onAuthenticationFailed() {
-        super.onAuthenticationFailed()
-//                    showToast(getString(R.string.txt_authen_finger_failed_v2))
-    }
 }
 
 /**
@@ -457,22 +315,6 @@ fun Context.getVersionName(): String {
     }
 }
 
-fun Fragment.getVersionName(): String {
-    return requireContext().getVersionName()
-}
-
-fun Fragment.openEqualizerSetting(audioSessionId: Int) {
-    try {
-        val equalizerIntent = Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL)
-        equalizerIntent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, audioSessionId)
-        equalizerIntent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, requireContext().packageName)
-        equalizerIntent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC)
-        startActivityForResult(equalizerIntent, 133)
-    } catch (e: Exception) {
-        showToast("Equalizer feature not supported!")
-    }
-}
-
 fun Context.getDrawableById(drawableId: Int): Drawable? {
     return ContextCompat.getDrawable(this, drawableId)
 }
@@ -489,31 +331,7 @@ fun Context.shareText(value: String) {
 
 fun Context.getLinkApp() = "https://play.google.com/store/apps/details?id=$packageName"
 
-private fun saveStringToFile(context: Context, content: String, fileName: String): File? {
-    if (context.isWritePermissionGranted()) {
-        // Handle the case when the permission is not granted
-        return null
-    }
-
-    val fileDir = File(context.getExternalFilesDir(null), "YourDirectory")
-    fileDir.mkdirs()
-    val file = File(fileDir, fileName)
-    try {
-        val fileOutputStream = FileOutputStream(file)
-        fileOutputStream.write(content.toByteArray())
-        fileOutputStream.close()
-        return file
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
-    return null
-}
-
-private fun shareFile(context: Context, file: File) {
-    val fileUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file)
-
-    val shareIntent = Intent(Intent.ACTION_SEND)
-    shareIntent.type = "application/json"
-    shareIntent.putExtra(Intent.EXTRA_STREAM, fileUri)
-    context.startActivity(Intent.createChooser(shareIntent, "Share JSON File"))
+fun Context.hideKeyboard(view: View) {
+    val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+    inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
 }
