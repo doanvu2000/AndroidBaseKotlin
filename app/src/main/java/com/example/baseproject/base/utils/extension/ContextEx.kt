@@ -14,7 +14,6 @@ import android.media.RingtoneManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -27,6 +26,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
+import com.example.baseproject.BuildConfig
 import com.example.baseproject.R
 import com.example.baseproject.base.utils.ImageUtil
 import java.io.IOException
@@ -155,6 +155,23 @@ fun Context.navigateToMarket(publishNameStore: String) {
                 Intent.ACTION_VIEW,
                 Uri.parse(webPlayStore + publishNameStore)
                 //https://play.google.com/store/apps/details?id=<package_name>
+            )
+        )
+    }
+}
+
+fun Context.rateApp() {
+    val uri = Uri.parse("market://details?id=$packageName")
+    val goToMarket = Intent(Intent.ACTION_VIEW, uri)
+    goToMarket.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+    goToMarket.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY or Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
+    try {
+        startActivity(goToMarket)
+    } catch (e: ActivityNotFoundException) {
+        startActivity(
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("http://play.google.com/store/apps/details?id=$packageName")
             )
         )
     }
@@ -299,11 +316,10 @@ fun Context.getColorByIdWithTheme(colorAttr: Int): Int {
 }
 
 fun Context.serviceIsRunning(serviceClass: Class<*>): Boolean {
-    val manager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
     @Suppress("DEPRECATION")
-    for (service in manager.getRunningServices(Int.MAX_VALUE))
-        if (serviceClass.name == service.service.className) return true
-    return false
+    return (getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager)
+        .getRunningServices(Int.MAX_VALUE)
+        .any { serviceClass.name == it.service.className }
 }
 
 fun Context.getVersionName(): String {
@@ -311,7 +327,7 @@ fun Context.getVersionName(): String {
         val packageInfo: PackageInfo = packageManager.getPackageInfo(packageName, 0)
         packageInfo.versionName
     } catch (e: Exception) {
-        Build.VERSION.RELEASE
+        BuildConfig.VERSION_NAME
     }
 }
 

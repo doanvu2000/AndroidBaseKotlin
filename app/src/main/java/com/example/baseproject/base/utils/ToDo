@@ -1,20 +1,20 @@
 TODO list todo, last update: 07/09/2023 by doanvv
-- ViewPager2: TODO viewpager2
-- TextView: TODO: Auto size TextViews
-- registerActivityForResult API: TODO registerActivityForResult
-- LocationUtils: TODO: get user current location (last location)
-- Camera: TODO: camera...
-- Animation: TODO animation, lottie file, shimmer loading (facebook)
-- ExoPlayer: TODO exo player
-- Room: TODO room
-- Vibrate: TODO Vibrate
-- In app purchase: TODO billing - in app purchase
-- Download file: TODO download file
-- Broadcast: TODO Broadcast receiver network, gps, volume detect (up - down)
-- Notification: TODO Notification
-- Jetpack compose (or not :v): TODO Jetpack compose
-- Flow: TODO flow
-- Ads: TODO ads
+- ViewPager2
+- TextView:  Auto size TextViews
+- registerActivityForResult API:  registerActivityForResult
+- LocationUtils:  get user current location (last location)
+- Camera
+- Animation: animation, lottie file, shimmer loading (facebook)
+- ExoPlayer
+- Room
+- Vibrate
+- In app purchase
+- Download file
+- Broadcast: Broadcast receiver network, gps, volume detect (up - down)
+- Notification
+- Jetpack compose (or not :v)
+- Flow
+- Ads
 .... coming soon
 Buy me a coffee:
 - 0901000104523 - Vietcombank - VU VAN DOAN

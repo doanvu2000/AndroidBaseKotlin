@@ -1,8 +1,14 @@
 package com.example.baseproject.base.viewmodel
 
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.pdf.PdfDocument
+import android.view.View
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.baseproject.base.utils.extension.showToast
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,6 +24,8 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
+import java.io.File
+import java.io.FileOutputStream
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 
@@ -134,4 +142,58 @@ abstract class BaseViewModel : ViewModel(), DefaultLifecycleObserver {
         viewModelJob.cancel()
         viewModelScope.cancel()
     }
+
+    fun exportPdf(view: View, totalWidth: Int, totalHeight: Int, onDone: (file: File) -> Unit) {
+        val context = view.context
+        launchHandler {
+            flow {
+                val fileName = "Demo_${System.currentTimeMillis()}.pdf"
+                val dir = File(context.cacheDir, "shared_files")
+                if (!dir.exists()) {
+                    dir.mkdirs()
+                }
+                val file = File(dir, fileName)
+                val bitmap = getBitmapFromView(view, totalWidth, totalHeight)
+                if (bitmap == null) {
+                    emit(null)
+                    return@flow
+                }
+                val document = PdfDocument()
+                val pageInfo = PdfDocument.PageInfo.Builder(totalWidth, totalHeight, 1).create()
+                val page = document.startPage(pageInfo)
+                bitmap.prepareToDraw()
+                val c: Canvas = page.canvas
+                c.drawBitmap(bitmap, 0f, 0f, null)
+                document.finishPage(page)
+                document.writeTo(FileOutputStream(file))
+                document.close()
+                bitmap.recycle()
+                emit(file)
+            }.flowOn(Dispatchers.IO).catch {
+                it.printStackTrace()
+            }.execute { file ->
+                if (file == null) {
+                    context.showToast("Export Error!")
+                } else {
+                    onDone.invoke(file)
+                }
+            }
+        }
+    }
+
+    private fun getBitmapFromView(view: View, totalWidth: Int, totalHeight: Int): Bitmap? {
+        return try {
+            val returnedBitmap =
+                Bitmap.createBitmap(totalWidth, totalHeight, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(returnedBitmap)
+            val bgDrawable = view.background
+            if (bgDrawable != null) bgDrawable.draw(canvas) else canvas.drawColor(Color.WHITE)
+            view.draw(canvas)
+            returnedBitmap
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
 }
