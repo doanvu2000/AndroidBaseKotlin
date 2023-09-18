@@ -3,11 +3,14 @@ package com.example.baseproject.base.utils.extension
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.graphics.Rect
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.ScrollView
 import androidx.core.widget.NestedScrollView
 import com.example.baseproject.R
@@ -112,4 +115,14 @@ fun ScrollView.scrollToTop() {
 fun NestedScrollView.scrollToTop() {
     fullScroll(ScrollView.FOCUS_UP)
     smoothScrollTo(0, 0)
+}
+fun ImageView.setTint(){
+    val matrix = ColorMatrix()
+    matrix.setSaturation(0f)
+
+    val filter = ColorMatrixColorFilter(matrix)
+    this.colorFilter = filter
+}
+fun ImageView.clearTint(){
+    this.colorFilter = null
 }

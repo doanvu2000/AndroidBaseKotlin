@@ -188,11 +188,7 @@ fun Context.sendEmail(toEmail: String, feedBackString: String) {
     try {
         startActivity(intent)
     } catch (ex: Exception) {
-        Toast.makeText(
-            this,
-            "Not have email app to send email!",
-            Toast.LENGTH_SHORT
-        ).show()
+        showToast("Not have email app to send email!")
         ex.printStackTrace()
     }
 }
