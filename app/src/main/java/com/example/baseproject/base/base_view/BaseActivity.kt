@@ -2,6 +2,7 @@ package com.example.baseproject.base.base_view
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewbinding.ViewBinding
 
@@ -15,6 +16,19 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
         initView()
         initData()
         initListener()
+        handleOnBackPressed()
+    }
+
+    private fun handleOnBackPressed() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                onBack()
+            }
+        })
+    }
+
+    open fun onBack() {
+        onBackPressedDispatcher.onBackPressed()
     }
 
     abstract fun initView()

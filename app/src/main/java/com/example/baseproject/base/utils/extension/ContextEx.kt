@@ -1,5 +1,6 @@
 package com.example.baseproject.base.utils.extension
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.ActivityManager
 import android.app.Service
@@ -15,6 +16,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -346,4 +348,9 @@ fun Context.getLinkApp() = "https://play.google.com/store/apps/details?id=$packa
 fun Context.hideKeyboard(view: View) {
     val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
     inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
+}
+
+@SuppressLint("HardwareIds")
+fun Context.getDeviceId(): String {
+    return Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
 }
