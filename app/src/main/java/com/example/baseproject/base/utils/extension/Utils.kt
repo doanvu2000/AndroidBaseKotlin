@@ -11,6 +11,8 @@ import android.os.Parcelable
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.FileProvider
 import com.example.baseproject.BuildConfig
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -85,8 +87,7 @@ fun Bitmap.rotate(angle: Float): Bitmap {
 }
 
 fun Bitmap.createWithMatrix(matrix: Matrix): Bitmap = Bitmap.createBitmap(
-    this, 0, 0, this.width, this.height,
-    matrix, true
+    this, 0, 0, this.width, this.height, matrix, true
 )
 
 fun mergeBitmapsVertical(bitmap1: Bitmap, bitmap2: Bitmap): Bitmap {
@@ -189,5 +190,23 @@ fun <T> getValueByCondition(condition: Boolean, trueValue: T, falseValue: T): T 
         trueValue
     } else {
         falseValue
+    }
+}
+
+suspend fun runOnDispatcherIO(action: () -> Unit) {
+    withContext(Dispatchers.IO) {
+        action.invoke()
+    }
+}
+
+suspend fun runOnDispatcherDefault(action: () -> Unit) {
+    withContext(Dispatchers.Default) {
+        action.invoke()
+    }
+}
+
+suspend fun runOnDispatcherMain(action: () -> Unit) {
+    withContext(Dispatchers.Main) {
+        action.invoke()
     }
 }
