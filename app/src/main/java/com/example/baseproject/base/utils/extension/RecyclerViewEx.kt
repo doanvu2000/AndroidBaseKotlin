@@ -4,47 +4,64 @@ import android.content.Context
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 
 fun RecyclerView.setGridManager(
     mContext: Context,
     lin: Int,
-    adapter: RecyclerView.Adapter<*>,
+    holderAdapter: RecyclerView.Adapter<*>,
     orientation: Int = RecyclerView.VERTICAL,
 ) {
-    val manager = GridLayoutManager(mContext, lin)
-    manager.orientation = orientation
-    this.layoutManager = manager
-    this.adapter = adapter
+    val manager = GridLayoutManager(mContext, lin, orientation, false)
+    this.apply {
+        layoutManager = manager
+        adapter = holderAdapter
+    }
 }
 
 fun RecyclerView.setLinearLayoutManager(
-    context: Context, adapter: RecyclerView.Adapter<*>, orientation: Int = RecyclerView.VERTICAL
+    context: Context, holderAdapter: RecyclerView.Adapter<*>, orientation: Int = RecyclerView.VERTICAL
 ) {
-    val manager = LinearLayoutManager(context)
-    manager.orientation = orientation
-    this.layoutManager = manager
-    this.adapter = adapter
+    val manager = LinearLayoutManager(context, orientation, false)
+    this.apply {
+        layoutManager = manager
+        adapter = holderAdapter
+    }
+}
+
+fun RecyclerView.setStaggeredGridManager(
+    lin: Int,
+    holderAdapter: RecyclerView.Adapter<*>,
+    orientation: Int = StaggeredGridLayoutManager.VERTICAL,
+) {
+    val manager = StaggeredGridLayoutManager(lin, orientation)
+    this.apply {
+        layoutManager = manager
+        adapter = holderAdapter
+    }
 }
 
 fun RecyclerView.setGridLayoutManagerIncludeAds(
     context: Context,
     spanCount: Int,
-    adapter: RecyclerView.Adapter<*>,
+    holderAdapter: RecyclerView.Adapter<*>,
 ) {
     val adsViewType = 1
     this.overScrollMode = RecyclerView.OVER_SCROLL_NEVER
-    val layoutManager = GridLayoutManager(context, spanCount).apply {
+    val mLayoutManager = GridLayoutManager(context, spanCount).apply {
         spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
-                return when (adapter.getItemViewType(position)) {
+                return when (holderAdapter.getItemViewType(position)) {
                     adsViewType -> spanCount
                     else -> 1
                 }
             }
         }
     }
-    this.layoutManager = layoutManager
-    this.adapter = adapter
+    this.apply {
+        layoutManager = mLayoutManager
+        adapter = holderAdapter
+    }
 }
 
 fun RecyclerView.onScrollListener(action: () -> Unit) {
