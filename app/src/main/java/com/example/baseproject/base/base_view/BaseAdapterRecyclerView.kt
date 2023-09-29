@@ -101,4 +101,16 @@ abstract class BaseAdapterRecyclerView<T, VB : ViewBinding>
         notifyDataSetChanged()
     }
 
+    /**
+     * add more data in last of base list and notify, using for load more
+     * @author doanvv
+     * @sample adapter.addDataList(list)
+     * @param data: list data insert
+     *
+     * */
+    open fun addDataList(data: Collection<T>) {
+        dataList.addAll(data)
+        notifyItemRangeInserted(dataList.size, data.size)
+    }
+
 }
