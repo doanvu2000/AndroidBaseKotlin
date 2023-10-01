@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
+import android.os.Bundle
 import android.provider.Settings
 import android.util.DisplayMetrics
 import android.util.Log
@@ -220,4 +221,32 @@ fun Activity.getScreenHeight(): Int {
         windowManager.defaultDisplay.getMetrics(displayMetrics)
         displayMetrics.heightPixels
     }
+}
+
+fun AppCompatActivity.replaceFragment(frameId: Int, fragment: Fragment, addToBackStack: Boolean = true, bundle: Bundle? = null) {
+    bundle?.let {
+        fragment.arguments = bundle
+    }
+    if (addToBackStack) {
+        replaceFragmentAddBackStack(frameId, fragment)
+    } else {
+        replaceFragmentNoAddBackStack(frameId, fragment)
+    }
+}
+
+fun AppCompatActivity.replaceFragmentNoAddBackStack(frameId: Int, fragment: Fragment) {
+    Log.d(Constant.TAG, "replaceFragment no add backstack: ${fragment.javaClass.name}")
+    supportFragmentManager
+        .beginTransaction()
+        .replace(frameId, fragment)
+        .commit()
+}
+
+fun AppCompatActivity.replaceFragmentAddBackStack(frameId: Int, fragment: Fragment) {
+    Log.d(Constant.TAG, "replaceFragment add backstack: ${fragment.javaClass.name}")
+    supportFragmentManager
+        .beginTransaction()
+        .replace(frameId, fragment)
+        .addToBackStack(fragment.javaClass.name)
+        .commit()
 }
