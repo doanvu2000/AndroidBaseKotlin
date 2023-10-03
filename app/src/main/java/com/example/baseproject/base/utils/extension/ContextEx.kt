@@ -100,6 +100,16 @@ fun Context.openActivity(pClass: Class<out Activity>, isFinish: Boolean = false,
     }
 }
 
+fun Context.openActivity(pClass: Class<out Activity>, isFinish: Boolean = false, isAnimation: Boolean = false, bundle: Bundle?) {
+    openActivity(pClass, bundle)
+    if (isAnimation) {
+        (this as Activity).openWithSlide()
+    }
+    if (isFinish) {
+        (this as Activity).finish()
+    }
+}
+
 fun Context.loadImage(
     imageView: ImageView, url: String,
     error: Int = R.drawable.ic_launcher_background

@@ -25,6 +25,7 @@ import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import com.example.baseproject.R
 import com.example.baseproject.base.utils.Constant
 import com.google.android.material.snackbar.Snackbar
 import java.util.concurrent.Executor
@@ -220,4 +221,17 @@ fun Activity.getScreenHeight(): Int {
         windowManager.defaultDisplay.getMetrics(displayMetrics)
         displayMetrics.heightPixels
     }
+}
+
+fun Activity.openWithSlide() {
+    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+}
+
+/**
+ * call when finish activity to apply animation
+ *
+ * */
+fun Activity.finishWithSlide() {
+    finish()
+    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
 }

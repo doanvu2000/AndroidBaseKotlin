@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewbinding.ViewBinding
+import com.example.baseproject.base.utils.extension.finishWithSlide
 
 abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
     lateinit var binding: VB
@@ -37,4 +38,9 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
 
     /**override it and inflate your view binding, demo in MainActivity*/
     abstract fun inflateViewBinding(inflater: LayoutInflater): VB
+
+    override fun finish() {
+        super.finish()
+        finishWithSlide()
+    }
 }
