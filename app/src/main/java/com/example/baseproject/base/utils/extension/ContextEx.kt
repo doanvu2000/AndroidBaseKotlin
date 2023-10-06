@@ -31,6 +31,9 @@ import com.bumptech.glide.Glide
 import com.example.baseproject.BuildConfig
 import com.example.baseproject.R
 import com.example.baseproject.base.utils.ImageUtil
+import com.google.android.play.core.review.ReviewException
+import com.google.android.play.core.review.ReviewManagerFactory
+import com.google.android.play.core.review.model.ReviewErrorCode
 import java.io.IOException
 import java.io.InputStream
 import java.util.*
@@ -363,4 +366,26 @@ fun Context.hideKeyboard(view: View) {
 @SuppressLint("HardwareIds")
 fun Context.getDeviceId(): String {
     return Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+}
+
+/**
+ * @author doanvv
+ * @contributor HuanND
+ * */
+fun Activity.showInAppReview() {
+    val reviewManager = ReviewManagerFactory.create(this)
+    reviewManager.requestReviewFlow().addOnCompleteListener { task ->
+        if (task.isSuccessful) {
+            val reviewInfo = task.result
+            val flow = reviewManager.launchReviewFlow(this, reviewInfo)
+            flow.addOnCompleteListener {
+                // The flow has finished. The API does not indicate whether the user
+                // reviewed or not, or even whether the review dialog was shown. Thus, no
+                // matter the result, we continue our app flow.
+            }
+
+        } else {
+            @ReviewErrorCode val reviewErrorCode = (task.exception as ReviewException).errorCode
+        }
+    }
 }
