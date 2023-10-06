@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.os.Parcelable
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.FileProvider
+import androidx.core.os.LocaleListCompat
 import com.example.baseproject.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -20,6 +21,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.Serializable
 import java.util.Calendar
+import java.util.Locale
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
@@ -180,6 +182,7 @@ fun shareFile(context: Context, file: File) {
     val fileUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file)
 
     val shareIntent = Intent(Intent.ACTION_SEND)
+    //set type for file
     shareIntent.type = "application/json"
     shareIntent.putExtra(Intent.EXTRA_STREAM, fileUri)
     context.startActivity(Intent.createChooser(shareIntent, "Share JSON File"))
@@ -210,3 +213,11 @@ suspend fun runOnDispatcherMain(action: () -> Unit) {
         action.invoke()
     }
 }
+
+fun setLanguageApp(code: String) {
+    val localeList = LocaleListCompat.forLanguageTags(code)
+    AppCompatDelegate.setApplicationLocales(localeList)
+}
+
+fun getApplicationLocales(): String = AppCompatDelegate.getApplicationLocales().toLanguageTags()
+    .ifEmpty { Locale.getDefault().language }
