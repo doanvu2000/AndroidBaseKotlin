@@ -20,7 +20,7 @@
         android:theme="@style/Theme.BaseProject"
         tools:targetApi="31">
         <activity
-            android:name=".user.MainActivity"
+            android:name=".base.ui.main.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,6 +28,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".base.ui.demo_viewpager.DemoViewPagerActivity"
+            android:exported="true" />
 
         <receiver android:name=".base.notification.AlarmReceiver" />
         <receiver android:name=".base.notification.AlarmReceiverV2" />

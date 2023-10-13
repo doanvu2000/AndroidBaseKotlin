@@ -84,3 +84,5 @@ fun String.convertToHalfWidth(): String {
     }
     return toHalfWidth()
 }
+
+fun String.isLinkGif(): Boolean = this.takeLast(4).contains(".gif")

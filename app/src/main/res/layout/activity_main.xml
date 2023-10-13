@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".user.MainActivity">
+    tools:context=".base.ui.main.MainActivity">
 
     <Button
         android:id="@+id/btnOpenFragment"
@@ -19,6 +19,13 @@
         android:layout_height="wrap_content"
         android:text="remove fragment" />
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnDemoViewPager"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/teal_200"
+        android:text="ViewPager" />
+
     <EditText
         android:id="@+id/edtNumberSize"
         android:layout_width="wrap_content"
@@ -27,7 +34,8 @@
         android:hint="Enter list size"
         android:inputType="number"
         android:textColor="@color/black"
-        android:textSize="20dp" />
+        android:textSize="20dp"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/tvTitle"

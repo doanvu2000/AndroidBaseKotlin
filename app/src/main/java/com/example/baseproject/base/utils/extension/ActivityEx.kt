@@ -86,8 +86,8 @@ fun AppCompatActivity.requestMultiplePermission(permission: List<String>) {
     }.launch(permission.toTypedArray())
 }
 
-fun AppCompatActivity.findFragment(TAG: String): Fragment? {
-    return supportFragmentManager.findFragmentByTag(TAG)
+fun AppCompatActivity.findFragment(tag: String): Fragment? {
+    return supportFragmentManager.findFragmentByTag(tag)
 }
 
 fun Activity.openSMS(smsBody: String, phone: String) {

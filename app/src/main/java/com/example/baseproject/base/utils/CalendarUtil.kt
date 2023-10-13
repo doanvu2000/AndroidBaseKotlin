@@ -9,19 +9,30 @@ import java.util.*
 object CalendarUtil {
     private var calendar = Calendar.getInstance()
     private val listOfMonth = mutableListOf(
-        R.string.month_1, R.string.month_2, R.string.month_3,
-        R.string.month_4, R.string.month_5, R.string.month_6,
-        R.string.month_7, R.string.month_8, R.string.month_9,
-        R.string.month_10, R.string.month_11, R.string.month_12
+        R.string.month_1,
+        R.string.month_2,
+        R.string.month_3,
+        R.string.month_4,
+        R.string.month_5,
+        R.string.month_6,
+        R.string.month_7,
+        R.string.month_8,
+        R.string.month_9,
+        R.string.month_10,
+        R.string.month_11,
+        R.string.month_12
     )
 
     enum class DayOfWeek(val order: Int, val stringId: Int, val stringShort: Int) {
-        SunDay(Calendar.SUNDAY, R.string.sunday_full, R.string.sunday),
-        MonDay(Calendar.MONDAY, R.string.monday_full, R.string.monday),
-        Tuesday(Calendar.TUESDAY, R.string.tuesday_full, R.string.tuesday),
-        Wednesday(Calendar.WEDNESDAY, R.string.wednesday_full, R.string.wednesday),
-        Thursday(Calendar.THURSDAY, R.string.thursday_full, R.string.thursday),
-        Friday(Calendar.FRIDAY, R.string.friday_full, R.string.friday),
+        SunDay(Calendar.SUNDAY, R.string.sunday_full, R.string.sunday), MonDay(
+            Calendar.MONDAY, R.string.monday_full, R.string.monday
+        ),
+        Tuesday(Calendar.TUESDAY, R.string.tuesday_full, R.string.tuesday), Wednesday(
+            Calendar.WEDNESDAY, R.string.wednesday_full, R.string.wednesday
+        ),
+        Thursday(Calendar.THURSDAY, R.string.thursday_full, R.string.thursday), Friday(
+            Calendar.FRIDAY, R.string.friday_full, R.string.friday
+        ),
         Saturday(Calendar.SATURDAY, R.string.saturday_full, R.string.saturday);
 
         companion object {
@@ -48,16 +59,18 @@ object CalendarUtil {
         1 to 31, 3 to 31, 4 to 30, 5 to 31, 6 to 30, 7 to 31, 8 to 31, 9 to 30, 10 to 31, 11 to 30, 12 to 31
     )
 
+    fun now() = calendar.timeInMillis
+
     fun getListMonthString(context: Context) = listOfMonth.map { context.getString(it) }
-    fun getYearInt() = calendar.get(Calendar.YEAR)
-    fun getMonthInt() = calendar.get(Calendar.MONTH)
-    fun getDayInt() = calendar.get(Calendar.DAY_OF_MONTH)
+    fun getYearInt() = calendar[Calendar.YEAR]
+    fun getMonthInt() = calendar[Calendar.MONTH]
+    fun getDayInt() = calendar[Calendar.DAY_OF_MONTH]
     fun getCurrentHour(): Int {
-        return calendar.get(Calendar.HOUR_OF_DAY)
+        return calendar[Calendar.HOUR_OF_DAY]
     }
 
     fun getCurrentMinutes(): Int {
-        return calendar.get(Calendar.MINUTE)
+        return calendar[Calendar.MINUTE]
     }
 
     fun getMonthString(context: Context, index: Int): String {
@@ -68,8 +81,7 @@ object CalendarUtil {
         return listOfMonth.map { context.getString(it) }
     }
 
-    fun isMonthFuture(context: Context, month: String) =
-        getListMonthString(context).indexOf(month) > getMonthInt()
+    fun isMonthFuture(context: Context, month: String) = getListMonthString(context).indexOf(month) > getMonthInt()
 
     //1 - sun, 2 - mon, 3 - tus, 4 - wed, 5 - thu, 6 - fri, 7 - sat
     fun getFirstDayOfWeekOfMonth(): Int {
@@ -82,7 +94,9 @@ object CalendarUtil {
     /**
      * get number day of the month != 2
      * */
-    private fun getDayCountOfMonth(monthNumber: Int) = mapDayCountOfMonth[monthNumber]
+    private fun getDayCountOfMonth(monthNumber: Int) = mutableMapOf(
+        1 to 31, 3 to 31, 4 to 30, 5 to 31, 6 to 30, 7 to 31, 8 to 31, 9 to 30, 10 to 31, 11 to 30, 12 to 31
+    )[monthNumber]
 
     /**
      * return true if day-month-year is today
@@ -180,15 +194,18 @@ object CalendarUtil {
         return minute1 > minute2
     }
 
+    fun getDayOfWeek(): DayOfWeek {
+        return DayOfWeek.getDayByIndex(calendar[Calendar.DAY_OF_WEEK])
+    }
+
     fun getTimeFormatDay(context: Context, day: Int, month: Int, year: Int): String {
         val calendar = Calendar.getInstance().apply {
             set(Calendar.DAY_OF_MONTH, day)
             set(Calendar.MONTH, month)
             set(Calendar.YEAR, year)
         }
-        val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
-        val dayString = context.getString(DayOfWeek.getDayByIndex(dayOfWeek).stringId)
-        val monthString = getMonthString(context, calendar.get(Calendar.MONTH))
+        val dayString = context.getString(getDayOfWeek().stringId)
+        val monthString = getMonthString(context, calendar[Calendar.MONTH])
 
         return "$dayString, $monthString $day"
     }
@@ -199,7 +216,7 @@ object CalendarUtil {
             set(Calendar.MONTH, month)
             set(Calendar.YEAR, year)
         }
-        val dayIndex = calendar.get(Calendar.DAY_OF_WEEK)
+        val dayIndex = calendar[Calendar.DAY_OF_WEEK]
         val dayName = context.getString(DayOfWeek.getDayShortByIndex(dayIndex))
         return if (day < 10) {
             "0$day $dayName"

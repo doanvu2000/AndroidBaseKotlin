@@ -1,4 +1,4 @@
-package com.example.baseproject.user
+package com.example.baseproject.base.ui.main
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
@@ -6,9 +6,12 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.baseproject.R
 import com.example.baseproject.base.base_view.BaseActivity
+import com.example.baseproject.base.base_view.HomeFragment
+import com.example.baseproject.base.ui.demo_viewpager.DemoViewPagerActivity
 import com.example.baseproject.base.utils.Constant
 import com.example.baseproject.base.utils.extension.clear
 import com.example.baseproject.base.utils.extension.hide
+import com.example.baseproject.base.utils.extension.openActivity
 import com.example.baseproject.base.utils.extension.runOnDispatcherIO
 import com.example.baseproject.base.utils.extension.show
 import com.example.baseproject.base.utils.extension.showToast
@@ -25,7 +28,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     }
 
     override fun initView() {
-
+        //nothing
     }
 
     override fun initData() {
@@ -33,23 +36,30 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     override fun initListener() {
         binding.btnOpenFragment.setOnClickListener {
-//            supportFragmentManager.beginTransaction().replace(R.id.frameContainer, HomeFragment()).commit()
-            val number = binding.edtNumberSize.text.toString().toIntOrNull()
-            number?.let {
-                if (it > 5000000) {
-                    showToast("Size is too large!!")
-                    return@let
-                }
-                mapList(it)
-            } ?: kotlin.run {
-                showToast("Enter list size!!")
-            }
+            supportFragmentManager.beginTransaction().replace(R.id.frameContainer, HomeFragment()).commit()
+//            randomAndSortList()
         }
         binding.btnRemoveFragment.setOnClickListener {
             val oldFragment: Fragment? = supportFragmentManager.findFragmentById(R.id.frameContainer)
             if (oldFragment != null) {
                 supportFragmentManager.beginTransaction().remove(oldFragment).commit()
             }
+        }
+        binding.btnDemoViewPager.clickSafe {
+            openActivity(DemoViewPagerActivity::class.java, isFinish = false, true, null)
+        }
+    }
+
+    private fun randomAndSortList() {
+        val number = binding.edtNumberSize.text.toString().toIntOrNull()
+        number?.let {
+            if (it > 5000000) {
+                showToast("Size is too large!!")
+                return@let
+            }
+            mapList(it)
+        } ?: kotlin.run {
+            showToast("Enter list size!!")
         }
     }
 

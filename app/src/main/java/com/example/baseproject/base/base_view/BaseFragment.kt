@@ -21,7 +21,7 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
         initView()
         initData()
         initListener()
-        handleOnBackPressed()
+//        handleOnBackPressed()
     }
 
     private fun handleOnBackPressed() {

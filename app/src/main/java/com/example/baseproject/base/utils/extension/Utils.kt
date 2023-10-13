@@ -219,5 +219,5 @@ fun setLanguageApp(code: String) {
     AppCompatDelegate.setApplicationLocales(localeList)
 }
 
-fun getApplicationLocales(): String = AppCompatDelegate.getApplicationLocales().toLanguageTags()
-    .ifEmpty { Locale.getDefault().language }
+fun getApplicationLocales(): String =
+    AppCompatDelegate.getApplicationLocales().toLanguageTags().ifEmpty { Locale.getDefault().language }

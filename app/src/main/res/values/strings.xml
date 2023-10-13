@@ -46,4 +46,9 @@
     <string name="friday_full">Friday</string>
     <string name="saturday_full">Saturday</string>
     <string name="sunday_full">Sunday</string>
+
+    <string name="txt_tab_name_1">Tab1</string>
+    <string name="txt_tab_name_2">Tab2</string>
+    <string name="txt_tab_name_3">Tab3</string>
+    <string name="txt_tab_name_4">Tab4</string>
 </resources>

@@ -27,10 +27,14 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.example.baseproject.BuildConfig
 import com.example.baseproject.R
 import com.example.baseproject.base.utils.ImageUtil
+import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.util.*
@@ -363,4 +367,56 @@ fun Context.hideKeyboard(view: View) {
 @SuppressLint("HardwareIds")
 fun Context.getDeviceId(): String {
     return Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+}
+
+fun Context.getUriByFileProvider(file: File): Uri {
+    return FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
+}
+
+fun Context.shareFileGif(file: File) {
+    val fileUri = getUriByFileProvider(file)
+    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+        type = "image/gif"
+        putExtra(Intent.EXTRA_STREAM, fileUri)
+    }
+    startActivity(Intent.createChooser(shareIntent, "Share File"))
+}
+
+fun Context.shareFileImage(file: File, title: String? = "") {
+    val uri = getUriByFileProvider(file)
+    val typeImage = "image/jpeg"
+    val shareIntent = Intent(Intent.ACTION_SEND)
+    shareIntent.apply {
+        type = "image/$typeImage" // Set the MIME type for images
+        putExtra(Intent.EXTRA_STREAM, uri)
+        // Optionally, add a subject or text to the shared content
+        putExtra(Intent.EXTRA_SUBJECT, title)
+        putExtra(Intent.EXTRA_TEXT, title)
+    }
+    startActivity(Intent.createChooser(shareIntent, "Share $title"))
+}
+
+fun Context.downloadBitmapByUrl(
+    url: String, onProgressLoading: () -> Unit, onLoadedBitmap: (Bitmap) -> Unit, onLoadFailed: () -> Unit
+) {
+    val target = object : CustomTarget<Bitmap>() {
+        override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+            onLoadedBitmap.invoke(resource)
+        }
+
+        override fun onLoadCleared(placeholder: Drawable?) {
+
+        }
+
+        override fun onLoadFailed(errorDrawable: Drawable?) {
+            super.onLoadFailed(errorDrawable)
+            onLoadFailed.invoke()
+        }
+
+        override fun onLoadStarted(placeholder: Drawable?) {
+            super.onLoadStarted(placeholder)
+            onProgressLoading.invoke()
+        }
+    }
+    Glide.with(this).asBitmap().load(url).into(target)
 }

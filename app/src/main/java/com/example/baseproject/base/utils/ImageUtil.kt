@@ -8,11 +8,17 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
+import com.example.baseproject.base.utils.extension.isSdk30
 import com.example.baseproject.base.utils.extension.isSdkQ
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
+import java.io.InputStream
 import java.io.OutputStream
+import java.net.HttpURLConnection
+import java.net.URL
 
 object ImageUtil {
     const val TYPE_JPEG = "image/jpeg"
@@ -59,7 +65,6 @@ object ImageUtil {
 
     private fun insertImage(resolver: ContentResolver, bitmap: Bitmap, fileName: String): Uri? {
         val fos: OutputStream?
-//        val APP_MEDIA_FOLDER = "doan"
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
             put(MediaStore.MediaColumns.MIME_TYPE, TYPE_JPEG)
@@ -107,6 +112,47 @@ object ImageUtil {
             }
         }
         return@withContext imageList
+    }
+
+    /**
+     * required WRITE_EXTERNAL_STORAGE permission with api below 30
+     * */
+    suspend fun saveGifFromUrlToPicture(gifUrl: String, fileName: String, onDone: (File?) -> Unit) = withContext(Dispatchers.IO) {
+        val outputStream: FileOutputStream
+        val outputFile: File
+        try {
+            outputFile = if (isSdk30()) {
+                File(
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                        .toString() + "/" + fileName + ".gif"
+                )
+            } else {
+
+                File(Environment.getExternalStorageDirectory().toString() + "/" + fileName + ".gif")
+            }
+            outputStream = FileOutputStream(outputFile)
+
+            val url = URL(gifUrl)
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "GET"
+
+            val inputStream: InputStream = connection.inputStream
+            val buffer = ByteArray(1024)
+            var bytesRead: Int
+
+            while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                outputStream.write(buffer, 0, bytesRead)
+            }
+
+            outputStream.close()
+            inputStream.close()
+            connection.disconnect()
+
+            onDone.invoke(outputFile)
+        } catch (e: IOException) {
+            e.printStackTrace()
+            onDone.invoke(null)
+        }
     }
 
 }
