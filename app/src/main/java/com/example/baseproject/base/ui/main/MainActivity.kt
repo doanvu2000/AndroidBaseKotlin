@@ -80,7 +80,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             timeStart = System.currentTimeMillis()
             showLoading()
             runOnDispatcherIO {
-                for (i in 1..size) {
+                repeat(size) {
                     list.add(Random.nextInt(-10000, 10000))
                 }
             }
