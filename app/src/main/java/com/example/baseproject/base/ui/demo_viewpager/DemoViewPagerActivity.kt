@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import com.example.baseproject.base.base_view.BaseActivity
 import com.example.baseproject.base.ui.demo_viewpager.adapter.ViewPagerAdapter
 import com.example.baseproject.base.ui.demo_viewpager.enumz.TabInfo
+import com.example.baseproject.base.utils.extension.finishWithSlide
 import com.example.baseproject.databinding.ActivityDemoViewPagerBinding
 import com.google.android.material.tabs.TabLayoutMediator
 
@@ -29,7 +30,13 @@ class DemoViewPagerActivity : BaseActivity<ActivityDemoViewPagerBinding>() {
     }
 
     override fun initListener() {
+        binding.btnBack.clickSafety {
+            onBack()
+        }
+    }
 
+    override fun onBack() {
+        finishWithSlide()
     }
 
     override fun inflateViewBinding(inflater: LayoutInflater): ActivityDemoViewPagerBinding {

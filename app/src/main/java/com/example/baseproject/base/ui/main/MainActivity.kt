@@ -12,6 +12,7 @@ import com.example.baseproject.base.utils.Constant
 import com.example.baseproject.base.utils.extension.clear
 import com.example.baseproject.base.utils.extension.hide
 import com.example.baseproject.base.utils.extension.openActivity
+import com.example.baseproject.base.utils.extension.removeFragment
 import com.example.baseproject.base.utils.extension.runOnDispatcherIO
 import com.example.baseproject.base.utils.extension.show
 import com.example.baseproject.base.utils.extension.showToast
@@ -41,11 +42,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         }
         binding.btnRemoveFragment.setOnClickListener {
             val oldFragment: Fragment? = supportFragmentManager.findFragmentById(R.id.frameContainer)
-            if (oldFragment != null) {
-                supportFragmentManager.beginTransaction().remove(oldFragment).commit()
+            oldFragment?.let {
+                removeFragment(it)
             }
         }
-        binding.btnDemoViewPager.clickSafe {
+        binding.btnDemoViewPager.clickSafety {
             openActivity(DemoViewPagerActivity::class.java, isFinish = false, true, null)
         }
     }
@@ -70,8 +71,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     @SuppressLint("SetTextI18n")
     private fun mapList(size: Int) {
         val list = mutableListOf<Int>()
-        var timeStart = 0L
-        var timeEnd = 0L
+        var timeStart: Long
+        var timeEnd: Long
         binding.tvTitle.text = "Init and sort list random with size: ${size.toStringFormat()}"
         binding.tvResult.clear()
         lifecycleScope.launch(coroutineException) {

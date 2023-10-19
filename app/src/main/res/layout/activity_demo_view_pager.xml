@@ -6,13 +6,21 @@
     android:layout_height="match_parent"
     tools:context=".base.ui.demo_viewpager.DemoViewPagerActivity">
 
+    <ImageView
+        android:id="@+id/btnBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:src="@drawable/ic_back"
+        tools:ignore="MissingConstraints" />
+
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/white"
         android:paddingBottom="8dp"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnBack"
         app:tabIndicatorColor="@color/black"
         app:tabIndicatorFullWidth="false"
         app:tabMode="fixed"

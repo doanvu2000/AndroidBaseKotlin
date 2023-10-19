@@ -14,10 +14,12 @@ import com.example.baseproject.base.utils.extension.isSdk26
 import java.util.Calendar
 
 object AlarmUtil {
-    // in application, call AlarmUtil.setIntervalAlarm(this, Constant.actions) to set schedule alarm
-    fun setIntervalAlarm(context: Context, actions: List<String>) {
+    /**
+     * in application, call AlarmUtil.setIntervalAlarm(this) on onCreate() to set schedule alarm
+     * */
+    fun setIntervalAlarm(context: Context) {
         createNotificationChannel(context)
-        actions.forEach { action ->
+        Constant.actions.forEach { action ->
             setAlarm(context, action)
         }
     }

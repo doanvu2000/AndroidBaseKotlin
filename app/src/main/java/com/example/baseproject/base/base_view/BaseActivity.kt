@@ -63,7 +63,7 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
         }
     }
 
-    fun View.clickSafe(action: () -> Unit) {
+    fun View.clickSafety(action: () -> Unit) {
         this.setOnClickListener {
             if (isAvailableClick) {
                 action()

@@ -264,3 +264,7 @@ fun AppCompatActivity.replaceFragmentAddBackStack(frameId: Int, fragment: Fragme
         .addToBackStack(fragment.javaClass.name)
         .commit()
 }
+
+fun AppCompatActivity.removeFragment(fragment: Fragment) {
+    supportFragmentManager.beginTransaction().remove(fragment).commit()
+}

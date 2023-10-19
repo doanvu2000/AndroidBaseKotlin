@@ -62,7 +62,7 @@ class AlarmReceiver : BroadcastReceiver() {
     }
 
     private fun getContentRandom(list: MutableList<String>): String {
-        for (i in 0..5) {
+        repeat(5) {
             list.shuffle()
         }
         return list[0]
