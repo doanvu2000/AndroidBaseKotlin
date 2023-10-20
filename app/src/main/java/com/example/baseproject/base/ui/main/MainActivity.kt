@@ -8,6 +8,7 @@ import com.example.baseproject.R
 import com.example.baseproject.base.base_view.BaseActivity
 import com.example.baseproject.base.base_view.HomeFragment
 import com.example.baseproject.base.ui.demo_viewpager.DemoViewPagerActivity
+import com.example.baseproject.base.ui.location.LocationActivity
 import com.example.baseproject.base.utils.Constant
 import com.example.baseproject.base.utils.extension.clear
 import com.example.baseproject.base.utils.extension.hide
@@ -33,6 +34,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     }
 
     override fun initData() {
+
     }
 
     override fun initListener() {
@@ -48,6 +50,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         }
         binding.btnDemoViewPager.clickSafety {
             openActivity(DemoViewPagerActivity::class.java, isFinish = false, true, null)
+        }
+        binding.btnDemoLocation.clickSafety {
+            openActivity(LocationActivity::class.java, isFinish = false, isAnimation = true, bundle = null)
         }
     }
 

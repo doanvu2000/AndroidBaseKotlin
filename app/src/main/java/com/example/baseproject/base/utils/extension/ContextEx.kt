@@ -1,5 +1,6 @@
 package com.example.baseproject.base.utils.extension
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.ActivityManager
@@ -10,6 +11,8 @@ import android.content.Intent
 import android.content.pm.PackageInfo
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
+import android.location.Location
+import android.location.LocationManager
 import android.media.Ringtone
 import android.media.RingtoneManager
 import android.net.ConnectivityManager
@@ -34,10 +37,13 @@ import com.bumptech.glide.request.transition.Transition
 import com.example.baseproject.BuildConfig
 import com.example.baseproject.R
 import com.example.baseproject.base.utils.ImageUtil
-import java.io.File
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.play.core.review.ReviewException
 import com.google.android.play.core.review.ReviewManagerFactory
 import com.google.android.play.core.review.model.ReviewErrorCode
+import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.util.*
@@ -118,24 +124,16 @@ fun Context.openActivity(pClass: Class<out Activity>, isFinish: Boolean = false,
 }
 
 fun Context.loadImage(
-    imageView: ImageView, url: String,
-    error: Int = R.drawable.ic_launcher_background
+    imageView: ImageView, url: String, error: Int = R.drawable.ic_launcher_background
 ) {
-    Glide.with(this).load(url)
-        .fitCenter()
-        .placeholder(error)
-        .into(imageView)
+    Glide.with(this).load(url).fitCenter().placeholder(error).into(imageView)
 
 }
 
 fun Context.loadImage(
-    imageView: ImageView, url: Int,
-    error: Int = R.drawable.ic_launcher_background
+    imageView: ImageView, url: Int, error: Int = R.drawable.ic_launcher_background
 ) {
-    Glide.with(this).load(url)
-        .fitCenter()
-        .placeholder(error)
-        .into(imageView)
+    Glide.with(this).load(url).fitCenter().placeholder(error).into(imageView)
 
 }
 
@@ -163,16 +161,14 @@ fun Context.navigateToMarket(publishNameStore: String) {
     try {
         startActivity(
             Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse(market + publishNameStore)
+                Intent.ACTION_VIEW, Uri.parse(market + publishNameStore)
                 //market://details?id=<package_name>
             )
         )
     } catch (e: ActivityNotFoundException) {
         startActivity(
             Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse(webPlayStore + publishNameStore)
+                Intent.ACTION_VIEW, Uri.parse(webPlayStore + publishNameStore)
                 //https://play.google.com/store/apps/details?id=<package_name>
             )
         )
@@ -189,8 +185,7 @@ fun Context.rateApp() {
     } catch (e: ActivityNotFoundException) {
         startActivity(
             Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse("http://play.google.com/store/apps/details?id=$packageName")
+                Intent.ACTION_VIEW, Uri.parse("http://play.google.com/store/apps/details?id=$packageName")
             )
         )
     }
@@ -199,9 +194,7 @@ fun Context.rateApp() {
 fun Context.sendEmail(toEmail: String, feedBackString: String) {
     val intent = Intent(Intent.ACTION_VIEW)
     val data = Uri.parse(
-        "mailto:"
-                + toEmail
-                + "?subject=" + feedBackString + "&body=" + ""
+        "mailto:" + toEmail + "?subject=" + feedBackString + "&body=" + ""
     )
     intent.data = data
     try {
@@ -213,8 +206,7 @@ fun Context.sendEmail(toEmail: String, feedBackString: String) {
 }
 
 fun Context.getRingTone(): Ringtone {
-    val defaultRingtoneUri: Uri =
-        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
+    val defaultRingtoneUri: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
     return RingtoneManager.getRingtone(this, defaultRingtoneUri)
 }
 
@@ -223,12 +215,10 @@ fun Context.getRingTone(): Ringtone {
  * */
 fun Context.isInternetAvailable(): Boolean {
     var result = false
-    val connectivityManager =
-        getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     if (isSdkM()) {
         val networkCapabilities = connectivityManager.activeNetwork ?: return false
-        val actNw =
-            connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return false
+        val actNw = connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return false
         result = when {
             actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
             actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
@@ -236,8 +226,7 @@ fun Context.isInternetAvailable(): Boolean {
             else -> false
         }
     } else {
-        @Suppress("DEPRECATION")
-        connectivityManager.run {
+        @Suppress("DEPRECATION") connectivityManager.run {
             connectivityManager.activeNetworkInfo?.run {
                 result = when (type) {
                     ConnectivityManager.TYPE_WIFI -> true
@@ -290,11 +279,8 @@ fun Context.saveImageToLocal(bitmap: Bitmap, result: (Boolean) -> Unit) {
     result.invoke(resultSaveImage)
 }
 
-fun getPromptInfo(title: String, subtitle: String, negativeButtonText: String) = BiometricPrompt.PromptInfo.Builder()
-    .setTitle(title)
-    .setSubtitle(subtitle)
-    .setNegativeButtonText(negativeButtonText)
-    .build()
+fun getPromptInfo(title: String, subtitle: String, negativeButtonText: String) =
+    BiometricPrompt.PromptInfo.Builder().setTitle(title).setSubtitle(subtitle).setNegativeButtonText(negativeButtonText).build()
 
 val biometricCall = object : BiometricPrompt.AuthenticationCallback() {
 
@@ -331,9 +317,7 @@ fun Context.getColorByIdWithTheme(colorAttr: Int): Int {
 }
 
 fun Context.serviceIsRunning(serviceClass: Class<*>): Boolean {
-    @Suppress("DEPRECATION")
-    return (getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager)
-        .getRunningServices(Int.MAX_VALUE)
+    @Suppress("DEPRECATION") return (getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).getRunningServices(Int.MAX_VALUE)
         .any { serviceClass.name == it.service.className }
 }
 
@@ -444,4 +428,31 @@ fun Context.downloadBitmapByUrl(
         }
     }
     Glide.with(this).asBitmap().load(url).into(target)
+}
+
+fun Context.isGpsEnable(): Boolean {
+    val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+            && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+}
+
+@SuppressLint("MissingPermission")
+fun Context.getLocationUser(
+    onGetLocationComplete: ((location: Location) -> Unit)? = null, onMissingPermission: () -> Unit, onFail: (() -> Unit)? = null
+) {
+    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+    if (!checkPermission(Manifest.permission.ACCESS_FINE_LOCATION) && !checkPermission(Manifest.permission.ACCESS_COARSE_LOCATION)) {
+        showToast("Missing location permission")
+        onMissingPermission.invoke()
+        return
+    }
+    //check permission before get
+    fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, CancellationTokenSource().token)
+        .addOnSuccessListener { location: Location? ->
+            location?.let {
+                onGetLocationComplete?.invoke(it)
+            } ?: kotlin.run {
+                onFail?.invoke()
+            }
+        }
 }
