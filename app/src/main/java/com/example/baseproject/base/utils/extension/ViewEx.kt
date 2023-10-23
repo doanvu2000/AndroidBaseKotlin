@@ -14,6 +14,7 @@ import android.widget.ImageView
 import android.widget.ScrollView
 import androidx.core.widget.NestedScrollView
 import com.example.baseproject.R
+import com.google.android.material.tabs.TabLayout
 
 fun View.hideKeyboard() {
     val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -116,13 +117,19 @@ fun NestedScrollView.scrollToTop() {
     fullScroll(ScrollView.FOCUS_UP)
     smoothScrollTo(0, 0)
 }
-fun ImageView.setTint(){
+
+fun ImageView.setTint() {
     val matrix = ColorMatrix()
     matrix.setSaturation(0f)
 
     val filter = ColorMatrixColorFilter(matrix)
     this.colorFilter = filter
 }
-fun ImageView.clearTint(){
+
+fun ImageView.clearTint() {
     this.colorFilter = null
+}
+
+fun TabLayout.createTab(tabName: String): TabLayout.Tab {
+    return newTab().setText(tabName)
 }

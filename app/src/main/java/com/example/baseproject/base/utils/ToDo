@@ -1,8 +1,8 @@
 TODO list todo, last update: 07/09/2023 by doanvv
-- ViewPager2: done
+- ViewPager2: ---done---
 - TextView:  Auto size TextViews
-- registerActivityForResult API:  registerActivityForResult
-- LocationUtils:  get user current location (last location)
+- registerActivityForResult API:  registerActivityForResult ---done--- (demo: request location permission in LocationActivity.kt)
+- LocationUtils:  get user current location (last location) ---done---
 - Camera
 - Animation: animation, lottie file, shimmer loading (facebook)
 - ExoPlayer
