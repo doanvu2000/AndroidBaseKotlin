@@ -7,6 +7,7 @@ import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 import android.graphics.Rect
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
@@ -132,4 +133,13 @@ fun ImageView.clearTint() {
 
 fun TabLayout.createTab(tabName: String): TabLayout.Tab {
     return newTab().setText(tabName)
+}
+
+/**
+ * make view is free to add in another view group
+ * */
+fun View?.removeSelf() {
+    this ?: return
+    val parentView = parent as? ViewGroup ?: return
+    parentView.removeView(this)
 }

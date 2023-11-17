@@ -18,6 +18,8 @@ import android.media.RingtoneManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
+import android.os.BatteryManager
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.TypedValue
@@ -53,7 +55,11 @@ fun Context.checkPermission(permission: String): Boolean {
     return ContextCompat.checkSelfPermission(this, permission) == PERMISSION_GRANTED
 }
 
-fun Context.hasWritePermission() = this.checkPermission(WRITE_EXTERNAL_STORAGE)
+fun Context.hasWritePermission() = if (isSdkR()) {
+    true
+} else {
+    this.checkPermission(WRITE_EXTERNAL_STORAGE)
+}
 
 fun Context.hasReadStoragePermission() = if (isSdk33()) {
     checkPermission(READ_MEDIA_IMAGE)
@@ -137,8 +143,9 @@ fun Context.loadImage(
 
 }
 
+@SuppressLint("DiscouragedApi")
 fun Context.getDrawableIdByName(name: String): Int {
-    return resources.getIdentifier(name.split(".").last(), "drawable", packageName)
+    return resources.getIdentifier(name, "drawable", packageName)
 }
 
 fun Context.inflateLayout(layoutResource: Int, parent: ViewGroup): View {
@@ -194,7 +201,7 @@ fun Context.rateApp() {
 fun Context.sendEmail(toEmail: String, feedBackString: String) {
     val intent = Intent(Intent.ACTION_VIEW)
     val data = Uri.parse(
-        "mailto:" + toEmail + "?subject=" + feedBackString + "&body=" + ""
+        "mailto:$toEmail?subject=$feedBackString&body="
     )
     intent.data = data
     try {
@@ -255,7 +262,9 @@ fun Context.endService(pClass: Class<out Service>) {
     stopService(Intent(this, pClass))
 }
 
-//required permission WRITE_EXTERNAL_STORAGE ( if sdk <= 29)
+/**
+ * required permission WRITE_EXTERNAL_STORAGE ( if sdk <= 29)
+ * */
 fun Context.shareImage(bitmap: Bitmap) {
     if (!hasWritePermission()) {
         showToast("No have permission to write file")
@@ -269,7 +278,9 @@ fun Context.shareImage(bitmap: Bitmap) {
     }
 }
 
-//required permission WRITE_EXTERNAL_STORAGE ( if sdk <= 29)
+/**
+ * required permission WRITE_EXTERNAL_STORAGE ( if sdk <= 29)
+ * */
 fun Context.saveImageToLocal(bitmap: Bitmap, result: (Boolean) -> Unit) {
     if (!hasWritePermission()) {
         showToast("No have permission to write file")
@@ -455,4 +466,42 @@ fun Context.getLocationUser(
                 onFail?.invoke()
             }
         }
+}
+
+fun Context.hasWriteSettingPermission(): Boolean {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        Settings.System.canWrite(this)
+    } else {
+        false
+    }
+}
+
+fun Context.hasOverlaySettingPermission(): Boolean {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        Settings.canDrawOverlays(this)
+    } else {
+        false
+    }
+}
+
+fun Context.hasAnswerCallComing(): Boolean {
+    return if (isSdk26()) {
+        checkPermission(Manifest.permission.ANSWER_PHONE_CALLS)
+    } else {
+        false
+    }
+}
+
+fun Context.hasReadContact(): Boolean {
+    return checkPermission(Manifest.permission.READ_CONTACTS)
+}
+
+fun Context.isNotificationListenerServiceEnabled(): Boolean {
+    val flat = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
+    return flat?.contains(packageName) ?: false
+}
+
+fun Context.getBatteryLevel(): Int {
+    val batteryManager = getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+    return batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
 }

@@ -2,15 +2,19 @@ package com.example.baseproject.base.utils.extension
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.role.RoleManager
 import android.content.ActivityNotFoundException
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
+import android.content.Context.ROLE_SERVICE
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.telecom.TelecomManager
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
@@ -267,4 +271,68 @@ fun AppCompatActivity.replaceFragmentAddBackStack(frameId: Int, fragment: Fragme
 
 fun AppCompatActivity.removeFragment(fragment: Fragment) {
     supportFragmentManager.beginTransaction().remove(fragment).commit()
+}
+
+fun Activity.openExactAlarmSettingPage() {
+    if (isSdkS()) {
+        startActivity(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM))
+    }
+}
+
+/**
+ * required android M,
+ * requestOpenWriteSettingLauncher is registerForActivityResultLauncher
+ * */
+fun Activity.openManageWriteSetting() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        val intent = Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS)
+        intent.data = Uri.parse("package:$packageName")
+//        requestOpenWriteSettingLauncher.launch(intent)
+    } else {
+//        TODO("VERSION.SDK_INT < M")
+    }
+
+}
+
+/**
+ * required android M,
+ * requestOpenSettingLauncher is registerForActivityResultLauncher
+ * */
+fun Activity.openSettingOverlay() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+        intent.data = Uri.fromParts("package", packageName, null as String?)
+//        requestOpenSettingLauncher.launch(intent)
+    } else {
+//        TODO("VERSION.SDK_INT < M")
+    }
+
+}
+
+/**
+ * required android M,
+ * startChangeDefaultDialler is registerForActivityResultLauncher
+ * */
+fun Activity.setDefaultPhoneApp() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        val roleManager = getSystemService(ROLE_SERVICE) as RoleManager
+        val isHasRole = roleManager.isRoleAvailable(RoleManager.ROLE_DIALER)
+        val isAppRoleHeld = roleManager.isRoleHeld(RoleManager.ROLE_DIALER)
+        if (isHasRole) {
+            if (!isAppRoleHeld) {
+                val intent2 = roleManager.createRequestRoleIntent(RoleManager.ROLE_DIALER)
+//                startChangeDefaultDialler.launch(intent2)
+            }
+        }
+    } else {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val intent1 = Intent(TelecomManager.ACTION_CHANGE_DEFAULT_DIALER)
+            intent1.putExtra(
+                TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME, this.packageName
+            )
+//        startChangeDefaultDialler.launch(intent1)
+        } else {
+//            TODO("VERSION.SDK_INT < M")
+        }
+    }
 }
