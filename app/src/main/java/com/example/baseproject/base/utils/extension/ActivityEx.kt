@@ -67,13 +67,16 @@ fun Activity.hideKeyboard() {
     hideKeyboard(currentFocus ?: View(this))
 }
 
-fun Activity.showSnackBar(msg: String, duration: Int = 500) {
+fun Activity.showSnackBar(msg: String, duration: Int = 500, isShowActionOK: Boolean = false, action: (() -> Unit)? = null) {
     val view = window.decorView.findViewById<View>(android.R.id.content)
     view?.let {
         val snackBar = Snackbar.make(it, msg, duration)
 //            .setTextColor(getColorById(R.color.text_selected))
 //        val snackView = snackBar.view
 //        snackView.setBackgroundColor(getColorById(R.color.color_app))
+        if (isShowActionOK) {
+            snackBar.setAction("OK") { action?.invoke() }
+        }
         snackBar.show()
     }
 }

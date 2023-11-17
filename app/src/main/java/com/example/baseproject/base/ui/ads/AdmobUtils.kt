@@ -217,6 +217,7 @@ class AdmobUtils constructor(val context: Activity) {
                         mInterstitialAd = null
                         initInter(context)
                         super.onAdFailedToShowFullScreenContent(adError)
+                        showInterFailed?.invoke(adError.message)
                     }
 
                     override fun onAdShowedFullScreenContent() {
@@ -226,6 +227,7 @@ class AdmobUtils constructor(val context: Activity) {
                 }
             }, TIME_SHOW_DIALOG_INTER)
         } else {
+            showInterFailed?.invoke("Inter ads not available")
             initInter(context)
         }
     }

@@ -46,7 +46,7 @@ class DemoAdsActivity : BaseActivity<ActivityDemoAdsBinding>() {
         binding.btnShowInter.clickSafety {
             AdmobUtils.getInstance(this).showInter(onDone = {
             }, showInterFailed = {
-                showSnackBar(it ?: "Error when show inter")
+                showSnackBar(it ?: "Error when show inter", 3000, true)
             })
         }
     }
