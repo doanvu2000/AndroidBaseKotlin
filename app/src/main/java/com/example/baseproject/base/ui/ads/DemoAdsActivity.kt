@@ -19,7 +19,6 @@ class DemoAdsActivity : BaseActivity<ActivityDemoAdsBinding>() {
 
     @SuppressLint("SetTextI18n")
     private fun initAds() {
-        binding.tvBanner.text = "Banner ads: show success"
         AdmobUtils.getInstance(this).showBannerNormal(this, binding.banner,
             onBannerShowSuccess = {
                 binding.tvBanner.text = "Banner ads: load success"
