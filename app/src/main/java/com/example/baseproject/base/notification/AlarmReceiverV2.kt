@@ -14,6 +14,7 @@ import com.example.baseproject.R
 import com.example.baseproject.base.utils.Constant
 import com.example.baseproject.base.utils.extension.getFlagPendingIntent
 import com.example.baseproject.base.utils.extension.isSdk26
+import com.example.baseproject.base.utils.extension.isSdkS
 
 class AlarmReceiverV2 : BroadcastReceiver() {
     companion object {
@@ -71,9 +72,23 @@ fun setReminder(context: Context, title: String, content: String, time: Long) {
     val flags = PendingIntent.FLAG_UPDATE_CURRENT.getFlagPendingIntent()
     val pendingIntent =
         PendingIntent.getBroadcast(context, AlarmReceiverV2.NOTIFICATION_ID, intent, flags)
-    AlarmManagerCompat.setExactAndAllowWhileIdle(
-        alarmManager, AlarmManager.RTC_WAKEUP, time, pendingIntent
-    )
+    val setExactAlarm = {
+        AlarmManagerCompat.setExactAndAllowWhileIdle(
+            alarmManager, AlarmManager.RTC_WAKEUP, time, pendingIntent
+        )
+    }
+    if (isSdkS()) {
+        if (alarmManager.canScheduleExactAlarms()) {
+            setExactAlarm()
+        } else {
+            //request open setting schedule alarm page
+            /**
+             * @see ActivityEx.kt: openExactAlarmSettingPage()
+             * */
+        }
+    } else {
+        setExactAlarm()
+    }
 }
 
 fun cancelReminder(context: Context?) {
