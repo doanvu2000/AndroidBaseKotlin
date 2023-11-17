@@ -7,6 +7,7 @@
     tools:context=".base.ui.main.MainActivity">
 
     <Button
+        android:layout_marginStart="16dp"
         android:id="@+id/btnOpenFragment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -14,6 +15,7 @@
         tools:ignore="MissingConstraints" />
 
     <Button
+        android:layout_marginStart="16dp"
         android:id="@+id/btnRemoveFragment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -21,6 +23,7 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnDemoViewPager"
+        android:layout_marginStart="16dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:backgroundTint="@color/teal_200"
@@ -28,16 +31,25 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnDemoLocation"
+        android:layout_marginStart="16dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:backgroundTint="@color/teal_200"
         android:text="Location" />
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnDemoAds"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:backgroundTint="@color/teal_200"
+        android:text="Ads mob" />
+
     <EditText
         android:id="@+id/edtNumberSize"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
+        android:layout_marginStart="16dp"
         android:hint="Enter list size"
         android:inputType="number"
         android:textColor="@color/black"
@@ -48,7 +60,7 @@
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
+        android:layout_marginStart="16dp"
         android:textColor="@color/black"
         android:textSize="20dp"
         tools:text="abc" />
@@ -57,7 +69,7 @@
         android:id="@+id/tvResult"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
+        android:layout_marginStart="16dp"
         android:textColor="@color/black"
         android:textSize="20dp"
         tools:text="abc" />

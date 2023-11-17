@@ -7,6 +7,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.baseproject.R
 import com.example.baseproject.base.base_view.BaseActivity
 import com.example.baseproject.base.base_view.HomeFragment
+import com.example.baseproject.base.ui.ads.DemoAdsActivity
 import com.example.baseproject.base.ui.demo_viewpager.DemoViewPagerActivity
 import com.example.baseproject.base.ui.location.LocationActivity
 import com.example.baseproject.base.utils.Constant
@@ -53,6 +54,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         }
         binding.btnDemoLocation.clickSafety {
             openActivity(LocationActivity::class.java, isFinish = false, isAnimation = true, bundle = null)
+        }
+        binding.btnDemoAds.clickSafety {
+            openActivity(DemoAdsActivity::class.java, false, isAnimation = true, bundle = null)
         }
     }
 

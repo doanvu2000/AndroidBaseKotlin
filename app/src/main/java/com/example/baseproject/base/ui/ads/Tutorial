@@ -1,0 +1,18 @@
+1. Create firebase project in link: https://console.firebase.google.com/
+2. Add Firebase to app:
+    - Create app android in project firebase
+    - Import file google-services.json to folder app
+    - Add Firebase SDK: add in build.gradle
+3. Add in AndroidManifest:
+    - <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+    - <meta-data
+                  android:name="com.google.android.gms.ads.APPLICATION_ID"
+                  android:value="${AD_MOD_APP_ID}" />
+
+    - <meta-data
+                  android:name="com.google.android.gms.ads.flag.OPTIMIZE_INITIALIZATION"
+                  android:value="true" />
+    - <meta-data
+                  android:name="com.google.android.gms.ads.flag.OPTIMIZE_AD_LOADING"
+                  android:value="true" />
+4. Demo in DemoAdsActivity.kt

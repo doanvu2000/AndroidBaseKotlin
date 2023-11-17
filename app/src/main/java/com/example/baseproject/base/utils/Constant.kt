@@ -3,7 +3,7 @@ package com.example.baseproject.base.utils
 object Constant {
     const val READ_TIME_OUT: Long = 15
     const val CONNECT_TIME_OUT: Long = 15
-    const val TAG = "dddd"
+    const val TAG = "doanvv"
 
     //-------------------alarm interval day-----------------------
     const val MILLISECOND_ONE_DAY = 86400000

@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'com.google.gms.google-services'
 }
 
 android {
@@ -14,6 +15,31 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        def formattedDate = new Date().format('MM.dd.yyyy_hh.mm')
+        archivesBaseName = "Base_Project_Kotlin_${formattedDate}"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        def addConstantTo = { target, constantName, constantValue ->
+            target.manifestPlaceholders += [(constantName): constantValue]
+            target.buildConfigField "String", "${constantName}", "\"${constantValue}\""
+        }
+        addConstantTo(owner, "AD_MOD_APP_ID", "ca-app-pub-3940256099942544~3347511713")
+
+        addConstantTo(owner, "ADS_BANNER_TEST", "ca-app-pub-3940256099942544/6300978111")
+        addConstantTo(owner, "ADS_ADMOB_BANNER", "ca-app-pub-3940256099942544/6300978111")
+
+        addConstantTo(owner, "ADS_INTER_TEST", "ca-app-pub-3940256099942544/1033173712")
+        addConstantTo(owner, "ADS_ADMOB_INTER_ID1", "ca-app-pub-3940256099942544/1033173712")
+        addConstantTo(owner, "ADS_ADMOB_INTER_ID2", "ca-app-pub-3940256099942544/1033173712")
+
+        addConstantTo(owner, "ADS_NATIVE_TEST", "ca-app-pub-3940256099942544/2247696110")
+        addConstantTo(owner, "ADS_NATIVE_ID1", "ca-app-pub-3940256099942544/2247696110")
+        addConstantTo(owner, "ADS_NATIVE_ID2", "ca-app-pub-3940256099942544/2247696110")
+
+        addConstantTo(owner, "ADS_ADMOB_OPEN_APP_TEST", "ca-app-pub-3940256099942544/3419835294")
+        addConstantTo(owner, "ADS_ADMOB_OPEN_APP_ID1", "ca-app-pub-3940256099942544/3419835294")
+        addConstantTo(owner, "ADS_ADMOB_OPEN_APP_ID2", "ca-app-pub-3940256099942544/3419835294")
     }
 
     buildTypes {
@@ -37,7 +63,7 @@ android {
 
 dependencies {
 
-    implementation 'androidx.core:core-ktx:1.8.22'
+    implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
@@ -72,6 +98,8 @@ dependencies {
 
     //glide
     implementation 'com.github.bumptech.glide:glide:4.15.1'
+    //lottie
+    implementation "com.airbnb.android:lottie:6.1.0"
 
     //biometric - authenticator with fingerprint
     implementation "androidx.biometric:biometric-ktx:1.2.0-alpha05"
@@ -82,4 +110,10 @@ dependencies {
     //location
     implementation 'com.google.android.gms:play-services-location:21.0.1'
 
+    //firebase
+    implementation platform('com.google.firebase:firebase-bom:32.5.0')
+    implementation 'com.google.firebase:firebase-analytics'
+
+    //ads
+    implementation 'com.google.android.gms:play-services-ads:22.5.0'
 }

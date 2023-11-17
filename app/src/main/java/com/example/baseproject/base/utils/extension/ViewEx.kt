@@ -1,11 +1,13 @@
 package com.example.baseproject.base.utils.extension
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 import android.graphics.Rect
+import android.util.DisplayMetrics
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
@@ -15,6 +17,7 @@ import android.widget.ImageView
 import android.widget.ScrollView
 import androidx.core.widget.NestedScrollView
 import com.example.baseproject.R
+import com.google.android.gms.ads.AdSize
 import com.google.android.material.tabs.TabLayout
 
 fun View.hideKeyboard() {
@@ -142,4 +145,17 @@ fun View?.removeSelf() {
     this ?: return
     val parentView = parent as? ViewGroup ?: return
     parentView.removeView(this)
+}
+
+fun Activity.getAdSizeFollowScreen(): AdSize {
+    val display = this.windowManager.defaultDisplay
+    val outMetrics = DisplayMetrics()
+    display.getMetrics(outMetrics)
+    val density = outMetrics.density
+    var adWidthPixels = resources.displayMetrics.widthPixels.toFloat()
+    if (adWidthPixels == 0f) {
+        adWidthPixels = outMetrics.widthPixels.toFloat()
+    }
+    val adWidth = (adWidthPixels / density).toInt()
+    return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this, adWidth)
 }
