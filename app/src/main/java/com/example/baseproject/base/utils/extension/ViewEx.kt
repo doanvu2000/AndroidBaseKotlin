@@ -179,3 +179,5 @@ fun SeekBar.setOnProgressChange(
         }
     })
 }
+val EditText.value
+    get() = text?.toString() ?: ""

@@ -16,3 +16,17 @@ fun Int.toStringFormat(pattern: String? = DECIMAL_PATTERN1): String {
 fun Int.toDp(context: Context): Int {
     return context.resources.displayMetrics.density.toInt() * this
 }
+
+// Convert px to dp
+val Int.dp: Int
+    get() = (this / Resources.getSystem().displayMetrics.density).toInt()
+
+//Convert dp to px
+val Int.px: Int
+    get() = (this * Resources.getSystem().displayMetrics.density).toInt()
+
+fun Int.isEven(): Boolean {
+    return this % 2 == 0
+}
+
+fun Int.isOdd() = !isEven()

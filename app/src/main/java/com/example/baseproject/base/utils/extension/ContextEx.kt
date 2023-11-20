@@ -218,6 +218,17 @@ fun Context.getRingTone(): Ringtone {
     return RingtoneManager.getRingtone(this, defaultRingtoneUri)
 }
 
+@RequiresApi(Build.VERSION_CODES.M)
+fun Context.isNetworkAvailable(): Boolean {
+    val manager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val capabilities = manager.getNetworkCapabilities(manager.activeNetwork)
+    return if (capabilities != null) {
+        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                || capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                || capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+    } else false
+}
+
 /**
  * require declare permission ACCESS_NETWORK_STATE in Manifest
  * */
