@@ -22,6 +22,7 @@ import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -338,4 +339,11 @@ fun Activity.setDefaultPhoneApp() {
 //            TODO("VERSION.SDK_INT < M")
         }
     }
+}
+fun ComponentActivity.handleBackPressed(action: () -> Unit) {
+    onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            action()
+        }
+    })
 }

@@ -15,6 +15,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.ScrollView
+import android.widget.SeekBar
 import androidx.core.widget.NestedScrollView
 import com.example.baseproject.R
 import com.google.android.gms.ads.AdSize
@@ -158,4 +159,23 @@ fun Activity.getAdSizeFollowScreen(): AdSize {
     }
     val adWidth = (adWidthPixels / density).toInt()
     return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this, adWidth)
+}
+fun SeekBar.setOnProgressChange(
+    action: (
+        seekBar: SeekBar?, progress: Int, fromUser: Boolean
+    ) -> Unit
+) {
+    this.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+            action.invoke(seekBar, progress, fromUser)
+        }
+
+        override fun onStartTrackingTouch(seekBar: SeekBar?) {
+
+        }
+
+        override fun onStopTrackingTouch(seekBar: SeekBar?) {
+
+        }
+    })
 }

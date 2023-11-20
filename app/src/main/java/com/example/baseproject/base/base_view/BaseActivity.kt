@@ -3,11 +3,11 @@ package com.example.baseproject.base.base_view
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.viewbinding.ViewBinding
 import com.example.baseproject.base.utils.extension.finishWithSlide
+import com.example.baseproject.base.utils.extension.handleBackPressed
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -29,15 +29,9 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
         initView()
         initData()
         initListener()
-        handleOnBackPressed()
-    }
-
-    private fun handleOnBackPressed() {
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                onBack()
-            }
-        })
+        handleBackPressed {
+            onBack()
+        }
     }
 
     open fun onBack() {

@@ -4,9 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.viewbinding.ViewBinding
+import com.example.baseproject.base.utils.extension.handleBackPressed
 
 abstract class BaseFragment<VB : ViewBinding> : Fragment() {
     private var _binding: VB? = null
@@ -25,12 +25,9 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
     }
 
     private fun handleOnBackPressed() {
-        requireActivity().onBackPressedDispatcher.addCallback(
-            viewLifecycleOwner, object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    onBack()
-                }
-            })
+        requireActivity().handleBackPressed {
+            onBack()
+        }
     }
 
     open fun onBack() {

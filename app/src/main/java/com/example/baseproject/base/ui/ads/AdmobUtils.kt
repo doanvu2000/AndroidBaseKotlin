@@ -1,5 +1,6 @@
 package com.example.baseproject.base.ui.ads
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.Bundle
 import android.os.Handler
@@ -25,11 +26,11 @@ import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 
 class AdmobUtils constructor(val context: Activity) {
-    private val ADS_INTER_TEST = BuildConfig.ADS_INTER_TEST
+    private val ADS_INTER_TEST_1 = BuildConfig.ADS_INTER_TEST
+    private val ADS_INTER_TEST_2 = BuildConfig.ADS_INTER_TEST_VIDEO
     private val ADS_BANNER_TEST = BuildConfig.ADS_BANNER_TEST
     private var mInterstitialAd: InterstitialAd? = null
     private val adRequest: AdRequest
-    private val adListener: AdListener? = null
 
     init {
         MobileAds.initialize(context) { initializationStatus: InitializationStatus ->
@@ -92,8 +93,7 @@ class AdmobUtils constructor(val context: Activity) {
     fun showBannerCollapsible(activity: Activity, viewGroup: ViewGroup, collapsible: String?) {
         val extras = Bundle()
         extras.putString(COLLAPSIBLE, collapsible)
-        val adRequest: AdRequest
-        adRequest = if (collapsible != null) {
+        val adRequest: AdRequest = if (collapsible != null) {
             AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter::class.java, extras).build()
         } else {
             AdRequest.Builder().build()
@@ -159,7 +159,12 @@ class AdmobUtils constructor(val context: Activity) {
         if (mInterstitialAd != null) {
             return
         }
-        InterstitialAd.load(context!!, BuildConfig.ADS_ADMOB_INTER_ID1, adRequest, object : InterstitialAdLoadCallback() {
+        val adUnit = if (BuildConfig.DEBUG) {
+            ADS_INTER_TEST_1
+        } else {
+            BuildConfig.ADS_ADMOB_INTER_ID1
+        }
+        InterstitialAd.load(context!!, adUnit, adRequest, object : InterstitialAdLoadCallback() {
             override fun onAdLoaded(interstitialAd: InterstitialAd) {
                 // The mInterstitialAd reference will be null until
                 // an ad is loaded.
@@ -179,7 +184,12 @@ class AdmobUtils constructor(val context: Activity) {
         if (mInterstitialAd != null) {
             return
         }
-        InterstitialAd.load(context!!, BuildConfig.ADS_ADMOB_INTER_ID2, adRequest, object : InterstitialAdLoadCallback() {
+        val adUnit = if (BuildConfig.DEBUG) {
+            ADS_INTER_TEST_2
+        } else {
+            BuildConfig.ADS_ADMOB_INTER_ID2
+        }
+        InterstitialAd.load(context!!, adUnit, adRequest, object : InterstitialAdLoadCallback() {
             override fun onAdLoaded(interstitialAd: InterstitialAd) {
                 // The mInterstitialAd reference will be null until
                 // an ad is loaded.
@@ -221,8 +231,8 @@ class AdmobUtils constructor(val context: Activity) {
                     }
 
                     override fun onAdShowedFullScreenContent() {
-                        dialogLoadingInter.hide()
                         super.onAdShowedFullScreenContent()
+                        dialogLoadingInter.hide()
                     }
                 }
             }, TIME_SHOW_DIALOG_INTER)
@@ -249,15 +259,19 @@ class AdmobUtils constructor(val context: Activity) {
     companion object {
         const val COLLAPSIBLE = "collapsible"
         const val COLLAPSIBLE_BANNER_BOTTOM = "bottom"
-        private val TAG = Constant.TAG
+        private const val TAG = Constant.TAG
         var adView: AdView? = null
+
+        @SuppressLint("StaticFieldLeak")
         private var instance: AdmobUtils? = null
         private const val TIME_SHOW_DIALOG_INTER: Long = 1500
         fun getInstance(context: Activity): AdmobUtils {
-            if (instance == null) {
-                instance = AdmobUtils(context)
+            synchronized(this) {
+                if (instance == null) {
+                    instance = AdmobUtils(context)
+                }
+                return instance!!
             }
-            return instance!!
         }
     }
 }

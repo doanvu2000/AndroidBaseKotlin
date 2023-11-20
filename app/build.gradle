@@ -30,6 +30,7 @@ android {
         addConstantTo(owner, "ADS_ADMOB_BANNER", "ca-app-pub-3940256099942544/6300978111")
 
         addConstantTo(owner, "ADS_INTER_TEST", "ca-app-pub-3940256099942544/1033173712")
+        addConstantTo(owner, "ADS_INTER_TEST_VIDEO", "ca-app-pub-3940256099942544/8691691433")
         addConstantTo(owner, "ADS_ADMOB_INTER_ID1", "ca-app-pub-3940256099942544/1033173712")
         addConstantTo(owner, "ADS_ADMOB_INTER_ID2", "ca-app-pub-3940256099942544/1033173712")
 
