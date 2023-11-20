@@ -21,11 +21,6 @@ class LocalCache private constructor() {
         fun initialize(context: Context) {
             MMKV.initialize(context)
         }
-
-        @JvmStatic
-        fun initialize(rootDir: String) {
-            MMKV.initialize(rootDir)
-        }
     }
 
     private var cache: MMKV = MMKV.defaultMMKV()!!

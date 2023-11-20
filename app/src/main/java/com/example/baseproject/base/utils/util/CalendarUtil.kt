@@ -1,4 +1,4 @@
-package com.example.baseproject.base.utils
+package com.example.baseproject.base.utils.util
 
 import android.annotation.SuppressLint
 import android.content.Context

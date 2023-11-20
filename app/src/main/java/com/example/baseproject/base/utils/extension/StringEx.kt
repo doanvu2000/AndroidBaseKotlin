@@ -3,6 +3,9 @@ package com.example.baseproject.base.utils.extension
 import android.icu.text.Transliterator
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 
 fun String.upperFirstCase(): String {

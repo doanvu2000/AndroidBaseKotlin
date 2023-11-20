@@ -1,6 +1,6 @@
 package com.example.baseproject.base.retrofit
 
-import com.example.baseproject.base.utils.Constant
+import com.example.baseproject.base.utils.util.Constant
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit

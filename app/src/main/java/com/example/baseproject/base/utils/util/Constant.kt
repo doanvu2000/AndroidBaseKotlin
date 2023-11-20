@@ -1,4 +1,4 @@
-package com.example.baseproject.base.utils
+package com.example.baseproject.base.utils.util
 
 object Constant {
     const val READ_TIME_OUT: Long = 15
