@@ -1,16 +1,13 @@
 package com.example.baseproject.base.utils.extension
 
 import android.app.PendingIntent
-import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Matrix
-import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
-import android.provider.OpenableColumns
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.FileProvider
 import androidx.core.os.LocaleListCompat
@@ -23,10 +20,8 @@ import retrofit2.Response
 import java.io.File
 import java.io.FileOutputStream
 import java.io.Serializable
-import java.text.DecimalFormat
 import java.util.Calendar
 import java.util.Locale
-import kotlin.math.log10
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
@@ -226,51 +221,3 @@ fun setLanguageApp(code: String) {
 
 fun getApplicationLocales(): String =
     AppCompatDelegate.getApplicationLocales().toLanguageTags().ifEmpty { Locale.getDefault().language }
-
-private fun getByteLengthInDouble(): Double {
-    return if (isSdkO()) 1000.0
-    else 1024.0
-}
-
-fun getReadableSize(size: Long): String {
-    if (size <= 0) return "0"
-    val units = arrayOf("B", "KB", "MB", "GB", "TB")
-    val digitGroups = (log10(size.toDouble()) / log10(getByteLengthInDouble())).toInt()
-    return DecimalFormat("#,##0.#").format(size / getByteLengthInDouble().pow(digitGroups.toDouble()))
-        .toString() + units[digitGroups]
-}
-
-fun Uri.getFileSize(context: Context?): Long {
-    if (context == null) return -1L
-    val contentResolver = context.contentResolver
-    val length = contentResolver.openFileDescriptor(this, "r")?.use { it.statSize } ?: -1L
-
-    if (length != -1L) {
-        return length
-    } else {
-        // https://stackoverflow.com/questions/48302972/content-resolver-returns-wrong-size
-        if (scheme.equals(ContentResolver.SCHEME_CONTENT)) {
-            return contentResolver.query(this, arrayOf(OpenableColumns.SIZE), null, null, null)
-                ?.use { cursor ->
-                    val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
-                    if (sizeIndex == -1) {
-                        return@use -1L
-                    }
-                    cursor.moveToFirst()
-                    return try {
-                        cursor.getLong(sizeIndex)
-                    } catch (throwable: Throwable) {
-                        -1L
-                    }
-                } ?: -1L
-        } else {
-            return -1L
-        }
-    }
-}
-
-fun Any?.ifNull(block: () -> Unit) = run {
-    if (this == null) {
-        block()
-    }
-}

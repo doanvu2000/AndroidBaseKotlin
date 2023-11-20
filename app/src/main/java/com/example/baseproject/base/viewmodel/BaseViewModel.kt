@@ -35,7 +35,7 @@ abstract class BaseViewModel : ViewModel(), DefaultLifecycleObserver {
         CoroutineScope(viewModelJob + Dispatchers.Main.immediate)
 
     /**catch exception when using coroutine*/
-    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+    private val exceptionHandler = CoroutineExceptionHandler { context, throwable ->
         throwable.printStackTrace()
         handlerError(throwable)
         isLoading.value = false

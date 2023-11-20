@@ -32,7 +32,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.example.baseproject.R
-import com.example.baseproject.base.utils.util.Constant
+import com.example.baseproject.base.utils.Constant
 import com.google.android.material.snackbar.Snackbar
 import java.util.concurrent.Executor
 

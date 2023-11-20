@@ -1,4 +1,4 @@
-package com.example.baseproject.base.utils.util
+package com.example.baseproject.base.utils
 
 import android.annotation.SuppressLint
 import android.content.ContentResolver
@@ -44,7 +44,7 @@ object ImageUtil {
         return try {
             contentResolver.insert(imageCollection, contentValues)?.also {
                 contentResolver.openOutputStream(it).use { outputStream ->
-                    if (bmp != null && outputStream != null) {
+                    if (bmp != null) {
                         if (!bmp.compress(Bitmap.CompressFormat.JPEG, 95, outputStream)) {
                             throw IOException("Failed to save Bitmap")
                         }

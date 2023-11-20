@@ -3,9 +3,6 @@ package com.example.baseproject.base.utils.extension
 import android.icu.text.Transliterator
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 
 fun String.upperFirstCase(): String {
@@ -89,26 +86,3 @@ fun String.convertToHalfWidth(): String {
 }
 
 fun String.isLinkGif(): Boolean = this.takeLast(4).contains(".gif")
-fun String.isDigitOnly(): Boolean = matches(Regex("^\\d*\$"))
-
-fun String.isAlphabeticOnly(): Boolean = matches(Regex("^[a-zA-Z]*\$"))
-
-fun String.isAlphanumericOnly(): Boolean = matches(Regex("^[a-zA-Z\\d]*\$"))
-
-val isValidNumber = "1234".isDigitOnly() // Return true
-val isValid = "1234abc".isDigitOnly() // Return false
-val isOnlyAlphabetic = "abcABC".isAlphabeticOnly() // Return true
-val isOnlyAlphabetic2 = "abcABC123".isAlphabeticOnly() // Return false
-val isOnlyAlphanumeric = "abcABC123".isAlphanumericOnly() // Return true
-val isOnlyAlphanumeric2 = "abcABC@123.".isAlphanumericOnly() // Return false
-
-
-fun String.toDate(format: String = "yyyy-MM-dd HH:mm:ss"): Date? {
-    val dateFormatter = SimpleDateFormat(format, Locale.getDefault())
-    return dateFormatter.parse(this)
-}
-
-fun Date.toStringFormat(format: String = "yyyy-MM-dd HH:mm:ss"): String {
-    val dateFormatter = SimpleDateFormat(format, Locale.getDefault())
-    return dateFormatter.format(this)
-}

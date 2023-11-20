@@ -1,4 +1,4 @@
-package com.example.baseproject.base.utils.util
+package com.example.baseproject.base.utils
 
 import android.content.Context
 import android.content.SharedPreferences

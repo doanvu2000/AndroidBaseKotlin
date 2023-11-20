@@ -9,10 +9,10 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.baseproject.R
 import com.example.baseproject.base.ui.main.MainActivity
+import com.example.baseproject.base.utils.Constant
 import com.example.baseproject.base.utils.extension.PERMISSION_GRANTED
 import com.example.baseproject.base.utils.extension.POST_NOTIFICATION
 import com.example.baseproject.base.utils.extension.getFlagPendingIntent
-import com.example.baseproject.base.utils.util.Constant
 
 object TodayNotification {
     private const val TODAY_NOTIFY_ID = 20122023

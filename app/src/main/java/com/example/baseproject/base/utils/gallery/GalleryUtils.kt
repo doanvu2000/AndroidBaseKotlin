@@ -218,10 +218,10 @@ object GalleryUtils {
             val path = trackData.let { cursor.getString(it) } ?: ""
             if (isAudioFile(path)) {
                 val musicData = MusicData()
-                musicData.trackId = trackId.let { cursor.getLong(it) }
+                musicData.trackId = trackId.let { cursor.getLong(it) } ?: 0
                 musicData.trackTitle = trackTitle.let { cursor.getString(it) }
                 musicData.trackdata = path
-                musicData.trackDuration = trackDuration.let { cursor.getLong(it) }
+                musicData.trackDuration = trackDuration.let { cursor.getLong(it) } ?: 0L
                 musicData.trackDisplayName = trackDisplayName.let { cursor.getString(it) }
                 musicData.thumb = cursor.getLong(storeId).toCoverUri()
                 musicData.artist = cursor.getString(artistIndex)

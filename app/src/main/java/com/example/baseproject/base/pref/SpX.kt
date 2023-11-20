@@ -16,16 +16,16 @@ import kotlin.coroutines.suspendCoroutine
 
 internal fun ByteArray.toCharArray(): CharArray {
     val charArray = CharArray(this.size)
-    for (i in indices) {
-        charArray[i] = get(i).toInt().toChar()
+    for (i in 0 until size) {
+        charArray[i] = get(i).toChar()
     }
     return charArray
 }
 
 internal fun CharArray.byteArray(): ByteArray {
     val bytes = ByteArray(this.size)
-    for (i in indices) {
-        bytes[i] = get(i).code.toByte()
+    for (i in 0 until size) {
+        bytes[i] = get(i).toByte()
     }
     return bytes
 }
