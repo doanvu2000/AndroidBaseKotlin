@@ -149,6 +149,24 @@ fun View?.removeSelf() {
 }
 
 fun Activity.getAdSizeFollowScreen(): AdSize {
+//    if(isSdkS()){
+//        val metrics = windowManager.currentWindowMetrics
+//        val windowInsets = metrics.windowInsets
+//        val insets: Insets = windowInsets.getInsetsIgnoringVisibility(
+//            WindowInsets.Type.navigationBars()
+//                    or WindowInsets.Type.displayCutout()
+//        )
+//
+//        val insetsWidth: Int = insets.right + insets.left
+//        val insetsHeight: Int = insets.top + insets.bottom
+//        val bounds: Rect = metrics.bounds
+//        val size = Size(
+//            bounds.width() - insetsWidth,
+//            bounds.height() - insetsHeight
+//        )
+//        size.width
+//        size.height
+//    }
     val display = this.windowManager.defaultDisplay
     val outMetrics = DisplayMetrics()
     display.getMetrics(outMetrics)
@@ -179,3 +197,6 @@ fun SeekBar.setOnProgressChange(
         }
     })
 }
+
+val EditText.value
+    get() = text?.toString() ?: ""

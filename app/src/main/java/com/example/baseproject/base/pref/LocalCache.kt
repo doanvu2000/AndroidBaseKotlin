@@ -17,14 +17,9 @@ class LocalCache private constructor() {
                 instance ?: LocalCache().also { instance = it }
             }
 
-        @JvmStatic
+
         fun initialize(context: Context) {
             MMKV.initialize(context)
-        }
-
-        @JvmStatic
-        fun initialize(rootDir: String) {
-            MMKV.initialize(rootDir)
         }
     }
 

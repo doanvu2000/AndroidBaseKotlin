@@ -1,4 +1,4 @@
-package com.example.baseproject.base.utils
+package com.example.baseproject.base.utils.util
 
 import android.content.Context
 import android.location.Address

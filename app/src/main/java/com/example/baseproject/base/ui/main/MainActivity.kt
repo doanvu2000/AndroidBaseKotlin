@@ -10,7 +10,7 @@ import com.example.baseproject.base.base_view.HomeFragment
 import com.example.baseproject.base.ui.ads.DemoAdsActivity
 import com.example.baseproject.base.ui.demo_viewpager.DemoViewPagerActivity
 import com.example.baseproject.base.ui.location.LocationActivity
-import com.example.baseproject.base.utils.Constant
+import com.example.baseproject.base.ui.test_coil.CoilActivity
 import com.example.baseproject.base.utils.extension.clear
 import com.example.baseproject.base.utils.extension.hide
 import com.example.baseproject.base.utils.extension.openActivity
@@ -19,6 +19,7 @@ import com.example.baseproject.base.utils.extension.runOnDispatcherIO
 import com.example.baseproject.base.utils.extension.show
 import com.example.baseproject.base.utils.extension.showToast
 import com.example.baseproject.base.utils.extension.toStringFormat
+import com.example.baseproject.base.utils.util.Constant
 import com.example.baseproject.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
@@ -58,6 +59,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         binding.btnDemoAds.clickSafety {
             openActivity(DemoAdsActivity::class.java, false, isAnimation = true, bundle = null)
         }
+        binding.btnTestCoilLib.clickSafety {
+            openActivity(CoilActivity::class.java, false, isAnimation = true, bundle = null)
+        }
     }
 
     private fun randomAndSortList() {
@@ -73,7 +77,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         }
     }
 
-    private val coroutineException = CoroutineExceptionHandler { coroutineContext, throwable ->
+    private val coroutineException = CoroutineExceptionHandler { _, throwable ->
         binding.tvResult.text = throwable.message
     }
 

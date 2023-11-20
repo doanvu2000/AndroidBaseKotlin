@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.example.baseproject.R
-import com.example.baseproject.base.utils.Constant
+import com.example.baseproject.base.utils.util.Constant
 
 //check setup in manifest
 class AlarmReceiver : BroadcastReceiver() {

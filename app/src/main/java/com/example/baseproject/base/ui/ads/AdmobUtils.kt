@@ -9,9 +9,9 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import com.example.baseproject.BuildConfig
-import com.example.baseproject.base.utils.Constant
 import com.example.baseproject.base.utils.extension.getAdSizeFollowScreen
 import com.example.baseproject.base.utils.extension.removeSelf
+import com.example.baseproject.base.utils.util.Constant
 import com.google.ads.mediation.admob.AdMobAdapter
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdListener

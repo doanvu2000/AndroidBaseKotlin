@@ -7,7 +7,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import com.example.baseproject.BuildConfig
-import com.example.baseproject.base.utils.Constant
+import com.example.baseproject.base.utils.util.Constant
 import com.example.baseproject.databinding.LayoutNativeAds2Binding
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdLoader

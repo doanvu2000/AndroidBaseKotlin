@@ -1,4 +1,4 @@
-package com.example.baseproject.base.utils
+package com.example.baseproject.base.utils.util
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -245,7 +245,6 @@ object CalendarUtil {
         val numDay = 1000 * 60 * 60 * 24
         val numHour = 1000 * 60 * 60
         val numMinutes = 1000 * 60
-        val numSecond = 1000
         val days = diff / numDay
         val hours = (diff - days * numDay) / numHour
         val minutes = (diff - days * numDay - hours * numHour) / numMinutes

@@ -30,6 +30,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.RequiresApi
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -38,7 +39,7 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.example.baseproject.BuildConfig
 import com.example.baseproject.R
-import com.example.baseproject.base.utils.ImageUtil
+import com.example.baseproject.base.utils.util.ImageUtil
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
@@ -217,6 +218,17 @@ fun Context.getRingTone(): Ringtone {
     return RingtoneManager.getRingtone(this, defaultRingtoneUri)
 }
 
+@RequiresApi(Build.VERSION_CODES.M)
+fun Context.isNetworkAvailable(): Boolean {
+    val manager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val capabilities = manager.getNetworkCapabilities(manager.activeNetwork)
+    return if (capabilities != null) {
+        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                || capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                || capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+    } else false
+}
+
 /**
  * require declare permission ACCESS_NETWORK_STATE in Manifest
  * */
@@ -363,7 +375,7 @@ fun Context.hideKeyboard(view: View) {
 }
 
 @SuppressLint("HardwareIds")
-fun Context.getDeviceId(): String {
+fun Context.getIdDevice(): String {
     return Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
 }
 

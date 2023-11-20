@@ -11,10 +11,10 @@ import android.util.Log
 import androidx.core.app.AlarmManagerCompat
 import androidx.core.app.NotificationCompat
 import com.example.baseproject.R
-import com.example.baseproject.base.utils.Constant
 import com.example.baseproject.base.utils.extension.getFlagPendingIntent
 import com.example.baseproject.base.utils.extension.isSdk26
 import com.example.baseproject.base.utils.extension.isSdkS
+import com.example.baseproject.base.utils.util.Constant
 
 class AlarmReceiverV2 : BroadcastReceiver() {
     companion object {
