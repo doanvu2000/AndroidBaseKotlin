@@ -71,7 +71,7 @@ object NativeAdsUtil {
                 }
 
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                    Log.e(Constant.TAG, "load native ad2 failed")
+                    Log.e(Constant.TAG, "Native-loadAds2 failed")
                     super.onAdFailedToLoad(loadAdError)
                     loadFailed.invoke()
                     adLoader = null
