@@ -9,6 +9,9 @@ object SharePrefUtils {
 
     //TODO: please call it in splash or MyApplication before using below other function
     fun init(context: Context) {
+        if (::sharePref.isInitialized) {
+            return
+        }
         sharePref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
     }
 
@@ -27,19 +30,22 @@ object SharePrefUtils {
         return sharePref.getString(key, "")?.trim() ?: ""
     }
 
-    fun getInt(key: String): Int {
-        return sharePref.getInt(key, 0)
+    fun getInt(key: String, defaultValue: Int = 0): Int {
+        return sharePref.getInt(key, defaultValue)
     }
 
-    fun getBoolean(key: String): Boolean {
-        return sharePref.getBoolean(key, false)
+    fun getBoolean(key: String, defaultValue: Boolean = false): Boolean {
+        return sharePref.getBoolean(key, defaultValue)
     }
 
-    fun getLong(key: String): Long {
-        return sharePref.getLong(key, 0L)
+    fun getLong(key: String, defaultValue: Long = 0L): Long {
+        return sharePref.getLong(key, defaultValue)
     }
 
-    fun getFloat(key: String): Float {
-        return sharePref.getFloat(key, 0f)
+    fun getFloat(key: String, defaultValue: Float = 0f): Float {
+        return sharePref.getFloat(key, defaultValue)
     }
+
+    fun isFistOpen() = getBoolean("is_first_open", true)
+    fun setIsFirstOpen(isFirstOpen: Boolean) = saveKey("is_first_open", isFirstOpen)
 }
