@@ -2,6 +2,8 @@ package com.example.baseproject.base.utils.extension
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.Activity.OVERRIDE_TRANSITION_CLOSE
+import android.app.Activity.OVERRIDE_TRANSITION_OPEN
 import android.app.role.RoleManager
 import android.content.ActivityNotFoundException
 import android.content.BroadcastReceiver
@@ -10,6 +12,7 @@ import android.content.Context
 import android.content.Context.ROLE_SERVICE
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -46,8 +49,9 @@ fun Activity.setFullScreenMode(isFullScreen: Boolean = false) {
                 controller.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             }
         } else {
-            @Suppress("DEPRECATION")
-            window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
+            @Suppress("DEPRECATION") window.setFlags(
+                WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN
+            )
         }
     } else {
         if (isSdkR()) {
@@ -58,8 +62,7 @@ fun Activity.setFullScreenMode(isFullScreen: Boolean = false) {
                 controller.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             }
         } else {
-            @Suppress("DEPRECATION")
-            window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+            @Suppress("DEPRECATION") window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
         }
     }
 }
@@ -100,8 +103,7 @@ fun AppCompatActivity.findFragment(tag: String): Fragment? {
 
 fun Activity.openSMS(smsBody: String, phone: String) {
     val intent = Intent(
-        Intent.ACTION_SENDTO,
-        Uri.parse("smsto:$phone")
+        Intent.ACTION_SENDTO, Uri.parse("smsto:$phone")
     )
     intent.putExtra("sms_body", smsBody)
     this.startActivity(intent)
@@ -140,8 +142,7 @@ fun FragmentActivity.showAuthenticatorWithFinger(
 fun Activity.checkDeviceHasFingerprint(): Boolean {
     val biometricManager = BiometricManager.from(this)
     when (biometricManager.canAuthenticate(
-        BiometricManager.Authenticators.BIOMETRIC_STRONG or
-                BiometricManager.Authenticators.DEVICE_CREDENTIAL
+        BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL
     )) {
         BiometricManager.BIOMETRIC_SUCCESS -> {
             Log.d(Constant.TAG, "App can authenticate using biometrics.")
@@ -159,8 +160,7 @@ fun Activity.checkDeviceHasFingerprint(): Boolean {
         }
 
         BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
-            Log.d(Constant.TAG, "Device has fingerprint but not set.")
-            /*
+            Log.d(Constant.TAG, "Device has fingerprint but not set.")/*
             // Prompts the user to create credentials that your app accepts.
 //            if (isMinSdk30) {
 //                val enrollIntent = Intent(Settings.ACTION_BIOMETRIC_ENROLL).apply {
@@ -213,8 +213,7 @@ fun Activity.getScreenWidth(): Int {
         windowMetrics.bounds.width() - insets.left - insets.right
     } else {
         val displayMetrics = DisplayMetrics()
-        @Suppress("DEPRECATION")
-        windowManager.defaultDisplay.getMetrics(displayMetrics)
+        @Suppress("DEPRECATION") windowManager.defaultDisplay.getMetrics(displayMetrics)
         displayMetrics.widthPixels
     }
 }
@@ -226,14 +225,19 @@ fun Activity.getScreenHeight(): Int {
         windowMetrics.bounds.height() - insets.top - insets.bottom
     } else {
         val displayMetrics = DisplayMetrics()
-        @Suppress("DEPRECATION")
-        windowManager.defaultDisplay.getMetrics(displayMetrics)
+        @Suppress("DEPRECATION") windowManager.defaultDisplay.getMetrics(displayMetrics)
         displayMetrics.heightPixels
     }
 }
 
 fun Activity.openWithSlide() {
-    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+    if (isSdk34()) {
+        overrideActivityTransition(
+            OVERRIDE_TRANSITION_OPEN, R.anim.slide_in_right, R.anim.slide_out_left, Color.TRANSPARENT
+        )
+    } else {
+        @Suppress("DEPRECATION") overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+    }
 }
 
 /**
@@ -242,7 +246,13 @@ fun Activity.openWithSlide() {
  * */
 fun Activity.finishWithSlide() {
     finish()
-    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+    if (isSdk34()) {
+        overrideActivityTransition(
+            OVERRIDE_TRANSITION_CLOSE, R.anim.slide_in_left, R.anim.slide_out_right, Color.TRANSPARENT
+        )
+    } else {
+        @Suppress("DEPRECATION") overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+    }
 }
 
 fun AppCompatActivity.replaceFragment(frameId: Int, fragment: Fragment, addToBackStack: Boolean = true, bundle: Bundle? = null) {
@@ -258,19 +268,12 @@ fun AppCompatActivity.replaceFragment(frameId: Int, fragment: Fragment, addToBac
 
 fun AppCompatActivity.replaceFragmentNoAddBackStack(frameId: Int, fragment: Fragment) {
     Log.d(Constant.TAG, "replaceFragment no add backstack: ${fragment.javaClass.name}")
-    supportFragmentManager
-        .beginTransaction()
-        .replace(frameId, fragment)
-        .commit()
+    supportFragmentManager.beginTransaction().replace(frameId, fragment).commit()
 }
 
 fun AppCompatActivity.replaceFragmentAddBackStack(frameId: Int, fragment: Fragment) {
     Log.d(Constant.TAG, "replaceFragment add backstack: ${fragment.javaClass.name}")
-    supportFragmentManager
-        .beginTransaction()
-        .replace(frameId, fragment)
-        .addToBackStack(fragment.javaClass.name)
-        .commit()
+    supportFragmentManager.beginTransaction().replace(frameId, fragment).addToBackStack(fragment.javaClass.name).commit()
 }
 
 fun AppCompatActivity.removeFragment(fragment: Fragment) {
@@ -340,6 +343,7 @@ fun Activity.setDefaultPhoneApp() {
         }
     }
 }
+
 fun ComponentActivity.handleBackPressed(action: () -> Unit) {
     onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
