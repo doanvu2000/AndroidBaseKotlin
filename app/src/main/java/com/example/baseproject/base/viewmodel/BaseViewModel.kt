@@ -143,6 +143,13 @@ abstract class BaseViewModel : ViewModel(), DefaultLifecycleObserver {
         viewModelScope.cancel()
     }
 
+    /**
+     * just call in onDestroy of Activity and Fragment
+     * */
+    fun clear() {
+        onCleared()
+    }
+
     fun exportPdf(view: View, totalWidth: Int, totalHeight: Int, onDone: (file: File) -> Unit) {
         val context = view.context
         launchHandler {
