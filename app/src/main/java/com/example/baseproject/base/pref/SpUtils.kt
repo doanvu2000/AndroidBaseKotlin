@@ -146,7 +146,11 @@ class SpUtils internal constructor(private val SP_FILE_KEY: String) {
     fun <T : Serializable> saveSerializableCollectionSync(context: Context, data: Collection<T>, key: String) =
         saveSerializableCollection(getSpEditor(context), data, key)
 
-    private fun <T : Serializable> saveSerializableCollection(editor: SharedPreferences.Editor, data: Collection<T>, key: String) {
+    private fun <T : Serializable> saveSerializableCollection(
+        editor: SharedPreferences.Editor,
+        data: Collection<T>,
+        key: String
+    ) {
         data.map { it.toSerializedString().addTag() }.toMutableSet().let {
             editor.putStringSet(key, it)
         }
@@ -170,7 +174,11 @@ class SpUtils internal constructor(private val SP_FILE_KEY: String) {
      * @param data Map<K : Serializable,V : Serializable>
      * @param key unique key to the object to be saved
      * */
-    suspend fun <K : Serializable, V : Serializable> saveSerializableMapSuspended(context: Context, data: Map<K, V>, key: String) =
+    suspend fun <K : Serializable, V : Serializable> saveSerializableMapSuspended(
+        context: Context,
+        data: Map<K, V>,
+        key: String
+    ) =
         runSuspended { saveSerializableMapSync(context, data, key) }
 
     /**
@@ -484,7 +492,8 @@ class SpUtils internal constructor(private val SP_FILE_KEY: String) {
      * @param data Parcelable
      * @param key unique key to the object to be saved
      * */
-    fun <T : Parcelable> saveParcelableSync(context: Context, data: T, key: String) = saveParcelable(getSpEditor(context), data, key)
+    fun <T : Parcelable> saveParcelableSync(context: Context, data: T, key: String) =
+        saveParcelable(getSpEditor(context), data, key)
 
     private fun <T : Parcelable> saveParcelable(editor: SharedPreferences.Editor, data: T, key: String) {
         editor.putString(key, data.toSerializedString())

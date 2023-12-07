@@ -1,25 +1,16 @@
 package com.example.baseproject.base.utils.extension
 
-import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.ColorMatrix
-import android.graphics.ColorMatrixColorFilter
 import android.graphics.Rect
-import android.util.DisplayMetrics
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.ScrollView
 import android.widget.SeekBar
-import androidx.core.widget.NestedScrollView
 import com.example.baseproject.R
-import com.google.android.gms.ads.AdSize
 import com.google.android.material.tabs.TabLayout
 
 fun View.hideKeyboard() {
@@ -69,6 +60,7 @@ fun View.focusAndShowKeyboard() {
         viewTreeObserver.addOnWindowFocusChangeListener(listener)
     }
 }
+
 fun View.disableView() {
     this.isClickable = false
     this.postDelayed({ this.isClickable = true }, 500)
@@ -137,42 +129,6 @@ fun View.isSoftKeyboardVisible(): Boolean {
     return keyboardHeight > threshold
 }
 
-fun EditText.setDrawableEnd(drawableId: Int) {
-    val drawable = if (drawableId == 0) {
-        null
-    } else {
-        context.getDrawableById(drawableId)
-    }
-    this.setCompoundDrawablesWithIntrinsicBounds(
-        null, null, drawable, null
-    )
-}
-
-fun EditText.clear() {
-    this.setText("")
-}
-
-fun ScrollView.scrollToTop() {
-    this.fullScroll(ScrollView.FOCUS_UP)
-}
-
-fun NestedScrollView.scrollToTop() {
-    fullScroll(ScrollView.FOCUS_UP)
-    smoothScrollTo(0, 0)
-}
-
-fun ImageView.setTint() {
-    val matrix = ColorMatrix()
-    matrix.setSaturation(0f)
-
-    val filter = ColorMatrixColorFilter(matrix)
-    this.colorFilter = filter
-}
-
-fun ImageView.clearTint() {
-    this.colorFilter = null
-}
-
 fun TabLayout.createTab(tabName: String): TabLayout.Tab {
     return newTab().setText(tabName)
 }
@@ -186,18 +142,6 @@ fun View?.removeSelf() {
     parentView.removeView(this)
 }
 
-fun Activity.getAdSizeFollowScreen(): AdSize {
-    val display = this.windowManager.defaultDisplay
-    val outMetrics = DisplayMetrics()
-    display.getMetrics(outMetrics)
-    val density = outMetrics.density
-    var adWidthPixels = resources.displayMetrics.widthPixels.toFloat()
-    if (adWidthPixels == 0f) {
-        adWidthPixels = outMetrics.widthPixels.toFloat()
-    }
-    val adWidth = (adWidthPixels / density).toInt()
-    return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this, adWidth)
-}
 fun SeekBar.setOnProgressChange(
     action: (
         seekBar: SeekBar?, progress: Int, fromUser: Boolean
@@ -217,5 +161,3 @@ fun SeekBar.setOnProgressChange(
         }
     })
 }
-val EditText.value
-    get() = text?.toString() ?: ""

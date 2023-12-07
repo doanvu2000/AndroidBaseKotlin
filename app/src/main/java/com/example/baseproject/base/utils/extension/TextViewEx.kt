@@ -2,6 +2,7 @@ package com.example.baseproject.base.utils.extension
 
 import android.graphics.Paint
 import android.text.Html
+import android.widget.EditText
 import android.widget.TextView
 
 fun TextView.clear() {
@@ -35,3 +36,21 @@ fun TextView.setDrawableEnd(drawableId: Int) {
         null, null, drawable, null
     )
 }
+
+fun EditText.setDrawableEnd(drawableId: Int) {
+    val drawable = if (drawableId == 0) {
+        null
+    } else {
+        context.getDrawableById(drawableId)
+    }
+    this.setCompoundDrawablesWithIntrinsicBounds(
+        null, null, drawable, null
+    )
+}
+
+fun EditText.clear() {
+    this.setText("")
+}
+
+val EditText.value
+    get() = text?.toString() ?: ""

@@ -36,6 +36,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.example.baseproject.R
 import com.example.baseproject.base.utils.util.Constant
+import com.google.android.gms.ads.AdSize
 import com.google.android.material.snackbar.Snackbar
 import java.util.concurrent.Executor
 
@@ -350,4 +351,17 @@ fun ComponentActivity.handleBackPressed(action: () -> Unit) {
             action()
         }
     })
+}
+
+fun Activity.getAdSizeFollowScreen(): AdSize {
+    val display = this.windowManager.defaultDisplay
+    val outMetrics = DisplayMetrics()
+    display.getMetrics(outMetrics)
+    val density = outMetrics.density
+    var adWidthPixels = resources.displayMetrics.widthPixels.toFloat()
+    if (adWidthPixels == 0f) {
+        adWidthPixels = outMetrics.widthPixels.toFloat()
+    }
+    val adWidth = (adWidthPixels / density).toInt()
+    return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this, adWidth)
 }
