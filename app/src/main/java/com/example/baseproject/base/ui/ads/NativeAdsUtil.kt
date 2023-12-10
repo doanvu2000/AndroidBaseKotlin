@@ -19,14 +19,14 @@ import com.google.android.gms.ads.nativead.NativeAdView
 object NativeAdsUtil {
 
     private const val NATIVE_ID_TEST = BuildConfig.ADS_NATIVE_TEST
-    private const val NATIVE_ID_TEST_VIDEO = "ca-app-pub-3940256099942544/1044960115"
+    private const val NATIVE_ID_TEST_VIDEO = BuildConfig.ADS_NATIVE_TEST_VIDEO
     private const val NATIVE_ID_1 = BuildConfig.ADS_NATIVE_ID1
     private const val NATIVE_ID_2 = BuildConfig.ADS_NATIVE_ID2
     fun loadNativeAds(context: Context, loadSuccess: (nativeAd: NativeAd?) -> Unit, loadFailed: () -> Unit) {
         var nativeAd: NativeAd? = null
         val adLoader: AdLoader?
         val id = if (BuildConfig.DEBUG) {
-            NATIVE_ID_TEST_VIDEO
+            NATIVE_ID_TEST
         } else {
             NATIVE_ID_1
         }
@@ -55,7 +55,7 @@ object NativeAdsUtil {
         var adLoader: AdLoader?
         Log.d(Constant.TAG, "loadAds2")
         val id = if (BuildConfig.DEBUG) {
-            NATIVE_ID_TEST_VIDEO
+            NATIVE_ID_TEST
         } else {
             NATIVE_ID_2
         }
