@@ -9,6 +9,7 @@ import com.example.baseproject.base.base_view.BaseActivity
 import com.example.baseproject.base.base_view.HomeFragment
 import com.example.baseproject.base.ui.ads.DemoAdsActivity
 import com.example.baseproject.base.ui.demo_viewpager.DemoViewPagerActivity
+import com.example.baseproject.base.ui.flex_box_layout.DemoFlexBoxLayoutActivity
 import com.example.baseproject.base.ui.location.LocationActivity
 import com.example.baseproject.base.ui.test_coil.CoilActivity
 import com.example.baseproject.base.utils.extension.clear
@@ -61,6 +62,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         }
         binding.btnTestCoilLib.clickSafety {
             openActivity(CoilActivity::class.java, false, isAnimation = true, bundle = null)
+        }
+        binding.btnFlexBoxManager.clickSafety {
+            openActivity(DemoFlexBoxLayoutActivity::class.java, false, isAnimation = true, bundle = null)
         }
     }
 

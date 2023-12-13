@@ -119,4 +119,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-ads:22.5.0'
     //coil (Coroutine Image loader)
     implementation 'io.coil-kt:coil:2.5.0'
+
+    //flexbox layout recyclerView
+    implementation 'com.google.android.flexbox:flexbox:3.0.0'
 }
