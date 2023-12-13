@@ -26,8 +26,7 @@ import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 
 class AdmobUtils constructor(val context: Activity) {
-    private val ADS_INTER_TEST_1 = BuildConfig.ADS_INTER_TEST
-    private val ADS_INTER_TEST_2 = BuildConfig.ADS_INTER_TEST_VIDEO
+    private val ADS_INTER_TEST = BuildConfig.ADS_INTER_TEST
     private val ADS_BANNER_TEST = BuildConfig.ADS_BANNER_TEST
     private var mInterstitialAd: InterstitialAd? = null
     private val adRequest: AdRequest
@@ -129,7 +128,7 @@ class AdmobUtils constructor(val context: Activity) {
         val adRequest: AdRequest = AdRequest.Builder().build()
         var adUnit = BuildConfig.ADS_ADMOB_BANNER
         if (BuildConfig.DEBUG) {
-            adUnit = ADS_BANNER_TEST
+            adUnit = "ca-app-pub-3940256099942544/6300978111"
         }
         val adView = AdView(activity)
         adView.apply {
@@ -160,7 +159,7 @@ class AdmobUtils constructor(val context: Activity) {
             return
         }
         val adUnit = if (BuildConfig.DEBUG) {
-            ADS_INTER_TEST_1
+            ADS_INTER_TEST
         } else {
             BuildConfig.ADS_ADMOB_INTER_ID1
         }
@@ -185,7 +184,7 @@ class AdmobUtils constructor(val context: Activity) {
             return
         }
         val adUnit = if (BuildConfig.DEBUG) {
-            ADS_INTER_TEST_2
+            ADS_INTER_TEST
         } else {
             BuildConfig.ADS_ADMOB_INTER_ID2
         }

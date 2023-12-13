@@ -26,19 +26,22 @@ android {
         }
         addConstantTo(owner, "AD_MOD_APP_ID", "ca-app-pub-3940256099942544~3347511713")
 
-        addConstantTo(owner, "ADS_BANNER_TEST", "ca-app-pub-3940256099942544/6300978111")
+        //key test
+        addConstantTo(owner, "ADS_BANNER_TEST", "/6499/example/banner")
+        addConstantTo(owner, "ADS_BANNER_COLLAPSIBLE_TEST", "ca-app-pub-3940256099942544/2014213617")
+        addConstantTo(owner, "ADS_INTER_TEST", "/6499/example/interstitial")
+        addConstantTo(owner, "ADS_NATIVE_TEST", "/6499/example/native")
+        addConstantTo(owner, "ADS_NATIVE_TEST_VIDEO", "/6499/example/native-video")
+        addConstantTo(owner, "ADS_ADMOB_OPEN_APP_TEST", "/6499/example/app-open")
+
         addConstantTo(owner, "ADS_ADMOB_BANNER", "ca-app-pub-3940256099942544/6300978111")
 
-        addConstantTo(owner, "ADS_INTER_TEST", "ca-app-pub-3940256099942544/1033173712")
-        addConstantTo(owner, "ADS_INTER_TEST_VIDEO", "ca-app-pub-3940256099942544/8691691433")
         addConstantTo(owner, "ADS_ADMOB_INTER_ID1", "ca-app-pub-3940256099942544/1033173712")
         addConstantTo(owner, "ADS_ADMOB_INTER_ID2", "ca-app-pub-3940256099942544/1033173712")
 
-        addConstantTo(owner, "ADS_NATIVE_TEST", "ca-app-pub-3940256099942544/2247696110")
         addConstantTo(owner, "ADS_NATIVE_ID1", "ca-app-pub-3940256099942544/2247696110")
         addConstantTo(owner, "ADS_NATIVE_ID2", "ca-app-pub-3940256099942544/2247696110")
 
-        addConstantTo(owner, "ADS_ADMOB_OPEN_APP_TEST", "ca-app-pub-3940256099942544/3419835294")
         addConstantTo(owner, "ADS_ADMOB_OPEN_APP_ID1", "ca-app-pub-3940256099942544/3419835294")
         addConstantTo(owner, "ADS_ADMOB_OPEN_APP_ID2", "ca-app-pub-3940256099942544/3419835294")
     }
