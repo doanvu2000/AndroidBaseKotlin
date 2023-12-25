@@ -37,3 +37,10 @@ fun ImageView.loadSrc(src: Any, placeHolder: Int, error: Int) {
         .error(error)
         .into(this)
 }
+
+fun ImageView.loadGif(src: Any) {
+    Glide.with(this.context)
+        .asGif()
+        .load(src)
+        .into(this)
+}

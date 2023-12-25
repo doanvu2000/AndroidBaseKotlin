@@ -34,10 +34,15 @@ import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.lifecycleScope
 import com.example.baseproject.R
 import com.example.baseproject.base.utils.util.Constant
 import com.google.android.gms.ads.AdSize
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.concurrent.Executor
 
 fun Activity.setFullScreenMode(isFullScreen: Boolean = false) {
@@ -364,4 +369,13 @@ fun Activity.getAdSizeFollowScreen(): AdSize {
     }
     val adWidth = (adWidthPixels / density).toInt()
     return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this, adWidth)
+}
+
+fun AppCompatActivity.delayBeforeAction(timeDelay: Long = 300, action: () -> Unit) {
+    lifecycleScope.launch(Dispatchers.Main) {
+        withContext(Dispatchers.IO) {
+            delay(timeDelay)
+        }
+        action()
+    }
 }

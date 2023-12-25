@@ -7,7 +7,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.concurrent.Executor
 
 fun Fragment.checkPermission(permission: String): Boolean {
@@ -72,5 +77,14 @@ fun Fragment.showSnackBar(msg: String, duration: Int = 500) {
         val snackView = snackBar.view
 //        snackView.setBackgroundColor(getColorById(R.color.color_app))
         snackBar.show()
+    }
+}
+
+fun Fragment.delayBeforeAction(timeDelay: Long = 300, action: () -> Unit) {
+    lifecycleScope.launch(Dispatchers.Main) {
+        withContext(Dispatchers.IO) {
+            delay(timeDelay)
+        }
+        action()
     }
 }

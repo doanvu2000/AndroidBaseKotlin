@@ -81,15 +81,45 @@ fun View.setOnSafeClick(onSafeClickListener: (View) -> Unit) {
 }
 
 fun View.hide() {
-    this.visibility = View.INVISIBLE
+    if (!isHide) {
+        this.visibility = View.INVISIBLE
+    }
 }
 
 fun View.show() {
-    this.visibility = View.VISIBLE
+    if (!isShow) {
+        this.visibility = View.VISIBLE
+    }
 }
 
 fun View.gone() {
-    this.visibility = View.GONE
+    if (!isGone) {
+        this.visibility = View.GONE
+    }
+}
+
+val View.isShow: Boolean
+    get() = this.visibility == View.VISIBLE
+
+val View.isHide: Boolean
+    get() = this.visibility == View.INVISIBLE
+val View.isGone: Boolean
+    get() = this.visibility == View.GONE
+
+fun View.showOrGone(isShow: Boolean) {
+    if (isShow) {
+        show()
+    } else {
+        gone()
+    }
+}
+
+fun View.showOrHide(isShow: Boolean) {
+    if (isShow) {
+        show()
+    } else {
+        hide()
+    }
 }
 
 fun View.getBitmapFromView(done: (Bitmap) -> Unit) {
