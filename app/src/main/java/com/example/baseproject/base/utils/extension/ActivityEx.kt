@@ -44,6 +44,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.concurrent.Executor
+import kotlin.coroutines.CoroutineContext
 
 fun Activity.setFullScreenMode(isFullScreen: Boolean = false) {
     if (isFullScreen) {
@@ -376,6 +377,12 @@ fun AppCompatActivity.delayBeforeAction(timeDelay: Long = 300, action: () -> Uni
         withContext(Dispatchers.IO) {
             delay(timeDelay)
         }
+        action()
+    }
+}
+
+fun AppCompatActivity.launchWitCoroutine(dispatcher: CoroutineContext = Dispatchers.Main, action: () -> Unit) {
+    lifecycleScope.launch(dispatcher) {
         action()
     }
 }

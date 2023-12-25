@@ -14,6 +14,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.concurrent.Executor
+import kotlin.coroutines.CoroutineContext
 
 fun Fragment.checkPermission(permission: String): Boolean {
     return requireContext().checkPermission(permission)
@@ -85,6 +86,12 @@ fun Fragment.delayBeforeAction(timeDelay: Long = 300, action: () -> Unit) {
         withContext(Dispatchers.IO) {
             delay(timeDelay)
         }
+        action()
+    }
+}
+
+fun Fragment.launchWitCoroutine(dispatcher: CoroutineContext = Dispatchers.Main, action: () -> Unit) {
+    lifecycleScope.launch(dispatcher) {
         action()
     }
 }
