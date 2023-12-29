@@ -37,11 +37,11 @@ object CalendarUtil {
 
         companion object {
             fun getDayByIndex(dayOfWeek: Int): DayOfWeek {
-                return values().find { it.order == dayOfWeek } ?: MonDay
+                return entries.find { it.order == dayOfWeek } ?: MonDay
             }
 
             fun getDayShortByIndex(dayOfWeek: Int): Int {
-                return values().find { it.order == dayOfWeek }?.stringShort ?: MonDay.stringShort
+                return entries.find { it.order == dayOfWeek }?.stringShort ?: MonDay.stringShort
             }
         }
     }

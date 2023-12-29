@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Parcelable
 import androidx.annotation.Keep
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.Serializable
@@ -36,7 +38,8 @@ class SpUtils internal constructor(private val SP_FILE_KEY: String) {
      * @param key unique key to the object to be saved
      * */
     fun <T : Serializable> saveData(context: Context, data: T, key: String) {
-        GlobalScope.launch { saveDataSync(context, data, key) }
+        CoroutineScope(Dispatchers.IO).launch { saveDataSync(context, data, key) }
+//        GlobalScope.launch { saveDataSync(context, data, key) }
     }
 
     /**
@@ -124,7 +127,8 @@ class SpUtils internal constructor(private val SP_FILE_KEY: String) {
      * @param saveSynced Whether should be saved synced
      * */
     fun <T : Serializable> saveSerializableCollection(context: Context, data: Collection<T>, key: String) =
-        GlobalScope.launch { saveSerializableCollectionSync(context, data, key) }
+        CoroutineScope(Dispatchers.IO).launch {saveSerializableCollectionSync(context, data, key)}
+//        GlobalScope.launch {  saveSerializableCollectionSync(context, data, key)}
 
     /**
      * Method(suspend) to save Collection of objects that implements Serializable on Shared Preference
@@ -165,7 +169,7 @@ class SpUtils internal constructor(private val SP_FILE_KEY: String) {
      * @param key unique key to the object to be saved
      * */
     fun <K : Serializable, V : Serializable> saveSerializableMap(context: Context, data: Map<K, V>, key: String) =
-        GlobalScope.launch { saveSerializableMapSync(context, data, key) }
+        CoroutineScope(Dispatchers.IO).launch { saveSerializableMapSync(context, data, key) }
 
     /**
      * Method(suspend) to save Map<K : Serializable,V : Serializable> on Shared Preference
@@ -214,7 +218,7 @@ class SpUtils internal constructor(private val SP_FILE_KEY: String) {
     fun <K : Serializable, V : Parcelable> saveParcelableMap(
         context: Context,
         data: Map<K, V>, key: String
-    ) = GlobalScope.launch { saveParcelableMapSync(context, data, key) }
+    ) = CoroutineScope(Dispatchers.IO).launch { saveParcelableMapSync(context, data, key) }
 
     /**
      * Method(suspend) to save Map<K : Serializable,V : Parcelable> on Shared Preference
@@ -400,7 +404,7 @@ class SpUtils internal constructor(private val SP_FILE_KEY: String) {
      * @param key unique key to the object to be saved
      * */
     fun <T : Parcelable> saveParcelableCollection(context: Context, data: Collection<T>, key: String) =
-        GlobalScope.launch { saveParcelableCollectionSync(context, data, key) }
+        CoroutineScope(Dispatchers.IO).launch { saveParcelableCollectionSync(context, data, key) }
 
     private fun <T : Parcelable> saveParcelableCollection(editor: SharedPreferences.Editor, data: Collection<T>, key: String) {
         data.map { it.toSerializedString().addTag() }.toMutableSet().let {
@@ -473,7 +477,7 @@ class SpUtils internal constructor(private val SP_FILE_KEY: String) {
      * @param key unique key to the object to be saved
      * */
     fun <T : Parcelable> saveParcelable(context: Context, data: T, key: String) =
-        GlobalScope.launch { saveParcelableSync(context, data, key) }
+        CoroutineScope(Dispatchers.IO).launch { saveParcelableSync(context, data, key) }
 
     /**
      * Method(suspend) to save Parcelable data on Shared Preference

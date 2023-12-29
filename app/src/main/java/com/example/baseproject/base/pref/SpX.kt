@@ -52,11 +52,11 @@ internal fun java.io.Serializable.toSerializedString(): String {
 
 @Suppress("UNCHECKED_CAST")
 private fun <T : java.io.Serializable> ByteArray.toSerializable(type: Class<T>): T? {
-    try {
-        return ObjectInputStream(ByteArrayInputStream(this)).readObject() as T
+    return try {
+        ObjectInputStream(ByteArrayInputStream(this)).readObject() as T
     } catch (ex: Throwable) {
         ex.printStackTrace()
-        return null
+        null
     }
 }
 

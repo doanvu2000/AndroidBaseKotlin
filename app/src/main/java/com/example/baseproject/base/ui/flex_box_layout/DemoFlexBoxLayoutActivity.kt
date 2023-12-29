@@ -85,7 +85,7 @@ class DemoFlexBoxLayoutActivity : BaseActivity<ActivityDemoFlexBoxLayoutBinding>
         binding.btnBack.clickSafety {
             onBack()
         }
-        dataAdapter.setOnClickItem { item, position ->
+        dataAdapter.setOnClickItem { _, position ->
             dataAdapter.setSelected(position)
         }
     }

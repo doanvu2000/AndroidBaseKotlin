@@ -12,8 +12,8 @@ enum class TabInfo(val position: Int, @StringRes val tabNameId: Int) {
 
     companion object {
 
-        fun getTabCount() = values().size
-        fun getTabByPosition(position: Int) = values().getOrNull(position) ?: Tab1
+        fun getTabCount() = entries.size
+        fun getTabByPosition(position: Int) = entries.getOrNull(position) ?: Tab1
 
         fun getTabName(context: Context, position: Int): String {
             return context.getString(getTabByPosition(position).tabNameId)

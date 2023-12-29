@@ -81,7 +81,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         }
     }
 
-    private val coroutineException = CoroutineExceptionHandler { coroutineContext, throwable ->
+    private val coroutineException = CoroutineExceptionHandler { _, throwable ->
         binding.tvResult.text = throwable.message
     }
 
