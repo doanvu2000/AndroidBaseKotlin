@@ -37,12 +37,14 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.baseproject.R
 import com.example.baseproject.base.utils.util.Constant
+import com.example.baseproject.base.utils.util.DownloadUtil
 import com.google.android.gms.ads.AdSize
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.util.concurrent.Executor
 import kotlin.coroutines.CoroutineContext
 
@@ -385,4 +387,10 @@ fun AppCompatActivity.launchWitCoroutine(dispatcher: CoroutineContext = Dispatch
     lifecycleScope.launch(dispatcher) {
         action()
     }
+}
+
+fun AppCompatActivity.downloadAudio(
+    fileName: String, src: String, timeDelay: Long = 300, onDone: (File) -> Unit, onFail: () -> Unit
+) {
+    DownloadUtil.downloadAudio(lifecycleScope, cacheDir, fileName, src, timeDelay, onDone, onFail)
 }

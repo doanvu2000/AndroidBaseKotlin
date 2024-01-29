@@ -8,11 +8,13 @@ import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.example.baseproject.base.utils.util.DownloadUtil
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.util.concurrent.Executor
 import kotlin.coroutines.CoroutineContext
 
@@ -94,4 +96,14 @@ fun Fragment.launchWitCoroutine(dispatcher: CoroutineContext = Dispatchers.Main,
     lifecycleScope.launch(dispatcher) {
         action()
     }
+}
+
+fun Fragment.downloadAudio(
+    fileName: String, src: String, timeDelay: Long = 300, onDone: (File) -> Unit, onFail: () -> Unit
+) {
+    val lifecycle = viewLifecycleOwner.lifecycleScope
+    DownloadUtil.downloadAudio(
+        lifecycle, requireContext().cacheDir, fileName, src, timeDelay, onDone,
+        onFail
+    )
 }
