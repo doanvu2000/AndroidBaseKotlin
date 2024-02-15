@@ -4,6 +4,7 @@ import android.app.PendingIntent
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Matrix
@@ -26,6 +27,7 @@ import java.io.Serializable
 import java.text.DecimalFormat
 import java.util.Calendar
 import java.util.Locale
+import kotlin.math.ceil
 import kotlin.math.log10
 import kotlin.math.pow
 import kotlin.math.roundToInt
@@ -274,3 +276,21 @@ fun Any?.ifNull(block: () -> Unit) = run {
         block()
     }
 }
+
+val Int.dpf: Float
+    get() {
+        return dp.toFloat()
+    }
+
+
+val Float.dpf: Float
+    get() {
+        return dp.toFloat()
+    }
+
+val Float.dp: Int
+    get() {
+        return if (this == 0f) {
+            0
+        } else ceil((Resources.getSystem().displayMetrics.density * this).toDouble()).toInt()
+    }

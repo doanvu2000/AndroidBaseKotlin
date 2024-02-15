@@ -11,6 +11,7 @@ import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import android.widget.SeekBar
 import com.example.baseproject.R
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.tabs.TabLayout
 
 fun View.hideKeyboard() {
@@ -190,4 +191,12 @@ fun SeekBar.setOnProgressChange(
 
         }
     })
+}
+
+fun MaterialCardView.removeShadow() {
+    this.cardElevation = 0f
+}
+
+fun MaterialCardView.addShadow(elevation: Float) {
+    this.cardElevation = elevation.dpf
 }
