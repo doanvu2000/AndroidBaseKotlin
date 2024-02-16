@@ -1,9 +1,11 @@
 package com.example.baseproject.base.utils.extension
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Rect
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
@@ -199,4 +201,34 @@ fun MaterialCardView.removeShadow() {
 
 fun MaterialCardView.addShadow(elevation: Float) {
     this.cardElevation = elevation.dpf
+}
+
+@SuppressLint("ClickableViewAccessibility")
+fun View.setTouchListener(
+    consumeEvent: Boolean = false,
+    onActionDown: (() -> Unit)? = null,
+    onActionUp: (() -> Unit)? = null,
+    onActionMove: (() -> Unit)? = null,
+    onActionScroll: (() -> Unit)? = null,
+) {
+    setOnTouchListener { v, event ->
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                onActionDown?.invoke()
+            }
+
+            MotionEvent.ACTION_UP -> {
+                onActionUp?.invoke()
+            }
+
+            MotionEvent.ACTION_MOVE -> {
+                onActionMove?.invoke()
+            }
+
+            MotionEvent.ACTION_SCROLL -> {
+                onActionScroll?.invoke()
+            }
+        }
+        consumeEvent
+    }
 }
