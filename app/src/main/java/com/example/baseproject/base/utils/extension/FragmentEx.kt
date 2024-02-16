@@ -2,6 +2,7 @@ package com.example.baseproject.base.utils.extension
 
 import android.content.Intent
 import android.media.audiofx.AudioEffect
+import android.view.animation.Animation
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricPrompt
@@ -106,4 +107,8 @@ fun Fragment.downloadAudio(
         lifecycle, requireContext().cacheDir, fileName, src, timeDelay, onDone,
         onFail
     )
+}
+
+fun Fragment.getAnimation(animationId: Int): Animation? {
+    return requireContext().getAnimation(animationId)
 }

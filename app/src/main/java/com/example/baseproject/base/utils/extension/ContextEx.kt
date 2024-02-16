@@ -26,6 +26,8 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.Toast
@@ -516,4 +518,8 @@ fun Context.isNotificationListenerServiceEnabled(): Boolean {
 fun Context.getBatteryLevel(): Int {
     val batteryManager = getSystemService(Context.BATTERY_SERVICE) as BatteryManager
     return batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+}
+
+fun Context.getAnimation(animationId: Int): Animation? {
+    return AnimationUtils.loadAnimation(this, animationId)
 }
