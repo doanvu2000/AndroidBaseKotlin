@@ -112,3 +112,9 @@ fun Date.toStringFormat(format: String = "yyyy-MM-dd HH:mm:ss"): String {
     val dateFormatter = SimpleDateFormat(format, Locale.getDefault())
     return dateFormatter.format(this)
 }
+fun String.subStringSafety(startIndex: Int, endIndex: Int, default: String): String {
+    if (length < startIndex || length < endIndex) {
+        return default
+    }
+    return substring(startIndex, endIndex)
+}
