@@ -113,6 +113,9 @@ fun Date.toStringFormat(format: String = "yyyy-MM-dd HH:mm:ss"): String {
     return dateFormatter.format(this)
 }
 fun String.subStringSafety(startIndex: Int, endIndex: Int, default: String): String {
+    if (startIndex > endIndex) {
+        return default
+    }
     if (length < startIndex || length < endIndex) {
         return default
     }
