@@ -394,3 +394,12 @@ fun AppCompatActivity.downloadAudio(
 ) {
     DownloadUtil.downloadAudio(lifecycleScope, cacheDir, fileName, src, timeDelay, onDone, onFail)
 }
+fun Activity.gotoDetailSetting() {
+    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+    intent.data = Uri.parse("package:$packageName")
+    startActivity(intent)
+    /**
+     * should use registerForActivityResult to handle result instead of (startActivity or startActivityForResult):
+     * registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
+     * */
+}
