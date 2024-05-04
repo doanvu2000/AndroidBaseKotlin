@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Rect
+import android.graphics.drawable.LayerDrawable
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +13,8 @@ import android.view.ViewTreeObserver
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import android.widget.SeekBar
+import androidx.annotation.DrawableRes
+import androidx.core.content.res.ResourcesCompat
 import com.example.baseproject.R
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.tabs.TabLayout
@@ -231,4 +234,14 @@ fun View.setTouchListener(
         }
         consumeEvent
     }
+}
+
+fun SeekBar.setTrackSrc(@DrawableRes drawable: Int) {
+    val layerDrawable = ResourcesCompat.getDrawable(resources, drawable, null) as LayerDrawable
+    progressDrawable = layerDrawable
+}
+
+fun SeekBar.setThumbSrc(@DrawableRes drawable: Int) {
+    val thumbDrawable = ResourcesCompat.getDrawable(resources, drawable, null)
+    thumb = thumbDrawable
 }
