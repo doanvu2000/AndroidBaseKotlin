@@ -1,4 +1,4 @@
-package com.example.baseproject.base.base_view.widget
+package com.example.baseproject.base.base_view.widget.smooth_seekbar
 
 import android.R
 import android.animation.ValueAnimator

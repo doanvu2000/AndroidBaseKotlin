@@ -1,7 +1,9 @@
 package com.example.baseproject.base.ui.main
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.view.LayoutInflater
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.baseproject.R
@@ -36,17 +38,26 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         //nothing
     }
 
-    override fun initData() {
+    private val startDemoAdsActivityResult =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            result.data
+            result.resultCode
+        }
 
+    override fun initData() {
+        val intent = Intent(this, DemoAdsActivity::class.java)
+        startDemoAdsActivityResult.launch(intent)
     }
 
     override fun initListener() {
         binding.btnOpenFragment.setOnClickListener {
-            supportFragmentManager.beginTransaction().replace(R.id.frameContainer, HomeFragment()).commit()
+            supportFragmentManager.beginTransaction().replace(R.id.frameContainer, HomeFragment())
+                .commit()
 //            randomAndSortList()
         }
         binding.btnRemoveFragment.setOnClickListener {
-            val oldFragment: Fragment? = supportFragmentManager.findFragmentById(R.id.frameContainer)
+            val oldFragment: Fragment? =
+                supportFragmentManager.findFragmentById(R.id.frameContainer)
             oldFragment?.let {
                 removeFragment(it)
             }
@@ -55,7 +66,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             openActivity(DemoViewPagerActivity::class.java, isFinish = false, true, null)
         }
         binding.btnDemoLocation.clickSafety {
-            openActivity(LocationActivity::class.java, isFinish = false, isAnimation = true, bundle = null)
+            openActivity(
+                LocationActivity::class.java,
+                isFinish = false,
+                isAnimation = true,
+                bundle = null
+            )
         }
         binding.btnDemoAds.clickSafety {
             openActivity(DemoAdsActivity::class.java, false, isAnimation = true, bundle = null)
@@ -64,7 +80,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             openActivity(CoilActivity::class.java, false, isAnimation = true, bundle = null)
         }
         binding.btnFlexBoxManager.clickSafety {
-            openActivity(DemoFlexBoxLayoutActivity::class.java, false, isAnimation = true, bundle = null)
+            openActivity(
+                DemoFlexBoxLayoutActivity::class.java,
+                false,
+                isAnimation = true,
+                bundle = null
+            )
         }
     }
 
