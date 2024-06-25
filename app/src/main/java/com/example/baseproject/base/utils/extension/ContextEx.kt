@@ -11,6 +11,9 @@ import android.content.Intent
 import android.content.pm.PackageInfo
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
+import android.icu.text.MeasureFormat
+import android.icu.util.Measure
+import android.icu.util.MeasureUnit
 import android.location.Location
 import android.location.LocationManager
 import android.media.Ringtone
@@ -51,7 +54,7 @@ import com.google.android.play.core.review.model.ReviewErrorCode
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
-import java.util.*
+import java.util.UUID
 
 
 fun Context.checkPermission(permission: String): Boolean {
@@ -522,4 +525,18 @@ fun Context.getBatteryLevel(): Int {
 
 fun Context.getAnimation(animationId: Int): Animation? {
     return AnimationUtils.loadAnimation(this, animationId)
+}
+
+/**
+ * determine the conversion convention for kilobytes (1000 or 1024) by locale
+ * */
+@RequiresApi(Build.VERSION_CODES.N)
+fun Context.isKilobyteBasedOn1000(): Boolean {
+    val formatter = MeasureFormat.getInstance(
+        resources.configuration.locales[0],
+        MeasureFormat.FormatWidth.SHORT
+    )
+    val oneKilobyte = Measure(1, MeasureUnit.KILOBYTE)
+    return formatter.format(oneKilobyte)
+        .contains("1000") // Check if the formatted output contains "1000"
 }

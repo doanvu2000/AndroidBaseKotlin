@@ -5,6 +5,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
+import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Matrix
@@ -294,3 +295,9 @@ val Float.dp: Int
             0
         } else ceil((Resources.getSystem().displayMetrics.density * this).toDouble()).toInt()
     }
+
+fun Cursor.getSafeColumn(column: String): Int? = try {
+    getColumnIndexOrThrow(column)
+} catch (e: Exception) {
+    null
+}

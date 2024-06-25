@@ -16,6 +16,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.OpenableColumns
 import android.provider.Settings
 import android.telecom.TelecomManager
 import android.util.DisplayMetrics
@@ -402,4 +403,27 @@ fun Activity.gotoDetailSetting() {
      * should use registerForActivityResult to handle result instead of (startActivity or startActivityForResult):
      * registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
      * */
+}
+
+/**
+ * get mime type of file
+ * */
+fun Activity.getMimeType(uri: Uri): String? {
+    return contentResolver.getType(uri)
+}
+
+/**
+ * get name and size of file
+ * */
+fun Activity.getNameAndSizeFile(uri: Uri, onQueryFile: (name: String, size: Long) -> Unit) {
+    contentResolver.query(
+        uri, null, null, null, null
+    )?.use { cursor ->
+        val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+        val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+        cursor.moveToFirst()
+        val name = cursor.getString(nameIndex)
+        val size = cursor.getLong(sizeIndex)
+        onQueryFile.invoke(name, size)
+    }
 }
