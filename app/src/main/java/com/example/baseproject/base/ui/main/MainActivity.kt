@@ -1,7 +1,6 @@
 package com.example.baseproject.base.ui.main
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.view.LayoutInflater
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
@@ -45,8 +44,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         }
 
     override fun initData() {
-        val intent = Intent(this, DemoAdsActivity::class.java)
-        startDemoAdsActivityResult.launch(intent)
+//        val intent = Intent(this, DemoAdsActivity::class.java)
+//        startDemoAdsActivityResult.launch(intent)
     }
 
     override fun initListener() {

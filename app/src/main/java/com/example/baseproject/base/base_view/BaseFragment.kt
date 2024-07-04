@@ -8,12 +8,16 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.viewbinding.ViewBinding
 import com.example.baseproject.base.utils.extension.handleBackPressed
+import com.example.baseproject.base.utils.util.Constant
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
 abstract class BaseFragment<VB : ViewBinding> : Fragment() {
+    companion object {
+        const val TAG = Constant.TAG
+    }
     private var _binding: VB? = null
     val binding: VB get() = _binding!!
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

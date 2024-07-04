@@ -5,9 +5,10 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
-import com.example.baseproject.base.utils.extension.gone
+import com.demo.skeleton.util.hideSkeleton
+import com.demo.skeleton.util.loadSkeleton
+import com.example.baseproject.R
 import com.example.baseproject.base.utils.extension.setLinearLayoutManager
-import com.example.baseproject.base.utils.extension.show
 import com.example.baseproject.base.viewmodel.UserViewModel
 import com.example.baseproject.databinding.FragmentHomeBinding
 import com.example.baseproject.user.UserAdapter
@@ -28,8 +29,12 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     }
 
     override fun initData() {
+        binding.rcvUser.loadSkeleton(R.layout.layout_item_user) {
+            itemCount(5)
+        }
         viewModel.getUsers(onSuccess = {
             adapter.setDataList(it)
+            binding.rcvUser.hideSkeleton()
         }, onError = {
             Log.d("ddd", "initData: $it")
             Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
@@ -38,11 +43,13 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     }
 
     private fun showLoading() {
-        binding.loading.show()
+        Log.d(TAG, "showLoading")
+//        binding.loading.show()
     }
 
     private fun hideLoading() {
-        binding.loading.gone()
+        Log.d(TAG, "hideLoading")
+//        binding.loading.gone()
     }
 
     override fun initListener() {
@@ -51,7 +58,9 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         }
     }
 
-    override fun inflateLayout(inflater: LayoutInflater, container: ViewGroup?): FragmentHomeBinding {
+    override fun inflateLayout(
+        inflater: LayoutInflater, container: ViewGroup?
+    ): FragmentHomeBinding {
         return FragmentHomeBinding.inflate(inflater, container, false)
     }
 
