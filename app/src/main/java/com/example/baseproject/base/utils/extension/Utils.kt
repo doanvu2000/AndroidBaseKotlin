@@ -10,6 +10,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Matrix
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import android.provider.OpenableColumns
@@ -129,7 +130,10 @@ fun overlayBitMap(bmp1: Bitmap, bmp2: Bitmap): Bitmap {
 /**
  * retrofit enqueue
  */
-fun <T> Call<T>.enqueueShort(success: ((Response<T>) -> Unit)? = null, failed: ((Throwable) -> Unit)? = null) {
+fun <T> Call<T>.enqueueShort(
+    success: ((Response<T>) -> Unit)? = null,
+    failed: ((Throwable) -> Unit)? = null
+) {
     this.enqueue(object : Callback<T> {
         override fun onResponse(call: Call<T>, response: Response<T>) {
             success?.invoke(response)
@@ -187,7 +191,8 @@ fun saveStringToFile(context: Context, content: String, fileName: String): File?
 }
 
 fun shareFile(context: Context, file: File) {
-    val fileUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file)
+    val fileUri =
+        FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file)
 
     val shareIntent = Intent(Intent.ACTION_SEND)
     //set type for file
@@ -228,7 +233,8 @@ fun setLanguageApp(code: String) {
 }
 
 fun getApplicationLocales(): String =
-    AppCompatDelegate.getApplicationLocales().toLanguageTags().ifEmpty { Locale.getDefault().language }
+    AppCompatDelegate.getApplicationLocales().toLanguageTags()
+        .ifEmpty { Locale.getDefault().language }
 
 private fun getByteLengthInDouble(): Double {
     return if (isSdkO()) 1000.0
@@ -301,3 +307,13 @@ fun Cursor.getSafeColumn(column: String): Int? = try {
 } catch (e: Exception) {
     null
 }
+
+fun isDebugMode() = BuildConfig.DEBUG
+fun isEmulator(): Boolean = Build.FINGERPRINT.startsWith("generic") ||
+        Build.FINGERPRINT.startsWith("unknown") ||
+        Build.MODEL.contains("google_sdk") ||
+        Build.MODEL.contains("Emulator") ||
+        Build.MODEL.contains("Android SDK built for x86") ||
+        Build.MANUFACTURER.contains("Genymotion") ||
+        (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic")) ||
+        "google_sdk" == Build.PRODUCT

@@ -1,6 +1,7 @@
 package com.example.baseproject.base.ui.main
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.view.LayoutInflater
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
@@ -15,6 +16,7 @@ import com.example.baseproject.base.ui.location.LocationActivity
 import com.example.baseproject.base.ui.test_coil.CoilActivity
 import com.example.baseproject.base.utils.extension.clear
 import com.example.baseproject.base.utils.extension.hide
+import com.example.baseproject.base.utils.extension.isEmulator
 import com.example.baseproject.base.utils.extension.openActivity
 import com.example.baseproject.base.utils.extension.removeFragment
 import com.example.baseproject.base.utils.extension.runOnDispatcherIO
@@ -35,6 +37,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     override fun initView() {
         //nothing
+        Log.d(TAG, "isEmulator: ${isEmulator()}")
     }
 
     private val startDemoAdsActivityResult =
