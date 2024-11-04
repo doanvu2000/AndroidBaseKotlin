@@ -176,7 +176,6 @@ inline fun View.loadSkeleton(
     skeletonLoader.load(skeleton)
 }
 
-
 /**
  * This is the type-unsafe version of [View.generateSkeleton].
  *
