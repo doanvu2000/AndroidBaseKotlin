@@ -18,7 +18,10 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.FileProvider
 import androidx.core.os.LocaleListCompat
 import com.example.baseproject.BuildConfig
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
@@ -308,6 +311,9 @@ fun Cursor.getSafeColumn(column: String): Int? = try {
     null
 }
 
+/**
+ * update by doan-vu.dev 04/11/2024
+ * */
 fun isDebugMode() = BuildConfig.DEBUG
 fun isEmulator(): Boolean = Build.FINGERPRINT.startsWith("generic") ||
         Build.FINGERPRINT.startsWith("unknown") ||
@@ -317,3 +323,23 @@ fun isEmulator(): Boolean = Build.FINGERPRINT.startsWith("generic") ||
         Build.MANUFACTURER.contains("Genymotion") ||
         (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic")) ||
         "google_sdk" == Build.PRODUCT
+
+/**
+ * Preventing click multiple view
+ * update by doan-vu.dev 04/11/2024
+ * */
+var readyClickStatic = true
+fun delayClickStatic(timeDelay: Long = 200L) {
+    readyClickStatic = false
+    CoroutineScope(Dispatchers.IO).launch {
+        delay(timeDelay)
+        readyClickStatic = true
+    }
+}
+
+fun clickStatic(action: () -> Unit) {
+    if (readyClickStatic) {
+        delayClickStatic()
+        action()
+    }
+}

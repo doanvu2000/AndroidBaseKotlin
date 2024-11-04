@@ -11,6 +11,7 @@ import com.example.baseproject.base.utils.extension.handleBackPressed
 import com.example.baseproject.base.utils.util.Constant
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
@@ -48,18 +49,41 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
         _binding = null
     }
 
+    /**override it and inflate your view binding, demo in HomeFragment*/
+    abstract fun inflateLayout(inflater: LayoutInflater, container: ViewGroup?): VB
+
     abstract fun initView()
     abstract fun initData()
     abstract fun initListener()
 
-    /**override it and inflate your view binding, demo in HomeFragment*/
-    abstract fun inflateLayout(inflater: LayoutInflater, container: ViewGroup?): VB
+    var isAvailableClick = true
+
+    fun delayClick() {
+        launchCoroutineIO {
+            isAvailableClick = false
+            delay(200)
+            isAvailableClick = true
+        }
+    }
+
+    fun View.clickSafe(action: () -> Unit) {
+        this.setOnClickListener {
+            if (isAvailableClick) {
+                action()
+                delayClick()
+            }
+        }
+    }
 
     fun launchAction(dispatcher: CoroutineContext, action: () -> Unit) {
-        view?.let {
-            viewLifecycleOwner.lifecycleScope.launch(dispatcher) {
-                action()
+        try {
+            view?.let {
+                viewLifecycleOwner.lifecycleScope.launch(dispatcher) {
+                    action()
+                }
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
