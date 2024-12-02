@@ -14,7 +14,7 @@ import com.example.baseproject.R
 import com.example.baseproject.base.utils.extension.getFlagPendingIntent
 import com.example.baseproject.base.utils.extension.isSdk26
 import com.example.baseproject.base.utils.extension.isSdkS
-import com.example.baseproject.base.utils.util.Constant
+import com.example.baseproject.base.utils.util.Constants
 
 class AlarmReceiverV2 : BroadcastReceiver() {
     companion object {
@@ -24,7 +24,7 @@ class AlarmReceiverV2 : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        Log.d(Constant.TAG, "onReceive: ")
+        Log.d(Constants.TAG, "onReceive: ")
         val title = intent.getStringExtra("title")
         val content = intent.getStringExtra("content")
         createNotification(context, title ?: "", content ?: "")

@@ -12,7 +12,7 @@ import com.example.baseproject.BuildConfig
 import com.example.baseproject.base.utils.extension.getAdSizeFollowScreen
 import com.example.baseproject.base.utils.extension.isDebugMode
 import com.example.baseproject.base.utils.extension.removeSelf
-import com.example.baseproject.base.utils.util.Constant
+import com.example.baseproject.base.utils.util.Constants
 import com.google.ads.mediation.admob.AdMobAdapter
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdListener
@@ -260,7 +260,7 @@ class AdmobUtils constructor(val context: Activity) {
     companion object {
         const val COLLAPSIBLE = "collapsible"
         const val COLLAPSIBLE_BANNER_BOTTOM = "bottom"
-        private const val TAG = Constant.TAG
+        private const val TAG = Constants.TAG
         var adView: AdView? = null
 
         @SuppressLint("StaticFieldLeak")

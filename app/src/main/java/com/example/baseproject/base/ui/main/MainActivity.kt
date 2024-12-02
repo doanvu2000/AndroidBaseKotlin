@@ -13,6 +13,7 @@ import com.example.baseproject.base.ui.ads.DemoAdsActivity
 import com.example.baseproject.base.ui.demo_viewpager.DemoViewPagerActivity
 import com.example.baseproject.base.ui.flex_box_layout.DemoFlexBoxLayoutActivity
 import com.example.baseproject.base.ui.location.LocationActivity
+import com.example.baseproject.base.ui.pick_image.PickImageActivity
 import com.example.baseproject.base.ui.test_coil.CoilActivity
 import com.example.baseproject.base.utils.extension.clear
 import com.example.baseproject.base.utils.extension.hide
@@ -23,7 +24,7 @@ import com.example.baseproject.base.utils.extension.runOnDispatcherIO
 import com.example.baseproject.base.utils.extension.show
 import com.example.baseproject.base.utils.extension.showToast
 import com.example.baseproject.base.utils.extension.toStringFormat
-import com.example.baseproject.base.utils.util.Constant
+import com.example.baseproject.base.utils.util.Constants
 import com.example.baseproject.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
@@ -32,7 +33,7 @@ import kotlin.random.Random
 
 class MainActivity : BaseActivity<ActivityMainBinding>() {
     companion object {
-        const val TAG = Constant.TAG
+        const val TAG = Constants.TAG
     }
 
     override fun initView() {
@@ -88,6 +89,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 isAnimation = true,
                 bundle = null
             )
+        }
+        binding.btnPickImage.clickSafety {
+            openActivity(PickImageActivity::class.java, false, isAnimation = true, bundle = null)
         }
     }
 

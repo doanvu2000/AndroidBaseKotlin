@@ -37,7 +37,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.baseproject.R
-import com.example.baseproject.base.utils.util.Constant
+import com.example.baseproject.base.utils.util.Constants
 import com.example.baseproject.base.utils.util.DownloadUtil
 import com.google.android.gms.ads.AdSize
 import com.google.android.material.snackbar.Snackbar
@@ -155,22 +155,22 @@ fun Activity.checkDeviceHasFingerprint(): Boolean {
         BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL
     )) {
         BiometricManager.BIOMETRIC_SUCCESS -> {
-            Log.d(Constant.TAG, "App can authenticate using biometrics.")
+            Log.d(Constants.TAG, "App can authenticate using biometrics.")
             return true
         }
 
         BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> {
-            Log.d(Constant.TAG, "No biometric features available on this device.")
+            Log.d(Constants.TAG, "No biometric features available on this device.")
             return false
         }
 
         BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> {
-            Log.d(Constant.TAG, "Biometric features are currently unavailable.")
+            Log.d(Constants.TAG, "Biometric features are currently unavailable.")
             return false
         }
 
         BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
-            Log.d(Constant.TAG, "Device has fingerprint but not set.")/*
+            Log.d(Constants.TAG, "Device has fingerprint but not set.")/*
             // Prompts the user to create credentials that your app accepts.
 //            if (isMinSdk30) {
 //                val enrollIntent = Intent(Settings.ACTION_BIOMETRIC_ENROLL).apply {
@@ -277,12 +277,12 @@ fun AppCompatActivity.replaceFragment(frameId: Int, fragment: Fragment, addToBac
 }
 
 fun AppCompatActivity.replaceFragmentNoAddBackStack(frameId: Int, fragment: Fragment) {
-    Log.d(Constant.TAG, "replaceFragment no add backstack: ${fragment.javaClass.name}")
+    Log.d(Constants.TAG, "replaceFragment no add backstack: ${fragment.javaClass.name}")
     supportFragmentManager.beginTransaction().replace(frameId, fragment).commit()
 }
 
 fun AppCompatActivity.replaceFragmentAddBackStack(frameId: Int, fragment: Fragment) {
-    Log.d(Constant.TAG, "replaceFragment add backstack: ${fragment.javaClass.name}")
+    Log.d(Constants.TAG, "replaceFragment add backstack: ${fragment.javaClass.name}")
     supportFragmentManager.beginTransaction().replace(frameId, fragment).addToBackStack(fragment.javaClass.name).commit()
 }
 

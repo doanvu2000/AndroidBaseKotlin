@@ -1,6 +1,11 @@
 package com.example.baseproject.base.utils.util
 
-object Constant {
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
+object Constants {
     const val READ_TIME_OUT: Long = 15
     const val CONNECT_TIME_OUT: Long = 15
     const val TAG = "doanvv"
@@ -23,4 +28,15 @@ object Constant {
     const val CHANNEL_NOTIFY_ID = "app_name_notification"
     const val NOTI_1 = "NOTI_1"
     const val NOTI_2 = "NOTI_2"
+
+    var isRequestPermission = false
+
+    var lastTimeShowInterOpenAds = 0L
+}
+
+fun delayResetFlagPermission() {
+    CoroutineScope(Dispatchers.IO).launch {
+        delay(500)
+        Constants.isRequestPermission = false
+    }
 }

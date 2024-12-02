@@ -10,7 +10,7 @@ import android.content.Intent
 import com.example.baseproject.R
 import com.example.baseproject.base.utils.extension.getFlagPendingIntent
 import com.example.baseproject.base.utils.extension.isSdk26
-import com.example.baseproject.base.utils.util.Constant
+import com.example.baseproject.base.utils.util.Constants
 import java.util.Calendar
 
 object AlarmUtil {
@@ -19,7 +19,7 @@ object AlarmUtil {
      * */
     fun setIntervalAlarm(context: Context) {
         createNotificationChannel(context)
-        Constant.actions.forEach { action ->
+        Constants.actions.forEach { action ->
             setAlarm(context, action)
         }
     }
@@ -31,7 +31,7 @@ object AlarmUtil {
             val name: CharSequence = context.getString(R.string.channel_name)
             val description = context.getString(R.string.channel_desc)
             val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(Constant.CHANNEL_NOTIFY_ID, name, importance)
+            val channel = NotificationChannel(Constants.CHANNEL_NOTIFY_ID, name, importance)
             channel.description = description
             // Register the channel with the system; you can't change the importance
             // or other notification behaviors after this
@@ -49,11 +49,11 @@ object AlarmUtil {
         val managerToday = context.getSystemService(Application.ALARM_SERVICE) as AlarmManager
         val todayCal = Calendar.getInstance()
         todayCal.apply {
-            set(Calendar.HOUR_OF_DAY, Constant.mapAlarmValue[action] ?: 0)
+            set(Calendar.HOUR_OF_DAY, Constants.mapAlarmValue[action] ?: 0)
             set(Calendar.MINUTE, 0)
             set(Calendar.SECOND, 0)
             if (timeInMillis < System.currentTimeMillis()) {
-                timeInMillis += Constant.MILLISECOND_ONE_DAY
+                timeInMillis += Constants.MILLISECOND_ONE_DAY
             }
         }
         managerToday.setInexactRepeating(

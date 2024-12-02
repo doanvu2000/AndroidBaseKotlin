@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<defaults>
+    <entry>
+        <key>inter_ad_capping_time</key>
+        <value>30</value>
+    </entry>
+    <entry>
+        <key>open_ad_capping_time</key>
+        <value>30</value>
+    </entry>
+    <entry>
+        <key>time_loading_splash</key>
+        <value>6</value>
+    </entry>
+    <entry>
+        <key>is_show_ads</key>
+        <value>true</value>
+    </entry>
+</defaults>

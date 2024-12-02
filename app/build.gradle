@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
 }
 
 android {
@@ -27,14 +28,14 @@ android {
         addConstantTo(owner, "AD_MOD_APP_ID", "ca-app-pub-3940256099942544~3347511713")
 
         //key test
-        addConstantTo(owner, "ADS_BANNER_TEST", "/6499/example/banner")
+        addConstantTo(owner, "ADS_BANNER_TEST", " /21775744923/example/adaptive-banner")
         addConstantTo(owner, "ADS_BANNER_COLLAPSIBLE_TEST", "ca-app-pub-3940256099942544/2014213617")
-        addConstantTo(owner, "ADS_INTER_TEST", "/6499/example/interstitial")
-        addConstantTo(owner, "ADS_NATIVE_TEST", "/6499/example/native")
-        addConstantTo(owner, "ADS_NATIVE_TEST_VIDEO", "/6499/example/native-video")
-        addConstantTo(owner, "ADS_ADMOB_OPEN_APP_TEST", "/6499/example/app-open")
+        addConstantTo(owner, "ADS_INTER_TEST", "/21775744923/example/interstitial")
+        addConstantTo(owner, "ADS_NATIVE_TEST", "/21775744923/example/native")
+        addConstantTo(owner, "ADS_NATIVE_TEST_VIDEO", "/21775744923/example/native-video")
+        addConstantTo(owner, "ADS_ADMOB_OPEN_APP_TEST", "/21775744923/example/app-open")
 
-        addConstantTo(owner, "ADS_ADMOB_BANNER", "ca-app-pub-3940256099942544/6300978111")
+        addConstantTo(owner, "ADS_ADMOB_BANNER", "ca-app-pub-3940256099942544/9214589741")
 
         addConstantTo(owner, "ADS_ADMOB_INTER_ID1", "ca-app-pub-3940256099942544/1033173712")
         addConstantTo(owner, "ADS_ADMOB_INTER_ID2", "ca-app-pub-3940256099942544/1033173712")
@@ -42,8 +43,8 @@ android {
         addConstantTo(owner, "ADS_NATIVE_ID1", "ca-app-pub-3940256099942544/2247696110")
         addConstantTo(owner, "ADS_NATIVE_ID2", "ca-app-pub-3940256099942544/2247696110")
 
-        addConstantTo(owner, "ADS_ADMOB_OPEN_APP_ID1", "ca-app-pub-3940256099942544/3419835294")
-        addConstantTo(owner, "ADS_ADMOB_OPEN_APP_ID2", "ca-app-pub-3940256099942544/3419835294")
+        addConstantTo(owner, "ADS_ADMOB_OPEN_APP_ID1", "ca-app-pub-3940256099942544/9257395921")
+        addConstantTo(owner, "ADS_ADMOB_OPEN_APP_ID2", "ca-app-pub-3940256099942544/9257395921")
     }
 
     buildTypes {
@@ -74,9 +75,11 @@ dependencies {
     implementation libs.material
     implementation libs.constraintlayout
     implementation libs.recyclerview
+    implementation libs.activity
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
+    implementation libs.androidx.lifecycle.process
 
     //retrofit
     implementation libs.retrofit
@@ -113,8 +116,9 @@ dependencies {
 
     //firebase
     implementation platform(libs.firebase.bom)
-    implementation libs.firebase.analytics
-
+    implementation libs.firebase.crashlytics.ktx
+    implementation libs.firebase.analytics.ktx
+    implementation libs.firebase.config.ktx
     //ads
     implementation libs.play.services.ads
     //coil (Coroutine Image loader)

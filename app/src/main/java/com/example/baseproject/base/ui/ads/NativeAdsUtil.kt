@@ -8,7 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.example.baseproject.BuildConfig
 import com.example.baseproject.base.utils.extension.isDebugMode
-import com.example.baseproject.base.utils.util.Constant
+import com.example.baseproject.base.utils.util.Constants
 import com.example.baseproject.databinding.LayoutNativeAds2Binding
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdLoader
@@ -42,13 +42,13 @@ object NativeAdsUtil {
             .withAdListener(object : AdListener() {
                 override fun onAdLoaded() {
                     super.onAdLoaded()
-                    Log.d(Constant.TAG, "Native-loadAds1 success")
+                    Log.d(Constants.TAG, "Native-loadAds1 success")
                     loadSuccess.invoke(nativeAd)
                 }
 
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                     super.onAdFailedToLoad(loadAdError)
-                    Log.e(Constant.TAG, "load native ad1 failed")
+                    Log.e(Constants.TAG, "load native ad1 failed")
                     reloadNativeAdWithId2(context, loadSuccess, loadFailed)
                 }
             }).build()
@@ -62,7 +62,7 @@ object NativeAdsUtil {
     ) {
         var nativeAd: NativeAd? = null
         var adLoader: AdLoader?
-        Log.d(Constant.TAG, "loadAds2")
+        Log.d(Constants.TAG, "loadAds2")
         val id = if (isDebugMode()) {
             NATIVE_ID_TEST
         } else {
@@ -76,11 +76,11 @@ object NativeAdsUtil {
                 override fun onAdLoaded() {
                     super.onAdLoaded()
                     loadSuccess.invoke(nativeAd)
-                    Log.d(Constant.TAG, "Native-loadAds2 success")
+                    Log.d(Constants.TAG, "Native-loadAds2 success")
                 }
 
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                    Log.e(Constant.TAG, "Native-loadAds2 failed")
+                    Log.e(Constants.TAG, "Native-loadAds2 failed")
                     super.onAdFailedToLoad(loadAdError)
                     loadFailed.invoke()
                     adLoader = null

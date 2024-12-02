@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.example.baseproject.R
-import com.example.baseproject.base.utils.util.Constant
+import com.example.baseproject.base.utils.util.Constants
 
 //check setup in manifest
 class AlarmReceiver : BroadcastReceiver() {
@@ -13,7 +13,7 @@ class AlarmReceiver : BroadcastReceiver() {
             return
         }
         when (intent.action) {
-            Constant.AM9 -> {
+            Constants.AM9 -> {
                 createNotification(
                     context,
                     listOf(
@@ -21,11 +21,11 @@ class AlarmReceiver : BroadcastReceiver() {
                         context?.resources?.getString(R.string.notification_content_2) ?: "",
                         context?.resources?.getString(R.string.notification_content_3) ?: ""
                     ),
-                    Constant.NOTI_1
+                    Constants.NOTI_1
                 )
             }
 
-            Constant.PM2 -> {
+            Constants.PM2 -> {
                 createNotification(
                     context,
                     listOf(
@@ -33,11 +33,11 @@ class AlarmReceiver : BroadcastReceiver() {
                         context?.resources?.getString(R.string.notification_content_5) ?: "",
                         context?.resources?.getString(R.string.notification_content_6) ?: ""
                     ),
-                    Constant.NOTI_2
+                    Constants.NOTI_2
                 )
             }
 
-            Constant.PM7 -> {
+            Constants.PM7 -> {
                 createNotification(
                     context,
                     listOf(
@@ -45,7 +45,7 @@ class AlarmReceiver : BroadcastReceiver() {
                         context?.resources?.getString(R.string.notification_content_8) ?: "",
                         context?.resources?.getString(R.string.notification_content_9) ?: ""
                     ),
-                    Constant.NOTI_1
+                    Constants.NOTI_1
                 )
             }
         }

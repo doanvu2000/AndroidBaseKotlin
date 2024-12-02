@@ -62,16 +62,16 @@ If you want to set the default values, you can set a default `SkeletonLoader` in
 
 ```kotlin
 // In your Application
-class MyApplication : Application(), SkeletonLoaderFactory {
-
-    override fun newSkeletonLoader(): SkeletonLoader {
-        return SkeletonLoader.Builder(this)
-        ...
-        .color(R.color.colorSkeleton)
-            .cornerRadius(radiusInPixel)
-            .build()
-    }
-}
+//class MyApplication : Application(), SkeletonLoaderFactory {
+//
+//    override fun newSkeletonLoader(): SkeletonLoader {
+//        return SkeletonLoader.Builder(this)
+//        ...
+//        .color(R.color.colorSkeleton)
+//            .cornerRadius(radiusInPixel)
+//            .build()
+//    }
+//}
 ```
 
 Or calling `Koleton.setSkeletonLoader`

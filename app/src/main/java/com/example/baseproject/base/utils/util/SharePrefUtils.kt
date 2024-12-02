@@ -26,23 +26,38 @@ object SharePrefUtils {
 
     }
 
-    fun getString(key: String): String {
+    fun getString(key: String, defaultValue: String = ""): String {
+        if (!::sharePref.isInitialized) {
+            return defaultValue
+        }
         return sharePref.getString(key, "")?.trim() ?: ""
     }
 
     fun getInt(key: String, defaultValue: Int = 0): Int {
+        if (!::sharePref.isInitialized) {
+            return defaultValue
+        }
         return sharePref.getInt(key, defaultValue)
     }
 
     fun getBoolean(key: String, defaultValue: Boolean = false): Boolean {
+        if (!::sharePref.isInitialized) {
+            return defaultValue
+        }
         return sharePref.getBoolean(key, defaultValue)
     }
 
     fun getLong(key: String, defaultValue: Long = 0L): Long {
+        if (!::sharePref.isInitialized) {
+            return defaultValue
+        }
         return sharePref.getLong(key, defaultValue)
     }
 
     fun getFloat(key: String, defaultValue: Float = 0f): Float {
+        if (!::sharePref.isInitialized) {
+            return defaultValue
+        }
         return sharePref.getFloat(key, defaultValue)
     }
 

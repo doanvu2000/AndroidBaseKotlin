@@ -47,7 +47,7 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.example.baseproject.BuildConfig
 import com.example.baseproject.R
-import com.example.baseproject.base.utils.util.Constant
+import com.example.baseproject.base.utils.util.Constants
 import com.example.baseproject.base.utils.util.ImageUtil
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
@@ -569,7 +569,7 @@ fun Context.getOrientationImage(uri: Uri): Int? {
             )
         }
     } catch (e: Exception) {
-        Log.e(Constant.TAG, "modifyOrientation: ${e.message}")
+        Log.e(Constants.TAG, "modifyOrientation: ${e.message}")
         e.printStackTrace()
         return null
     }
@@ -595,7 +595,7 @@ fun modifyOrientation(bitmap: Bitmap, inputStream: InputStream): Bitmap {
             else -> bitmap
         }
     } catch (e: Exception) {
-        Log.e(Constant.TAG, "modifyOrientation: ${e.message}")
+        Log.e(Constants.TAG, "modifyOrientation: ${e.message}")
         e.printStackTrace()
         return bitmap
     }

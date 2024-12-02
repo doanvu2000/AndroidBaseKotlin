@@ -1,6 +1,6 @@
 package com.example.baseproject.base.retrofit
 
-import com.example.baseproject.base.utils.util.Constant
+import com.example.baseproject.base.utils.util.Constants
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -24,8 +24,8 @@ object RetrofitClient {
             level = HttpLoggingInterceptor.Level.BODY
         }
         val client: OkHttpClient = OkHttpClient.Builder()
-            .readTimeout(Constant.READ_TIME_OUT, TimeUnit.SECONDS)
-            .connectTimeout(Constant.CONNECT_TIME_OUT, TimeUnit.SECONDS)
+            .readTimeout(Constants.READ_TIME_OUT, TimeUnit.SECONDS)
+            .connectTimeout(Constants.CONNECT_TIME_OUT, TimeUnit.SECONDS)
             .addInterceptor(interceptor).build()
         return Retrofit.Builder()
             .baseUrl(BASE_URL)

@@ -8,7 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.viewbinding.ViewBinding
 import com.example.baseproject.base.utils.extension.handleBackPressed
-import com.example.baseproject.base.utils.util.Constant
+import com.example.baseproject.base.utils.util.Constants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -17,11 +17,16 @@ import kotlin.coroutines.CoroutineContext
 
 abstract class BaseFragment<VB : ViewBinding> : Fragment() {
     companion object {
-        const val TAG = Constant.TAG
+        const val TAG = Constants.TAG
     }
+
     private var _binding: VB? = null
     val binding: VB get() = _binding!!
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         _binding = inflateLayout(inflater, container)
         return binding.root
     }
@@ -116,6 +121,15 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
     fun launchCoroutineDefault(blockCoroutine: suspend CoroutineScope.() -> Unit) {
         launchCoroutine(Dispatchers.Default) {
             blockCoroutine()
+        }
+    }
+
+    fun delayToAction(delayTime: Long = 200L, action: () -> Unit) {
+        launchCoroutineIO {
+            delay(delayTime)
+            launchCoroutineMain {
+                action()
+            }
         }
     }
 }

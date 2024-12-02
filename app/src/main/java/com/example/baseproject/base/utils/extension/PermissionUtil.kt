@@ -1,8 +1,10 @@
 package com.example.baseproject.base.utils.extension
 
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.fragment.app.Fragment
 
 const val PERMISSION_GRANTED = PackageManager.PERMISSION_GRANTED
 
@@ -23,3 +25,6 @@ const val POST_NOTIFICATION = android.Manifest.permission.POST_NOTIFICATIONS
 
 const val ACCESS_COARSE_LOCATION = android.Manifest.permission.ACCESS_COARSE_LOCATION
 const val ACCESS_FINE_LOCATION = android.Manifest.permission.ACCESS_FINE_LOCATION
+
+fun Context.hasReadPermissionBelowQ() = checkPermission(READ_EXTERNAL_STORAGE)
+fun Fragment.hasReadPermissionBelowQ() = requireContext().hasReadPermissionBelowQ()

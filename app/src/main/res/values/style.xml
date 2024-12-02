@@ -41,4 +41,24 @@
         <item name="android:gravity">center</item>
         <item name="android:layout_gravity">center</item>
     </style>
+
+    <style name="fontRoboto400" parent="Widget.AppCompat.TextView">
+        <item name="android:fontFamily">@font/roboto_serif_regular_400</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
+    <style name="fontRoboto500" parent="Widget.AppCompat.TextView">
+        <item name="android:fontFamily">@font/roboto_serif_medium_500</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
+    <style name="fontRoboto600" parent="Widget.AppCompat.TextView">
+        <item name="android:fontFamily">@font/roboto_serif_semi_bold_600</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
+    <style name="fontRoboto700" parent="Widget.AppCompat.TextView">
+        <item name="android:fontFamily">@font/roboto_serif_bold_700</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
 </resources>

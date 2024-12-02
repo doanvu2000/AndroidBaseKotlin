@@ -12,7 +12,7 @@ import com.example.baseproject.base.ui.main.MainActivity
 import com.example.baseproject.base.utils.extension.PERMISSION_GRANTED
 import com.example.baseproject.base.utils.extension.POST_NOTIFICATION
 import com.example.baseproject.base.utils.extension.getFlagPendingIntent
-import com.example.baseproject.base.utils.util.Constant
+import com.example.baseproject.base.utils.util.Constants
 
 object TodayNotification {
     private const val TODAY_NOTIFY_ID = 20122023
@@ -22,10 +22,10 @@ object TodayNotification {
             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.putExtra(Constant.NOTI_DATA, from)
+        intent.putExtra(Constants.NOTI_DATA, from)
         val flag = PendingIntent.FLAG_UPDATE_CURRENT.getFlagPendingIntent()
         val resultPendingIntent = PendingIntent.getActivity(context, 0, intent, flag)
-        val builder = NotificationCompat.Builder(context, Constant.CHANNEL_NOTIFY_ID)
+        val builder = NotificationCompat.Builder(context, Constants.CHANNEL_NOTIFY_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentIntent(resultPendingIntent)
             .setContentTitle(today)
