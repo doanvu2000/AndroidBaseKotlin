@@ -9,14 +9,12 @@ import android.graphics.PorterDuffXfermode
 import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.text.LineBreaker
-import android.os.Build
 import android.text.StaticLayout
 import android.text.TextPaint
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.ColorInt
-import androidx.annotation.RequiresApi
 import com.demo.skeleton.util.NUMBER_ONE
 import com.demo.skeleton.util.NUMBER_ZERO
 import com.demo.skeleton.util.WRAPPING_LIMIT
@@ -81,14 +79,9 @@ internal class KoletonMask(
             root.offsetDescendantRectToMyCoords(view, it)
         }
         val textPaint = view.paint.apply { isAntiAlias = cornerRadius > NUMBER_ZERO }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            maskStaticLayout(view, rect, textPaint)
-        } else {
-            maskLineWrapping(view, rect, textPaint)
-        }
+        maskStaticLayout(view, rect, textPaint)
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     private fun maskStaticLayout(
         view: TextView,
         rect: Rect,

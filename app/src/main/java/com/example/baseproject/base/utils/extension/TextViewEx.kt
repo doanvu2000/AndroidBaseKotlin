@@ -8,16 +8,17 @@ import android.widget.TextView
 import androidx.annotation.FontRes
 import androidx.core.content.res.ResourcesCompat
 
+/**
+ * Update by doan.vv.dev
+ * since 02/12/2024
+ * */
+
 fun TextView.clear() {
     this.text = ""
 }
 
 fun TextView.setTextHtml(content: String) {
-    this.text = if (isSdkN()) {
-        Html.fromHtml(content, Html.FROM_HTML_MODE_COMPACT)
-    } else {
-        @Suppress("DEPRECATION") Html.fromHtml(content)
-    }
+    this.text = Html.fromHtml(content, Html.FROM_HTML_MODE_COMPACT)
 }
 
 fun TextView.setStrikeThrough(show: Boolean = true) {

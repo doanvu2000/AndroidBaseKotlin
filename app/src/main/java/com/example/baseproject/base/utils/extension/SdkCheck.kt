@@ -2,14 +2,6 @@ package com.example.baseproject.base.utils.extension
 
 import android.os.Build
 
-/** SDK 23 - M*/
-fun isSdk23() = isSdkM()
-fun isSdkM() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-
-/** SDK 24 - N*/
-fun isSdk24() = isSdkN()
-fun isSdkN() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
-
 /** SDK 26 - O*/
 fun isSdk26() = isSdkO()
 fun isSdkO() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O

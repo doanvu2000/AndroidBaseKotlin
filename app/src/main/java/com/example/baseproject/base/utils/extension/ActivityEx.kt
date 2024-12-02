@@ -56,11 +56,13 @@ fun Activity.setFullScreenMode(isFullScreen: Boolean = false) {
 
             if (controller != null) {
                 controller.hide(WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())
-                controller.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                controller.systemBarsBehavior =
+                    WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             }
         } else {
             @Suppress("DEPRECATION") window.setFlags(
-                WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN
+                WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN
             )
         }
     } else {
@@ -69,7 +71,8 @@ fun Activity.setFullScreenMode(isFullScreen: Boolean = false) {
 
             if (controller != null) {
                 controller.show(WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())
-                controller.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                controller.systemBarsBehavior =
+                    WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             }
         } else {
             @Suppress("DEPRECATION") window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
@@ -81,7 +84,12 @@ fun Activity.hideKeyboard() {
     hideKeyboard(currentFocus ?: View(this))
 }
 
-fun Activity.showSnackBar(msg: String, duration: Int = 500, isShowActionOK: Boolean = false, action: (() -> Unit)? = null) {
+fun Activity.showSnackBar(
+    msg: String,
+    duration: Int = 500,
+    isShowActionOK: Boolean = false,
+    action: (() -> Unit)? = null
+) {
     val view = window.decorView.findViewById<View>(android.R.id.content)
     view?.let {
         val snackBar = Snackbar.make(it, msg, duration)
@@ -202,7 +210,9 @@ fun Activity.checkDeviceHasFingerprint(): Boolean {
 
 @SuppressLint("UnspecifiedRegisterReceiverFlag")
 fun Activity.registerBroadcast(
-    broadcastReceiver: BroadcastReceiver, intentFilter: IntentFilter, listenToBroadcastsFromOtherApps: Boolean = false
+    broadcastReceiver: BroadcastReceiver,
+    intentFilter: IntentFilter,
+    listenToBroadcastsFromOtherApps: Boolean = false
 ) {
     if (isSdk33()) {
         val receiverFlags = if (listenToBroadcastsFromOtherApps) {
@@ -219,7 +229,8 @@ fun Activity.registerBroadcast(
 fun Activity.getScreenWidth(): Int {
     return if (isSdkR()) {
         val windowMetrics = windowManager.currentWindowMetrics
-        val insets = windowMetrics.windowInsets.getInsetsIgnoringVisibility(WindowInsets.Type.systemBars())
+        val insets =
+            windowMetrics.windowInsets.getInsetsIgnoringVisibility(WindowInsets.Type.systemBars())
         windowMetrics.bounds.width() - insets.left - insets.right
     } else {
         val displayMetrics = DisplayMetrics()
@@ -231,7 +242,8 @@ fun Activity.getScreenWidth(): Int {
 fun Activity.getScreenHeight(): Int {
     return if (isSdkR()) {
         val windowMetrics = windowManager.currentWindowMetrics
-        val insets = windowMetrics.windowInsets.getInsetsIgnoringVisibility(WindowInsets.Type.systemBars())
+        val insets =
+            windowMetrics.windowInsets.getInsetsIgnoringVisibility(WindowInsets.Type.systemBars())
         windowMetrics.bounds.height() - insets.top - insets.bottom
     } else {
         val displayMetrics = DisplayMetrics()
@@ -243,10 +255,16 @@ fun Activity.getScreenHeight(): Int {
 fun Activity.openWithSlide() {
     if (isSdk34()) {
         overrideActivityTransition(
-            OVERRIDE_TRANSITION_OPEN, R.anim.slide_in_right, R.anim.slide_out_left, Color.TRANSPARENT
+            OVERRIDE_TRANSITION_OPEN,
+            R.anim.slide_in_right,
+            R.anim.slide_out_left,
+            Color.TRANSPARENT
         )
     } else {
-        @Suppress("DEPRECATION") overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+        @Suppress("DEPRECATION") overridePendingTransition(
+            R.anim.slide_in_right,
+            R.anim.slide_out_left
+        )
     }
 }
 
@@ -258,14 +276,25 @@ fun Activity.finishWithSlide() {
     finish()
     if (isSdk34()) {
         overrideActivityTransition(
-            OVERRIDE_TRANSITION_CLOSE, R.anim.slide_in_left, R.anim.slide_out_right, Color.TRANSPARENT
+            OVERRIDE_TRANSITION_CLOSE,
+            R.anim.slide_in_left,
+            R.anim.slide_out_right,
+            Color.TRANSPARENT
         )
     } else {
-        @Suppress("DEPRECATION") overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+        @Suppress("DEPRECATION") overridePendingTransition(
+            R.anim.slide_in_left,
+            R.anim.slide_out_right
+        )
     }
 }
 
-fun AppCompatActivity.replaceFragment(frameId: Int, fragment: Fragment, addToBackStack: Boolean = true, bundle: Bundle? = null) {
+fun AppCompatActivity.replaceFragment(
+    frameId: Int,
+    fragment: Fragment,
+    addToBackStack: Boolean = true,
+    bundle: Bundle? = null
+) {
     bundle?.let {
         fragment.arguments = bundle
     }
@@ -283,7 +312,8 @@ fun AppCompatActivity.replaceFragmentNoAddBackStack(frameId: Int, fragment: Frag
 
 fun AppCompatActivity.replaceFragmentAddBackStack(frameId: Int, fragment: Fragment) {
     Log.d(Constants.TAG, "replaceFragment add backstack: ${fragment.javaClass.name}")
-    supportFragmentManager.beginTransaction().replace(frameId, fragment).addToBackStack(fragment.javaClass.name).commit()
+    supportFragmentManager.beginTransaction().replace(frameId, fragment)
+        .addToBackStack(fragment.javaClass.name).commit()
 }
 
 fun AppCompatActivity.removeFragment(fragment: Fragment) {
@@ -301,13 +331,9 @@ fun Activity.openExactAlarmSettingPage() {
  * requestOpenWriteSettingLauncher is registerForActivityResultLauncher
  * */
 fun Activity.openManageWriteSetting() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        val intent = Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS)
-        intent.data = Uri.parse("package:$packageName")
+    val intent = Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS)
+    intent.data = Uri.parse("package:$packageName")
 //        requestOpenWriteSettingLauncher.launch(intent)
-    } else {
-//        TODO("VERSION.SDK_INT < M")
-    }
 
 }
 
@@ -316,13 +342,9 @@ fun Activity.openManageWriteSetting() {
  * requestOpenSettingLauncher is registerForActivityResultLauncher
  * */
 fun Activity.openSettingOverlay() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
-        intent.data = Uri.fromParts("package", packageName, null as String?)
+    val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+    intent.data = Uri.fromParts("package", packageName, null as String?)
 //        requestOpenSettingLauncher.launch(intent)
-    } else {
-//        TODO("VERSION.SDK_INT < M")
-    }
 
 }
 
@@ -342,15 +364,11 @@ fun Activity.setDefaultPhoneApp() {
             }
         }
     } else {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val intent1 = Intent(TelecomManager.ACTION_CHANGE_DEFAULT_DIALER)
-            intent1.putExtra(
-                TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME, this.packageName
-            )
+        val intent1 = Intent(TelecomManager.ACTION_CHANGE_DEFAULT_DIALER)
+        intent1.putExtra(
+            TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME, this.packageName
+        )
 //        startChangeDefaultDialler.launch(intent1)
-        } else {
-//            TODO("VERSION.SDK_INT < M")
-        }
     }
 }
 
@@ -384,7 +402,10 @@ fun AppCompatActivity.delayBeforeAction(timeDelay: Long = 300, action: () -> Uni
     }
 }
 
-fun AppCompatActivity.launchWitCoroutine(dispatcher: CoroutineContext = Dispatchers.Main, action: () -> Unit) {
+fun AppCompatActivity.launchWitCoroutine(
+    dispatcher: CoroutineContext = Dispatchers.Main,
+    action: () -> Unit
+) {
     lifecycleScope.launch(dispatcher) {
         action()
     }
@@ -395,6 +416,7 @@ fun AppCompatActivity.downloadAudio(
 ) {
     DownloadUtil.downloadAudio(lifecycleScope, cacheDir, fileName, src, timeDelay, onDone, onFail)
 }
+
 fun Activity.gotoDetailSetting() {
     val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
     intent.data = Uri.parse("package:$packageName")
