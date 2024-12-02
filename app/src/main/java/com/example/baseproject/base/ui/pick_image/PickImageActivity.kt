@@ -11,17 +11,15 @@ import android.view.LayoutInflater
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.Companion.isPhotoPickerAvailable
-import androidx.exifinterface.media.ExifInterface
 import com.example.baseproject.base.base_view.BaseActivity
 import com.example.baseproject.base.dialog.DialogNeedPermission
 import com.example.baseproject.base.utils.extension.READ_EXTERNAL_STORAGE
-import com.example.baseproject.base.utils.extension.flip
 import com.example.baseproject.base.utils.extension.getOrientationImage
 import com.example.baseproject.base.utils.extension.hasReadPermissionBelowQ
 import com.example.baseproject.base.utils.extension.isNeedRotateOrFlipImage
 import com.example.baseproject.base.utils.extension.isSdkR
 import com.example.baseproject.base.utils.extension.loadSrcNoCache
-import com.example.baseproject.base.utils.extension.rotate
+import com.example.baseproject.base.utils.extension.modifyOrientation
 import com.example.baseproject.base.utils.util.Constants
 import com.example.baseproject.base.utils.util.delayResetFlagPermission
 import com.example.baseproject.databinding.ActivityPickImageBinding
@@ -192,19 +190,7 @@ class PickImageActivity : BaseActivity<ActivityPickImageBinding>() {
             originalBitmap = BitmapFactory.decodeStream(inputStream)
 
             originalBitmap?.let { bitmap ->
-                originalBitmap = when (orientationUri) {
-                    ExifInterface.ORIENTATION_ROTATE_90 -> bitmap.rotate(90f)
-
-                    ExifInterface.ORIENTATION_ROTATE_180 -> bitmap.rotate(180f)
-
-                    ExifInterface.ORIENTATION_ROTATE_270 -> bitmap.rotate(270f)
-
-                    ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> bitmap.flip(flipXAxis = true)
-
-                    ExifInterface.ORIENTATION_FLIP_VERTICAL -> bitmap.flip(flipXAxis = false)
-
-                    else -> originalBitmap
-                }
+                originalBitmap = bitmap.modifyOrientation(orientationUri)
                 originalBitmap?.let {
                     binding.imgPick.loadSrcNoCache(it)
                 }

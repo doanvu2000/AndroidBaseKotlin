@@ -613,5 +613,27 @@ fun modifyOrientation(bitmap: Bitmap, inputStream: InputStream): Bitmap {
     }
 }
 
+fun Bitmap.modifyOrientation(orientation: Int?): Bitmap {
+    try {
+        return when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> this.rotate(90f)
+
+            ExifInterface.ORIENTATION_ROTATE_180 -> this.rotate(180f)
+
+            ExifInterface.ORIENTATION_ROTATE_270 -> this.rotate(270f)
+
+            ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> this.flip(true)
+
+            ExifInterface.ORIENTATION_FLIP_VERTICAL -> this.flip(false)
+
+            else -> this
+        }
+    } catch (e: Exception) {
+        Log.e(Constants.TAG, "modifyOrientation: ${e.message}")
+        e.printStackTrace()
+        return this
+    }
+}
+
 fun Context.getBitmapFromAsset(path: String): Bitmap =
     assets.open(path).use { BitmapFactory.decodeStream(it) }
