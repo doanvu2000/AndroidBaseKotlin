@@ -1,9 +1,12 @@
 package com.example.baseproject.base.utils.extension
 
+import android.graphics.Color
 import android.graphics.Paint
 import android.text.Html
 import android.widget.EditText
 import android.widget.TextView
+import androidx.annotation.FontRes
+import androidx.core.content.res.ResourcesCompat
 
 fun TextView.clear() {
     this.text = ""
@@ -54,3 +57,35 @@ fun EditText.clear() {
 
 val EditText.value
     get() = text?.toString() ?: ""
+
+fun TextView.setFont(@FontRes fontId: Int) {
+    val font = ResourcesCompat.getFont(context, fontId)
+    this.typeface = font
+}
+
+enum class TextShadowEnum {
+    None,
+    Center,
+    TopRight,
+    BottomRight
+}
+
+fun TextView.setShadow(textShadowEnum: TextShadowEnum) {
+    when (textShadowEnum) {
+        TextShadowEnum.None -> {
+            setShadowLayer(0f, 0f, 0f, Color.parseColor("#00000000"))
+        }
+
+        TextShadowEnum.Center -> {
+            setShadowLayer(3f, 4f, 10f, Color.parseColor("#4D000000"))
+        }
+
+        TextShadowEnum.TopRight -> {
+            setShadowLayer(3f, 8f, -8f, Color.parseColor("#4D000000"))
+        }
+
+        TextShadowEnum.BottomRight -> {
+            setShadowLayer(3f, 8f, 8f, Color.parseColor("#4D000000"))
+        }
+    }
+}

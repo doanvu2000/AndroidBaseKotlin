@@ -7,6 +7,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import com.example.baseproject.BuildConfig
+import com.example.baseproject.base.utils.extension.isDebugMode
 import com.example.baseproject.base.utils.util.Constant
 import com.example.baseproject.databinding.LayoutNativeAds2Binding
 import com.google.android.gms.ads.AdListener
@@ -22,10 +23,14 @@ object NativeAdsUtil {
     private const val NATIVE_ID_TEST_VIDEO = BuildConfig.ADS_NATIVE_TEST_VIDEO
     private const val NATIVE_ID_1 = BuildConfig.ADS_NATIVE_ID1
     private const val NATIVE_ID_2 = BuildConfig.ADS_NATIVE_ID2
-    fun loadNativeAds(context: Context, loadSuccess: (nativeAd: NativeAd?) -> Unit, loadFailed: () -> Unit) {
+    fun loadNativeAds(
+        context: Context,
+        loadSuccess: (nativeAd: NativeAd?) -> Unit,
+        loadFailed: () -> Unit
+    ) {
         var nativeAd: NativeAd? = null
         val adLoader: AdLoader?
-        val id = if (BuildConfig.DEBUG) {
+        val id = if (isDebugMode()) {
             NATIVE_ID_TEST
         } else {
             NATIVE_ID_1
@@ -50,11 +55,15 @@ object NativeAdsUtil {
         adLoader.loadAd(AdRequest.Builder().build())
     }
 
-    fun reloadNativeAdWithId2(context: Context, loadSuccess: (nativeAd: NativeAd?) -> Unit, loadFailed: () -> Unit) {
+    fun reloadNativeAdWithId2(
+        context: Context,
+        loadSuccess: (nativeAd: NativeAd?) -> Unit,
+        loadFailed: () -> Unit
+    ) {
         var nativeAd: NativeAd? = null
         var adLoader: AdLoader?
         Log.d(Constant.TAG, "loadAds2")
-        val id = if (BuildConfig.DEBUG) {
+        val id = if (isDebugMode()) {
             NATIVE_ID_TEST
         } else {
             NATIVE_ID_2
@@ -80,7 +89,11 @@ object NativeAdsUtil {
         adLoader?.loadAd(AdRequest.Builder().build())
     }
 
-    fun populateNativeAdView(nativeAd: NativeAd?, adView: NativeAdView, binding: LayoutNativeAds2Binding?) {
+    fun populateNativeAdView(
+        nativeAd: NativeAd?,
+        adView: NativeAdView,
+        binding: LayoutNativeAds2Binding?
+    ) {
         if (nativeAd != null) {
             adView.mediaView = binding?.adMedia
             adView.headlineView = binding?.adHeadLine

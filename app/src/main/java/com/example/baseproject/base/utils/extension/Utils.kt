@@ -9,11 +9,17 @@ import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Matrix
+import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.Parcelable
 import android.provider.OpenableColumns
+import android.view.PixelCopy
+import android.view.View
+import android.view.Window
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.FileProvider
 import androidx.core.os.LocaleListCompat
@@ -341,5 +347,33 @@ fun clickStatic(action: () -> Unit) {
     if (readyClickStatic) {
         delayClickStatic()
         action()
+    }
+}
+
+fun captureView(view: View, window: Window, bitmapCallback: (Bitmap) -> Unit) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        // Above Android O, use PixelCopy
+        val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+        val location = IntArray(2)
+        view.getLocationInWindow(location)
+        PixelCopy.request(
+            window,
+            Rect(location[0], location[1], location[0] + view.width, location[1] + view.height),
+            bitmap,
+            {
+                if (it == PixelCopy.SUCCESS) {
+                    bitmapCallback.invoke(bitmap)
+                }
+            },
+            Handler(Looper.getMainLooper())
+        )
+    } else {
+        val tBitmap = Bitmap.createBitmap(
+            view.width, view.height, Bitmap.Config.RGB_565
+        )
+        val canvas = Canvas(tBitmap)
+        view.draw(canvas)
+        canvas.setBitmap(null)
+        bitmapCallback.invoke(tBitmap)
     }
 }

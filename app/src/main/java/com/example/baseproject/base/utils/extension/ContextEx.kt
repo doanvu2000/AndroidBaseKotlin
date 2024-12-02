@@ -10,12 +10,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageInfo
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.icu.text.MeasureFormat
 import android.icu.util.Measure
 import android.icu.util.MeasureUnit
 import android.location.Location
 import android.location.LocationManager
+import android.media.ExifInterface
 import android.media.Ringtone
 import android.media.RingtoneManager
 import android.net.ConnectivityManager
@@ -25,6 +27,7 @@ import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -44,6 +47,7 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.example.baseproject.BuildConfig
 import com.example.baseproject.R
+import com.example.baseproject.base.utils.util.Constant
 import com.example.baseproject.base.utils.util.ImageUtil
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
@@ -52,6 +56,7 @@ import com.google.android.play.core.review.ReviewException
 import com.google.android.play.core.review.ReviewManagerFactory
 import com.google.android.play.core.review.model.ReviewErrorCode
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
 import java.util.UUID
@@ -125,7 +130,12 @@ fun Context.openActivity(pClass: Class<out Activity>, isFinish: Boolean = false,
     }
 }
 
-fun Context.openActivity(pClass: Class<out Activity>, isFinish: Boolean = false, isAnimation: Boolean = false, bundle: Bundle?) {
+fun Context.openActivity(
+    pClass: Class<out Activity>,
+    isFinish: Boolean = false,
+    isAnimation: Boolean = false,
+    bundle: Bundle?
+) {
     openActivity(pClass, bundle)
     if (isAnimation) {
         (this as Activity).openWithSlide()
@@ -198,7 +208,8 @@ fun Context.rateApp() {
     } catch (e: ActivityNotFoundException) {
         startActivity(
             Intent(
-                Intent.ACTION_VIEW, Uri.parse("http://play.google.com/store/apps/details?id=$packageName")
+                Intent.ACTION_VIEW,
+                Uri.parse("http://play.google.com/store/apps/details?id=$packageName")
             )
         )
     }
@@ -228,9 +239,9 @@ fun Context.isNetworkAvailable(): Boolean {
     val manager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val capabilities = manager.getNetworkCapabilities(manager.activeNetwork)
     return if (capabilities != null) {
-        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
-                || capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
-                || capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) || capabilities.hasTransport(
+            NetworkCapabilities.TRANSPORT_WIFI
+        ) || capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
     } else false
 }
 
@@ -303,12 +314,14 @@ fun Context.saveImageToLocal(bitmap: Bitmap, result: (Boolean) -> Unit) {
         showToast("No have permission to write file")
         return
     }
-    val resultSaveImage = ImageUtil.savePhotoToExternalStorage(contentResolver, UUID.randomUUID().toString(), bitmap)
+    val resultSaveImage =
+        ImageUtil.savePhotoToExternalStorage(contentResolver, UUID.randomUUID().toString(), bitmap)
     result.invoke(resultSaveImage)
 }
 
 fun getPromptInfo(title: String, subtitle: String, negativeButtonText: String) =
-    BiometricPrompt.PromptInfo.Builder().setTitle(title).setSubtitle(subtitle).setNegativeButtonText(negativeButtonText).build()
+    BiometricPrompt.PromptInfo.Builder().setTitle(title).setSubtitle(subtitle)
+        .setNegativeButtonText(negativeButtonText).build()
 
 val biometricCall = object : BiometricPrompt.AuthenticationCallback() {
 
@@ -345,8 +358,9 @@ fun Context.getColorByIdWithTheme(colorAttr: Int): Int {
 }
 
 fun Context.serviceIsRunning(serviceClass: Class<*>): Boolean {
-    @Suppress("DEPRECATION") return (getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).getRunningServices(Int.MAX_VALUE)
-        .any { serviceClass.name == it.service.className }
+    @Suppress("DEPRECATION") return (getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).getRunningServices(
+        Int.MAX_VALUE
+    ).any { serviceClass.name == it.service.className }
 }
 
 fun Context.getVersionName(): String {
@@ -419,22 +433,16 @@ fun Context.shareFileGif(file: File) {
     startActivity(Intent.createChooser(shareIntent, "Share File"))
 }
 
-fun Context.shareFileImage(file: File, title: String? = "") {
-    val uri = getUriByFileProvider(file)
-    val typeImage = "image/jpeg"
-    val shareIntent = Intent(Intent.ACTION_SEND)
-    shareIntent.apply {
-        type = "image/$typeImage" // Set the MIME type for images
-        putExtra(Intent.EXTRA_STREAM, uri)
-        // Optionally, add a subject or text to the shared content
-        putExtra(Intent.EXTRA_SUBJECT, title)
-        putExtra(Intent.EXTRA_TEXT, title)
-    }
-    startActivity(Intent.createChooser(shareIntent, "Share $title"))
-}
-
+/**
+ * get bitmap online by glide
+ * update: 04/11/2024
+ * by: doan-vu.dev
+ * */
 fun Context.downloadBitmapByUrl(
-    url: String, onProgressLoading: () -> Unit, onLoadedBitmap: (Bitmap) -> Unit, onLoadFailed: () -> Unit
+    url: String,
+    onProgressLoading: () -> Unit,
+    onLoadedBitmap: (Bitmap) -> Unit,
+    onLoadFailed: () -> Unit
 ) {
     val target = object : CustomTarget<Bitmap>() {
         override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
@@ -460,13 +468,16 @@ fun Context.downloadBitmapByUrl(
 
 fun Context.isGpsEnable(): Boolean {
     val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-    return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-            && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+    return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && locationManager.isProviderEnabled(
+        LocationManager.NETWORK_PROVIDER
+    )
 }
 
 @SuppressLint("MissingPermission")
 fun Context.getLocationUser(
-    onGetLocationComplete: ((location: Location) -> Unit)? = null, onMissingPermission: () -> Unit, onFail: (() -> Unit)? = null
+    onGetLocationComplete: ((location: Location) -> Unit)? = null,
+    onMissingPermission: () -> Unit,
+    onFail: (() -> Unit)? = null
 ) {
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
     if (!checkPermission(Manifest.permission.ACCESS_FINE_LOCATION) && !checkPermission(Manifest.permission.ACCESS_COARSE_LOCATION)) {
@@ -475,14 +486,15 @@ fun Context.getLocationUser(
         return
     }
     //check permission before get
-    fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, CancellationTokenSource().token)
-        .addOnSuccessListener { location: Location? ->
-            location?.let {
-                onGetLocationComplete?.invoke(it)
-            } ?: kotlin.run {
-                onFail?.invoke()
-            }
+    fusedLocationClient.getCurrentLocation(
+        Priority.PRIORITY_HIGH_ACCURACY, CancellationTokenSource().token
+    ).addOnSuccessListener { location: Location? ->
+        location?.let {
+            onGetLocationComplete?.invoke(it)
+        } ?: kotlin.run {
+            onFail?.invoke()
         }
+    }
 }
 
 fun Context.hasWriteSettingPermission(): Boolean {
@@ -533,10 +545,61 @@ fun Context.getAnimation(animationId: Int): Animation? {
 @RequiresApi(Build.VERSION_CODES.N)
 fun Context.isKilobyteBasedOn1000(): Boolean {
     val formatter = MeasureFormat.getInstance(
-        resources.configuration.locales[0],
-        MeasureFormat.FormatWidth.SHORT
+        resources.configuration.locales[0], MeasureFormat.FormatWidth.SHORT
     )
     val oneKilobyte = Measure(1, MeasureUnit.KILOBYTE)
     return formatter.format(oneKilobyte)
         .contains("1000") // Check if the formatted output contains "1000"
 }
+
+fun Context.getOrientationImage(uri: Uri): Int? {
+    try {
+        val inputStream: InputStream?
+        try {
+            inputStream = contentResolver.openInputStream(Uri.parse(uri.toString()))
+        } catch (e: FileNotFoundException) {
+            e.printStackTrace()
+            return null
+        }
+
+        inputStream?.let {
+            val ei = ExifInterface(inputStream)
+            return ei.getAttributeInt(
+                ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL
+            )
+        }
+    } catch (e: Exception) {
+        Log.e(Constant.TAG, "modifyOrientation: ${e.message}")
+        e.printStackTrace()
+        return null
+    }
+    return null
+}
+
+fun modifyOrientation(bitmap: Bitmap, inputStream: InputStream): Bitmap {
+    try {
+        val ei = ExifInterface(inputStream)
+        val orientation: Int =
+            ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+        return when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> bitmap.rotate(90f)
+
+            ExifInterface.ORIENTATION_ROTATE_180 -> bitmap.rotate(180f)
+
+            ExifInterface.ORIENTATION_ROTATE_270 -> bitmap.rotate(270f)
+
+            ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> bitmap.flip(true)
+
+            ExifInterface.ORIENTATION_FLIP_VERTICAL -> bitmap.flip(false)
+
+            else -> bitmap
+        }
+    } catch (e: Exception) {
+        Log.e(Constant.TAG, "modifyOrientation: ${e.message}")
+        e.printStackTrace()
+        return bitmap
+    }
+}
+
+fun Context.getBitmapFromAsset(path: String): Bitmap =
+    assets.open(path).use { BitmapFactory.decodeStream(it) }

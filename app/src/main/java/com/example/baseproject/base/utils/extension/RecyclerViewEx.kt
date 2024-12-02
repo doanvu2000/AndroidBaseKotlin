@@ -19,6 +19,12 @@ fun RecyclerView.setGridManager(
     }
 }
 
+fun RecyclerView.setLinearLayoutHorizontal(
+    context: Context, holderAdapter: RecyclerView.Adapter<*>
+) {
+    setLinearLayoutManager(context, holderAdapter, RecyclerView.HORIZONTAL)
+}
+
 fun RecyclerView.setLinearLayoutManager(
     context: Context, holderAdapter: RecyclerView.Adapter<*>, orientation: Int = RecyclerView.VERTICAL
 ) {

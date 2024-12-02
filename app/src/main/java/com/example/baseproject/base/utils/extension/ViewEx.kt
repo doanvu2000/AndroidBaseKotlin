@@ -198,6 +198,26 @@ fun SeekBar.setOnProgressChange(
     })
 }
 
+fun SeekBar.setListener(
+    onProgressChanged: ((seekBar: SeekBar?, progress: Int, fromUser: Boolean) -> Unit)? = null,
+    onStartTrackingTouch: ((seekBar: SeekBar?) -> Unit)? = null,
+    onStopTrackingTouch: ((seekBar: SeekBar?) -> Unit)? = null
+) {
+    setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+            onProgressChanged?.invoke(seekBar, progress, fromUser)
+        }
+
+        override fun onStartTrackingTouch(seekBar: SeekBar?) {
+            onStartTrackingTouch?.invoke(seekBar)
+        }
+
+        override fun onStopTrackingTouch(seekBar: SeekBar?) {
+            onStopTrackingTouch?.invoke(seekBar)
+        }
+    })
+}
+
 fun MaterialCardView.removeShadow() {
     this.cardElevation = 0f
 }
@@ -244,4 +264,29 @@ fun SeekBar.setTrackSrc(@DrawableRes drawable: Int) {
 fun SeekBar.setThumbSrc(@DrawableRes drawable: Int) {
     val thumbDrawable = ResourcesCompat.getDrawable(resources, drawable, null)
     thumb = thumbDrawable
+}
+
+@SuppressLint("ClickableViewAccessibility")
+fun View.setOnTouchAction(
+    isDisableClick: Boolean = false,
+    onDownAction: (() -> Unit)? = null,
+    onUpAction: (() -> Unit)? = null,
+    onMoveAction: (() -> Unit)? = null
+) {
+    setOnTouchListener { _, event ->
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                onDownAction?.invoke()
+            }
+
+            MotionEvent.ACTION_UP -> {
+                onUpAction?.invoke()
+            }
+
+            MotionEvent.ACTION_MOVE -> {
+                onMoveAction?.invoke()
+            }
+        }
+        isDisableClick
+    }
 }

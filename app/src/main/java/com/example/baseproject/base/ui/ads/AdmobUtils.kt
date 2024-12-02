@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.example.baseproject.BuildConfig
 import com.example.baseproject.base.utils.extension.getAdSizeFollowScreen
+import com.example.baseproject.base.utils.extension.isDebugMode
 import com.example.baseproject.base.utils.extension.removeSelf
 import com.example.baseproject.base.utils.util.Constant
 import com.google.ads.mediation.admob.AdMobAdapter
@@ -39,7 +40,8 @@ class AdmobUtils constructor(val context: Activity) {
         }
         val testDevices: MutableList<String> = ArrayList()
         testDevices.add(AdRequest.DEVICE_ID_EMULATOR)
-        val requestConfiguration = RequestConfiguration.Builder().setTestDeviceIds(testDevices).build()
+        val requestConfiguration =
+            RequestConfiguration.Builder().setTestDeviceIds(testDevices).build()
         MobileAds.setRequestConfiguration(requestConfiguration)
         Log.d(TAG, "Test device: " + MobileAds.getRequestConfiguration().testDeviceIds)
         adRequest = AdRequest.Builder().build()
@@ -56,7 +58,7 @@ class AdmobUtils constructor(val context: Activity) {
             AdRequest.Builder().build()
         }
         var adUnit = BuildConfig.ADS_ADMOB_BANNER
-        if (BuildConfig.DEBUG) {
+        if (isDebugMode()) {
             adUnit = ADS_BANNER_TEST
         }
         adView = AdView(activity)
@@ -98,7 +100,7 @@ class AdmobUtils constructor(val context: Activity) {
             AdRequest.Builder().build()
         }
         var adUnit = BuildConfig.ADS_ADMOB_BANNER
-        if (BuildConfig.DEBUG) {
+        if (isDebugMode()) {
             adUnit = ADS_BANNER_TEST
         }
         val adView = AdView(activity)
@@ -127,7 +129,7 @@ class AdmobUtils constructor(val context: Activity) {
     ) {
         val adRequest: AdRequest = AdRequest.Builder().build()
         var adUnit = BuildConfig.ADS_ADMOB_BANNER
-        if (BuildConfig.DEBUG) {
+        if (isDebugMode()) {
             adUnit = "ca-app-pub-3940256099942544/6300978111"
         }
         val adView = AdView(activity)
@@ -158,7 +160,7 @@ class AdmobUtils constructor(val context: Activity) {
         if (mInterstitialAd != null) {
             return
         }
-        val adUnit = if (BuildConfig.DEBUG) {
+        val adUnit = if (isDebugMode()) {
             ADS_INTER_TEST
         } else {
             BuildConfig.ADS_ADMOB_INTER_ID1
@@ -183,7 +185,7 @@ class AdmobUtils constructor(val context: Activity) {
         if (mInterstitialAd != null) {
             return
         }
-        val adUnit = if (BuildConfig.DEBUG) {
+        val adUnit = if (isDebugMode()) {
             ADS_INTER_TEST
         } else {
             BuildConfig.ADS_ADMOB_INTER_ID2
