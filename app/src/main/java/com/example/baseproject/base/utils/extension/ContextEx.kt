@@ -576,6 +576,18 @@ fun Context.getOrientationImage(uri: Uri): Int? {
     return null
 }
 
+fun Int?.isNeedRotateOrFlipImage(): Boolean {
+    val exifList = listOf(
+        androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_90,
+        androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_180,
+        androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_270,
+        androidx.exifinterface.media.ExifInterface.ORIENTATION_FLIP_HORIZONTAL,
+        androidx.exifinterface.media.ExifInterface.ORIENTATION_FLIP_VERTICAL
+    )
+
+    return exifList.contains(this)
+}
+
 fun modifyOrientation(bitmap: Bitmap, inputStream: InputStream): Bitmap {
     try {
         val ei = ExifInterface(inputStream)

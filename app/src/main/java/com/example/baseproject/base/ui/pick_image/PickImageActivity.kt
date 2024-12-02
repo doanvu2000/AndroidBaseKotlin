@@ -18,6 +18,7 @@ import com.example.baseproject.base.utils.extension.READ_EXTERNAL_STORAGE
 import com.example.baseproject.base.utils.extension.flip
 import com.example.baseproject.base.utils.extension.getOrientationImage
 import com.example.baseproject.base.utils.extension.hasReadPermissionBelowQ
+import com.example.baseproject.base.utils.extension.isNeedRotateOrFlipImage
 import com.example.baseproject.base.utils.extension.isSdkR
 import com.example.baseproject.base.utils.extension.loadSrcNoCache
 import com.example.baseproject.base.utils.extension.rotate
@@ -174,7 +175,7 @@ class PickImageActivity : BaseActivity<ActivityPickImageBinding>() {
         }
         val uri = uriPhoto!!
 
-        if (!isNeedRotateOrFlipImage()) {
+        if (!orientationUri.isNeedRotateOrFlipImage()) {
             binding.imgPick.loadSrcNoCache(uri)
             return
         }
@@ -209,17 +210,5 @@ class PickImageActivity : BaseActivity<ActivityPickImageBinding>() {
                 }
             }
         }
-    }
-
-    private fun isNeedRotateOrFlipImage(): Boolean {
-        val exifList = listOf(
-            ExifInterface.ORIENTATION_ROTATE_90,
-            ExifInterface.ORIENTATION_ROTATE_180,
-            ExifInterface.ORIENTATION_ROTATE_270,
-            ExifInterface.ORIENTATION_FLIP_HORIZONTAL,
-            ExifInterface.ORIENTATION_FLIP_VERTICAL
-        )
-
-        return exifList.contains(orientationUri)
     }
 }
