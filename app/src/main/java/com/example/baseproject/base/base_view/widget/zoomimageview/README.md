@@ -10,14 +10,6 @@ Supports
 - Fling to pan
 - Swipe to dismiss
 
-![Double tap](media/double_tap.gif)
-&nbsp;&nbsp;
-![Pinch to zoom](media/pinch.gif)
-&nbsp;&nbsp;  
-![Pan](media/pan.gif)
-&nbsp;&nbsp;
-![Swipe to dismiss](media/swipe_dismiss.gif)
-
 ## Implementation
 
 ### Extends the standard `AppCompatImageView` api with a few minor additions
