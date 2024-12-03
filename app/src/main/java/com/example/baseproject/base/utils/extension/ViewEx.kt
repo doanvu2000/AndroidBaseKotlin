@@ -15,17 +15,20 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.SeekBar
 import androidx.annotation.DrawableRes
 import androidx.core.content.res.ResourcesCompat
+import com.base.stickerview.StickerImageView
 import com.example.baseproject.R
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.tabs.TabLayout
 
 fun View.hideKeyboard() {
-    val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    val inputMethodManager =
+        context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     inputMethodManager.hideSoftInputFromWindow(windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
 }
 
 fun View.showKeyboard() {
-    val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    val inputMethodManager =
+        context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     inputMethodManager.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
 }
 
@@ -289,4 +292,8 @@ fun View.setOnTouchAction(
         }
         isDisableClick
     }
+}
+
+fun StickerImageView.loadSrc(src: Any) {
+    ivMain?.loadSrc(src)
 }

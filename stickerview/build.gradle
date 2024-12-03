@@ -1,10 +1,10 @@
 plugins {
-    id 'com.android.library'
-    id 'org.jetbrains.kotlin.android'
+    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.jetbrainsKotlinAndroid)
 }
 
 android {
-    namespace 'com.demo.skeleton'
+    namespace 'com.base.stickerview'
     compileSdk 34
 
     defaultConfig {
@@ -37,6 +37,4 @@ dependencies {
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
-
-    implementation(libs.shimmer)
 }

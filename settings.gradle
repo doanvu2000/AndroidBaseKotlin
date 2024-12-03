@@ -18,3 +18,4 @@ rootProject.name = "BaseProject"
 include ':app'
 include ':skeleton'
 include ':sliderview'
+include ':stickerview'

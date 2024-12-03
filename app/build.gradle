@@ -70,6 +70,7 @@ android {
 dependencies {
     implementation project(':skeleton')
     implementation project(':sliderview')
+    implementation project(':stickerview')
 
     implementation libs.core.ktx
     implementation libs.appcompat

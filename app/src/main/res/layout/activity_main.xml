@@ -6,118 +6,127 @@
     android:orientation="vertical"
     tools:context=".base.ui.main.MainActivity">
 
-    <com.example.baseproject.base.base_view.widget.imageviewdetect.ImageViewDetect
-        android:layout_width="100dp"
-        android:layout_height="100dp" />
-
-    <Button
-        android:id="@+id/btnOpenFragment"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:text="open-fragment"
-        tools:ignore="MissingConstraints" />
-
-    <Button
-        android:id="@+id/btnRemoveFragment"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:text="remove fragment" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnDemoViewPager"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:backgroundTint="@color/teal_200"
-        android:text="ViewPager" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnDemoLocation"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:backgroundTint="@color/teal_200"
-        android:text="Location" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnDemoAds"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:backgroundTint="@color/teal_200"
-        android:text="Ads mob" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnTestCoilLib"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:backgroundTint="@color/teal_200"
-        android:text="Test Coil lib" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnFlexBoxManager"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:backgroundTint="@color/teal_200"
-        android:text="FlexBoxManager" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnPickImage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:backgroundTint="@color/teal_200"
-        android:text="Pick Image from device" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnCameraTakePicture"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:backgroundTint="@color/teal_200"
-        android:text="Take picture from camera" />
-
-    <EditText
-        android:id="@+id/edtNumberSize"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:hint="Enter list size"
-        android:inputType="number"
-        android:textColor="@color/black"
-        android:textSize="20dp"
-        android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/tvTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:textColor="@color/black"
-        android:textSize="20dp"
-        tools:text="abc" />
-
-    <TextView
-        android:id="@+id/tvResult"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:textColor="@color/black"
-        android:textSize="20dp"
-        tools:text="abc" />
-
-    <ProgressBar
-        android:id="@+id/loading"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone" />
-
-    <FrameLayout
-        android:id="@+id/frameContainer"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/btnOpenFragment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="open-fragment"
+                tools:ignore="MissingConstraints" />
+
+            <Button
+                android:id="@+id/btnRemoveFragment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="remove fragment" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDemoViewPager"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:backgroundTint="@color/teal_200"
+                android:text="ViewPager" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDemoLocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:backgroundTint="@color/teal_200"
+                android:text="Location" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDemoAds"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:backgroundTint="@color/teal_200"
+                android:text="Ads mob" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnTestCoilLib"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:backgroundTint="@color/teal_200"
+                android:text="Test Coil lib" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnFlexBoxManager"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:backgroundTint="@color/teal_200"
+                android:text="FlexBoxManager" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPickImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:backgroundTint="@color/teal_200"
+                android:text="Pick Image from device" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCameraTakePicture"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:backgroundTint="@color/teal_200"
+                android:text="Take picture from camera" />
+
+            <EditText
+                android:id="@+id/edtNumberSize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:hint="Enter list size"
+                android:inputType="number"
+                android:textColor="@color/black"
+                android:textSize="20dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:textColor="@color/black"
+                android:textSize="20dp"
+                tools:text="abc" />
+
+            <TextView
+                android:id="@+id/tvResult"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:textColor="@color/black"
+                android:textSize="20dp"
+                tools:text="abc" />
+
+            <ProgressBar
+                android:id="@+id/loading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+
+            <FrameLayout
+                android:id="@+id/frameContainer"
+                android:layout_width="match_parent"
+                android:layout_height="500dp" />
+        </LinearLayout>
+    </ScrollView>
+
 </LinearLayout>
