@@ -167,11 +167,7 @@ fun <K : Parcelable> pushParcelableBundle(k: K): Bundle {
 }
 
 fun Int.getFlagPendingIntent(): Int {
-    return if (isSdk23()) {
-        PendingIntent.FLAG_IMMUTABLE or this
-    } else {
-        this
-    }
+    return PendingIntent.FLAG_IMMUTABLE or this
 }
 
 fun setDarkMode(enable: Boolean = false) {

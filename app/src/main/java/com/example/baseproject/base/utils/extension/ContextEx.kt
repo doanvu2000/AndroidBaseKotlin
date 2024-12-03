@@ -24,7 +24,6 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.BatteryManager
-import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
@@ -39,7 +38,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
-import androidx.annotation.RequiresApi
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -238,7 +236,6 @@ fun Context.getRingTone(): Ringtone {
     return RingtoneManager.getRingtone(this, defaultRingtoneUri)
 }
 
-@RequiresApi(Build.VERSION_CODES.M)
 fun Context.isNetworkAvailable(): Boolean {
     val manager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val capabilities = manager.getNetworkCapabilities(manager.activeNetwork)
@@ -253,32 +250,15 @@ fun Context.isNetworkAvailable(): Boolean {
  * require declare permission ACCESS_NETWORK_STATE in Manifest
  * */
 fun Context.isInternetAvailable(): Boolean {
-    var result = false
     val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    if (isSdkM()) {
-        val networkCapabilities = connectivityManager.activeNetwork ?: return false
-        val actNw = connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return false
-        result = when {
-            actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-            actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-            actNw.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
-            else -> false
-        }
-    } else {
-        @Suppress("DEPRECATION") connectivityManager.run {
-            connectivityManager.activeNetworkInfo?.run {
-                result = when (type) {
-                    ConnectivityManager.TYPE_WIFI -> true
-                    ConnectivityManager.TYPE_MOBILE -> true
-                    ConnectivityManager.TYPE_ETHERNET -> true
-                    else -> false
-                }
-
-            }
-        }
+    val networkCapabilities = connectivityManager.activeNetwork ?: return false
+    val actNw = connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return false
+    return when {
+        actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+        actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+        actNw.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
+        else -> false
     }
-
-    return result
 }
 
 fun Context.showToast(msg: String, isShowDurationLong: Boolean = false) {
@@ -502,19 +482,11 @@ fun Context.getLocationUser(
 }
 
 fun Context.hasWriteSettingPermission(): Boolean {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        Settings.System.canWrite(this)
-    } else {
-        false
-    }
+    return Settings.System.canWrite(this)
 }
 
 fun Context.hasOverlaySettingPermission(): Boolean {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        Settings.canDrawOverlays(this)
-    } else {
-        false
-    }
+    return Settings.canDrawOverlays(this)
 }
 
 fun Context.hasAnswerCallComing(): Boolean {
@@ -546,7 +518,6 @@ fun Context.getAnimation(animationId: Int): Animation? {
 /**
  * determine the conversion convention for kilobytes (1000 or 1024) by locale
  * */
-@RequiresApi(Build.VERSION_CODES.N)
 fun Context.isKilobyteBasedOn1000(): Boolean {
     val formatter = MeasureFormat.getInstance(
         resources.configuration.locales[0], MeasureFormat.FormatWidth.SHORT

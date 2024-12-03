@@ -82,7 +82,7 @@ internal class MainSkeletonLoader(
         val skeletonDelegate = delegateService.createSkeletonDelegate(
             skeleton, targetDelegate, lifecycle, mainDispatcher, deferred
         )
-        deferred.invokeOnCompletion { throwable ->
+        deferred.invokeOnCompletion {
             loaderScope.launch(Dispatchers.Main.immediate) { skeletonDelegate.onComplete() }
         }
         deferred.await()

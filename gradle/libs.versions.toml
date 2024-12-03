@@ -26,6 +26,7 @@ retrofit = "2.11.0"
 review = "2.0.2"
 activity = "1.9.3"
 lifecycleProcess = "2.8.6"
+shimmer = "0.5.0"
 [libraries]
 appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 biometric-ktx = { module = "androidx.biometric:biometric-ktx", version.ref = "biometricKtx" }
@@ -59,6 +60,7 @@ review = { module = "com.google.android.play:review", version.ref = "review" }
 review-ktx = { module = "com.google.android.play:review-ktx", version.ref = "review" }
 activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "lifecycleProcess" }
+shimmer = { module = "com.facebook.shimmer:shimmer", version.ref = "shimmer" }
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
