@@ -133,7 +133,9 @@ class PickImageActivity : BaseActivity<ActivityPickImageBinding>() {
 
     private val requestReadPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGrant ->
-            if (!isGrant) {
+            if (isGrant) {
+                pickImageQAndBelow()
+            } else {
                 //show dialog require
                 showDialogRequiredPermission()
             }
@@ -161,7 +163,7 @@ class PickImageActivity : BaseActivity<ActivityPickImageBinding>() {
     private val requestOpenSettingReadPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             delayResetFlagPermission()
-            if (hasReadPermissionBelowQ()) {
+            if (!hasReadPermissionBelowQ()) {
                 showDialogRequiredPermission()
             }
         }

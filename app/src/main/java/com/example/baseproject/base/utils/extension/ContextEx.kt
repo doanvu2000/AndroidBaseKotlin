@@ -26,6 +26,7 @@ import android.net.Uri
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.provider.Settings
 import android.util.Log
 import android.util.TypedValue
@@ -59,6 +60,9 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.UUID
 
 
@@ -593,19 +597,7 @@ fun modifyOrientation(bitmap: Bitmap, inputStream: InputStream): Bitmap {
         val ei = ExifInterface(inputStream)
         val orientation: Int =
             ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
-        return when (orientation) {
-            ExifInterface.ORIENTATION_ROTATE_90 -> bitmap.rotate(90f)
-
-            ExifInterface.ORIENTATION_ROTATE_180 -> bitmap.rotate(180f)
-
-            ExifInterface.ORIENTATION_ROTATE_270 -> bitmap.rotate(270f)
-
-            ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> bitmap.flip(true)
-
-            ExifInterface.ORIENTATION_FLIP_VERTICAL -> bitmap.flip(false)
-
-            else -> bitmap
-        }
+        return bitmap.modifyOrientation(orientation)
     } catch (e: Exception) {
         Log.e(Constants.TAG, "modifyOrientation: ${e.message}")
         e.printStackTrace()
@@ -637,3 +629,13 @@ fun Bitmap.modifyOrientation(orientation: Int?): Bitmap {
 
 fun Context.getBitmapFromAsset(path: String): Bitmap =
     assets.open(path).use { BitmapFactory.decodeStream(it) }
+
+fun Context.createImageFile(): File {
+    val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+    val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+    return File.createTempFile(
+        "JPEG_${timeStamp}_",
+        ".jpg",
+        storageDir
+    )
+}

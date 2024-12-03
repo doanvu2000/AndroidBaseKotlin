@@ -26,5 +26,10 @@ const val POST_NOTIFICATION = android.Manifest.permission.POST_NOTIFICATIONS
 const val ACCESS_COARSE_LOCATION = android.Manifest.permission.ACCESS_COARSE_LOCATION
 const val ACCESS_FINE_LOCATION = android.Manifest.permission.ACCESS_FINE_LOCATION
 
+const val CAMERA_PERMISSION = android.Manifest.permission.CAMERA
+
 fun Context.hasReadPermissionBelowQ() = checkPermission(READ_EXTERNAL_STORAGE)
 fun Fragment.hasReadPermissionBelowQ() = requireContext().hasReadPermissionBelowQ()
+
+fun Context.hasCameraPermission() = checkPermission(CAMERA_PERMISSION)
+fun Fragment.hasCameraPermission() = requireContext().hasCameraPermission()

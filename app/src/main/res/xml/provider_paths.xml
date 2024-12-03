@@ -6,4 +6,8 @@
     <cache-path
         name="image_share"
         path="." />
+
+    <external-path
+        name="my_images"
+        path="Pictures" />
 </paths>

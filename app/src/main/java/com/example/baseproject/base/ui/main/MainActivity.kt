@@ -14,6 +14,7 @@ import com.example.baseproject.base.ui.demo_viewpager.DemoViewPagerActivity
 import com.example.baseproject.base.ui.flex_box_layout.DemoFlexBoxLayoutActivity
 import com.example.baseproject.base.ui.location.LocationActivity
 import com.example.baseproject.base.ui.pick_image.PickImageActivity
+import com.example.baseproject.base.ui.pick_image.TakePictureActivity
 import com.example.baseproject.base.ui.test_coil.CoilActivity
 import com.example.baseproject.base.utils.extension.clear
 import com.example.baseproject.base.utils.extension.hide
@@ -92,6 +93,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         }
         binding.btnPickImage.clickSafety {
             openActivity(PickImageActivity::class.java, false, isAnimation = true, bundle = null)
+        }
+
+        binding.btnCameraTakePicture.clickSafety {
+            openActivity(TakePictureActivity::class.java, false, isAnimation = true, bundle = null)
         }
     }
 
