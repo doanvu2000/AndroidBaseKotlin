@@ -17,7 +17,6 @@ import android.icu.util.Measure
 import android.icu.util.MeasureUnit
 import android.location.Location
 import android.location.LocationManager
-import android.media.ExifInterface
 import android.media.Ringtone
 import android.media.RingtoneManager
 import android.net.ConnectivityManager
@@ -41,6 +40,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.exifinterface.media.ExifInterface
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
@@ -553,11 +553,11 @@ fun Context.getOrientationImage(uri: Uri): Int? {
 
 fun Int?.isNeedRotateOrFlipImage(): Boolean {
     val exifList = listOf(
-        androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_90,
-        androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_180,
-        androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_270,
-        androidx.exifinterface.media.ExifInterface.ORIENTATION_FLIP_HORIZONTAL,
-        androidx.exifinterface.media.ExifInterface.ORIENTATION_FLIP_VERTICAL
+        ExifInterface.ORIENTATION_ROTATE_90,
+        ExifInterface.ORIENTATION_ROTATE_180,
+        ExifInterface.ORIENTATION_ROTATE_270,
+        ExifInterface.ORIENTATION_FLIP_HORIZONTAL,
+        ExifInterface.ORIENTATION_FLIP_VERTICAL
     )
 
     return exifList.contains(this)
