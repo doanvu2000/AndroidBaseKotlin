@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import android.location.Location
 import android.view.LayoutInflater
 import androidx.activity.result.contract.ActivityResultContracts
-import com.example.baseproject.base.base_view.BaseActivity
+import com.example.baseproject.base.base_view.screen.BaseActivity
 import com.example.baseproject.base.utils.extension.ACCESS_COARSE_LOCATION
 import com.example.baseproject.base.utils.extension.ACCESS_FINE_LOCATION
 import com.example.baseproject.base.utils.extension.finishWithSlide

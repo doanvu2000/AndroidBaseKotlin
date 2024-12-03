@@ -11,7 +11,7 @@ import android.view.LayoutInflater
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.Companion.isPhotoPickerAvailable
-import com.example.baseproject.base.base_view.BaseActivity
+import com.example.baseproject.base.base_view.screen.BaseActivity
 import com.example.baseproject.base.dialog.DialogNeedPermission
 import com.example.baseproject.base.utils.extension.READ_EXTERNAL_STORAGE
 import com.example.baseproject.base.utils.extension.getOrientationImage

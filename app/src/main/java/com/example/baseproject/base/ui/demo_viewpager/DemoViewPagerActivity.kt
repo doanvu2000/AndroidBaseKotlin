@@ -1,7 +1,7 @@
 package com.example.baseproject.base.ui.demo_viewpager
 
 import android.view.LayoutInflater
-import com.example.baseproject.base.base_view.BaseActivity
+import com.example.baseproject.base.base_view.screen.BaseActivity
 import com.example.baseproject.base.ui.demo_viewpager.adapter.ViewPagerAdapter
 import com.example.baseproject.base.ui.demo_viewpager.enumz.TabInfo
 import com.example.baseproject.base.utils.extension.finishWithSlide

@@ -2,7 +2,7 @@ package com.example.baseproject.base.ui.demo_viewpager.fragment
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import com.example.baseproject.base.base_view.BaseFragment
+import com.example.baseproject.base.base_view.screen.BaseFragment
 import com.example.baseproject.base.ui.demo_viewpager.DemoViewPagerActivity
 import com.example.baseproject.base.ui.demo_viewpager.enumz.TabInfo
 import com.example.baseproject.databinding.FragmentTabDemoBinding

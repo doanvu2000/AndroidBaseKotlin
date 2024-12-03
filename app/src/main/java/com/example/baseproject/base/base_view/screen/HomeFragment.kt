@@ -1,4 +1,4 @@
-package com.example.baseproject.base.base_view
+package com.example.baseproject.base.base_view.screen
 
 import android.util.Log
 import android.view.LayoutInflater

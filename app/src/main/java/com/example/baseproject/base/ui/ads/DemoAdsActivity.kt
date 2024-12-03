@@ -2,7 +2,7 @@ package com.example.baseproject.base.ui.ads
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
-import com.example.baseproject.base.base_view.BaseActivity
+import com.example.baseproject.base.base_view.screen.BaseActivity
 import com.example.baseproject.base.utils.extension.gone
 import com.example.baseproject.base.utils.extension.show
 import com.example.baseproject.base.utils.extension.showSnackBar

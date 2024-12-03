@@ -8,7 +8,7 @@ import coil.request.ImageRequest
 import coil.request.SuccessResult
 import coil.transform.RoundedCornersTransformation
 import com.example.baseproject.R
-import com.example.baseproject.base.base_view.BaseActivity
+import com.example.baseproject.base.base_view.screen.BaseActivity
 import com.example.baseproject.base.utils.extension.dp
 import com.example.baseproject.databinding.ActivityCoilBinding
 import kotlin.properties.Delegates

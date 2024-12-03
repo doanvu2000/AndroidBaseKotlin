@@ -4,7 +4,7 @@ import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.example.baseproject.R
-import com.example.baseproject.base.base_view.BaseAdapterRecyclerView
+import com.example.baseproject.base.base_view.screen.BaseAdapterRecyclerView
 import com.example.baseproject.databinding.LayoutItemFlexBoxBinding
 
 class DataAdapter : BaseAdapterRecyclerView<DataEntity, LayoutItemFlexBoxBinding>() {

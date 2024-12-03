@@ -2,7 +2,7 @@ package com.example.baseproject.base.ui.flex_box_layout
 
 import android.view.LayoutInflater
 import androidx.lifecycle.lifecycleScope
-import com.example.baseproject.base.base_view.BaseActivity
+import com.example.baseproject.base.base_view.screen.BaseActivity
 import com.example.baseproject.base.utils.extension.hide
 import com.example.baseproject.databinding.ActivityDemoFlexBoxLayoutBinding
 import com.google.android.flexbox.AlignItems
