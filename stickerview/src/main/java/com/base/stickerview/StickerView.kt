@@ -105,10 +105,10 @@ abstract class StickerView : FrameLayout {
 
                 MotionEvent.ACTION_UP -> Log.v(TAG, "sticker view action up")
             }
-        } else if (view.tag == "iv_scale") {
+        } else if (view.tag == IV_SCALE_TAG) {
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    Log.v(TAG, "iv_scale action down")
+                    Log.v(TAG, "$IV_SCALE_TAG action down")
 
                     thisOrgX = this@StickerView.x
                     thisOrgY = this@StickerView.y
@@ -138,7 +138,7 @@ abstract class StickerView : FrameLayout {
                 }
 
                 MotionEvent.ACTION_MOVE -> {
-                    Log.v(TAG, "iv_scale action move")
+                    Log.v(TAG, "$IV_SCALE_TAG action move")
 
                     rotateNewX = event.rawX
                     rotateNewY = event.rawY
@@ -200,7 +200,7 @@ abstract class StickerView : FrameLayout {
                     requestLayout()
                 }
 
-                MotionEvent.ACTION_UP -> Log.v(TAG, "iv_scale action up")
+                MotionEvent.ACTION_UP -> Log.v(TAG, "$IV_SCALE_TAG action up")
             }
         }
         true
@@ -238,11 +238,11 @@ abstract class StickerView : FrameLayout {
         this.ivEdit!!.setImageResource(R.drawable.edit)
 
         this.tag = "DraggableViewGroup"
-        this.ivBorder!!.tag = "iv_border"
-        this.ivScale!!.tag = "iv_scale"
-        this.ivDelete!!.tag = "iv_delete"
-        this.ivFlip!!.tag = "iv_flip"
-        this.ivEdit!!.tag = "iv_edit"
+        this.ivBorder!!.tag = IV_BORDER_TAG
+        this.ivScale!!.tag = IV_SCALE_TAG
+        this.ivDelete!!.tag = IV_DELETE_TAG
+        this.ivFlip!!.tag = IV_FLIP_TAG
+        this.ivEdit!!.tag = IV_EDIT_TAG
 
         val margin = convertDpToPixel(BUTTON_SIZE_DP.toFloat(), getContext()) / 2
         val size = convertDpToPixel(SELF_SIZE_DP.toFloat(), getContext())
@@ -388,6 +388,12 @@ abstract class StickerView : FrameLayout {
 
         private const val BUTTON_SIZE_DP = 28
         const val SELF_SIZE_DP = 200
+
+        const val IV_SCALE_TAG = "iv_scale"
+        const val IV_BORDER_TAG = "iv_border"
+        const val IV_DELETE_TAG = "iv_delete"
+        const val IV_FLIP_TAG = "iv_flip"
+        const val IV_EDIT_TAG = "iv_edit"
 
         private fun convertDpToPixel(dp: Float, context: Context): Int {
             val resources = context.resources

@@ -117,13 +117,13 @@ class AutoResizeTextView : androidx.appcompat.widget.AppCompatTextView {
 
     override fun setText(text: CharSequence, type: BufferType) {
         super.setText(text, type)
-        adjustTextSize(text.toString())
+        adjustTextSize()
     }
 
     override fun setTextSize(size: Float) {
         mMaxTextSize = size
         mTextCachedSizes!!.clear()
-        adjustTextSize(text.toString())
+        adjustTextSize()
     }
 
     override fun setMaxLines(maxlines: Int) {
@@ -171,7 +171,7 @@ class AutoResizeTextView : androidx.appcompat.widget.AppCompatTextView {
             r.displayMetrics
         )
         mTextCachedSizes!!.clear()
-        adjustTextSize(text.toString())
+        adjustTextSize()
     }
 
     override fun setLineSpacing(add: Float, mult: Float) {
@@ -191,10 +191,10 @@ class AutoResizeTextView : androidx.appcompat.widget.AppCompatTextView {
     }
 
     private fun reAdjust() {
-        adjustTextSize(text.toString())
+        adjustTextSize()
     }
 
-    private fun adjustTextSize(string: String) {
+    private fun adjustTextSize() {
         if (!mInitiallized) {
             return
         }
@@ -226,7 +226,7 @@ class AutoResizeTextView : androidx.appcompat.widget.AppCompatTextView {
     fun enableSizeCache(enable: Boolean) {
         mEnableSizeCache = enable
         mTextCachedSizes!!.clear()
-        adjustTextSize(text.toString())
+        adjustTextSize()
     }
 
     private fun efficientTextSizeSearch(
