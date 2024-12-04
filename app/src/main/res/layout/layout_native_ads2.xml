@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/native_ad_view"
     android:layout_width="match_parent"
-    android:layout_height="350dp"
+    android:layout_height="330dp"
     android:layout_marginBottom="4dp"
     android:background="@drawable/gnt_outline_shape">
 
@@ -98,6 +98,7 @@
 
         <com.google.android.gms.ads.nativead.MediaView
             android:id="@+id/adMedia"
+            android:minHeight="120dp"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginHorizontal="24dp"

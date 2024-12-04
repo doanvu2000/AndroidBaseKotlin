@@ -71,6 +71,7 @@ dependencies {
     implementation project(':skeleton')
     implementation project(':sliderview')
     implementation project(':stickerview')
+    implementation project(':simplecropview')
 
     implementation libs.core.ktx
     implementation libs.appcompat

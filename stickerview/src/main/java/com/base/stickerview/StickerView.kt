@@ -124,17 +124,8 @@ abstract class StickerView : FrameLayout {
                     centerX =
                         (this@StickerView.x + (this@StickerView.parent as View).x + this@StickerView.width.toFloat() / 2).toDouble()
 
-
-                    //double statusBarHeight = Math.ceil(25 * getContext().getResources().getDisplayMetrics().density);
-                    var result = 0
-                    val resourceId =
-                        resources.getIdentifier("status_bar_height", "dimen", "android")
-                    if (resourceId > 0) {
-                        result = resources.getDimensionPixelSize(resourceId)
-                    }
-                    val statusBarHeight = result.toDouble()
                     centerY =
-                        this@StickerView.y.toDouble() + (this@StickerView.parent as View).y.toDouble() + statusBarHeight + (this@StickerView.height.toFloat() / 2).toDouble()
+                        this@StickerView.y.toDouble() + (this@StickerView.parent as View).y.toDouble() + (this@StickerView.height.toFloat() / 2).toDouble()
                 }
 
                 MotionEvent.ACTION_MOVE -> {

@@ -162,6 +162,7 @@ class AdmobUtils constructor(val context: Activity) {
         }
         val adUnit = if (isDebugMode()) {
             ADS_INTER_TEST
+            BuildConfig.ADS_ADMOB_INTER_ID1
         } else {
             BuildConfig.ADS_ADMOB_INTER_ID1
         }

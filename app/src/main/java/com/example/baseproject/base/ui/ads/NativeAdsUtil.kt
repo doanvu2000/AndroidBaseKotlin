@@ -30,11 +30,12 @@ object NativeAdsUtil {
     ) {
         var nativeAd: NativeAd? = null
         val adLoader: AdLoader?
-        val id = if (isDebugMode()) {
-            NATIVE_ID_TEST
-        } else {
-            NATIVE_ID_1
-        }
+//        val id = if (isDebugMode()) {
+//            NATIVE_ID_TEST
+//        } else {
+//            NATIVE_ID_1
+//        }
+        val id = NATIVE_ID_1
         val builder = AdLoader.Builder(context, id)
         adLoader = builder.forNativeAd { nativeAds ->
             nativeAd = nativeAds
