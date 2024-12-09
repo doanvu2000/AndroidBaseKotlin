@@ -72,6 +72,7 @@ dependencies {
     implementation project(':sliderview')
     implementation project(':stickerview')
     implementation project(':simplecropview')
+    implementation project(':cameraview')
 
     implementation libs.core.ktx
     implementation libs.appcompat
