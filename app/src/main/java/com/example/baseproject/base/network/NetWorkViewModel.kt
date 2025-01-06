@@ -1,7 +1,5 @@
 package com.example.baseproject.base.network
 
-import UrlFetcher
-import UrlFetcherConfig
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

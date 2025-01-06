@@ -1,3 +1,5 @@
+package com.example.baseproject.base.network
+
 import android.content.Context
 import androidx.collection.LruCache
 import kotlinx.coroutines.CoroutineScope

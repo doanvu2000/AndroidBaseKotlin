@@ -1,6 +1,5 @@
 package com.example.baseproject.base.ui.network_demo
 
-import NetworkResult
 import android.annotation.SuppressLint
 import android.util.Log
 import android.view.LayoutInflater
@@ -8,6 +7,7 @@ import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.baseproject.base.base_view.screen.BaseActivity
 import com.example.baseproject.base.network.NetWorkViewModel
+import com.example.baseproject.base.network.NetworkResult
 import com.example.baseproject.base.network.formatFileSize
 import com.example.baseproject.base.utils.extension.hide
 import com.example.baseproject.base.utils.extension.setTextHtml
