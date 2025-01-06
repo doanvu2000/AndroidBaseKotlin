@@ -1,6 +1,6 @@
 [versions]
-agp = "8.7.2"
-firebaseBom = "33.6.0"
+agp = "8.7.3"
+firebaseBom = "33.7.0"
 kotlin = "1.9.24"
 appcompat = "1.7.0"
 biometricKtx = "1.2.0-alpha05"

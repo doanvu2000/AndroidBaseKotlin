@@ -13,6 +13,7 @@ import com.example.baseproject.base.ui.ads.DemoAdsActivity
 import com.example.baseproject.base.ui.demo_viewpager.DemoViewPagerActivity
 import com.example.baseproject.base.ui.flex_box_layout.DemoFlexBoxLayoutActivity
 import com.example.baseproject.base.ui.location.LocationActivity
+import com.example.baseproject.base.ui.network_demo.NetWorkDemoActivity
 import com.example.baseproject.base.ui.pick_image.PickImageActivity
 import com.example.baseproject.base.ui.pick_image.TakePictureActivity
 import com.example.baseproject.base.ui.test_coil.CoilActivity
@@ -97,6 +98,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
         binding.btnCameraTakePicture.clickSafety {
             openActivity(TakePictureActivity::class.java, false, isAnimation = true, bundle = null)
+        }
+
+        binding.btnNetWorkDemo.clickSafety {
+            openActivity(NetWorkDemoActivity::class.java)
         }
     }
 

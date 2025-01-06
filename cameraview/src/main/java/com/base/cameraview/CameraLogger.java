@@ -27,26 +27,20 @@ public final class CameraLogger {
     @VisibleForTesting
     static String lastTag;
     @VisibleForTesting
-    static Logger sAndroidLogger = new Logger() {
-        @Override
-        public void log(int level,
-                        @NonNull String tag,
-                        @NonNull String message,
-                        @Nullable Throwable throwable) {
-            switch (level) {
-                case LEVEL_VERBOSE:
-                    Log.v(tag, message, throwable);
-                    break;
-                case LEVEL_INFO:
-                    Log.i(tag, message, throwable);
-                    break;
-                case LEVEL_WARNING:
-                    Log.w(tag, message, throwable);
-                    break;
-                case LEVEL_ERROR:
-                    Log.e(tag, message, throwable);
-                    break;
-            }
+    static Logger sAndroidLogger = (level, tag, message, throwable) -> {
+        switch (level) {
+            case LEVEL_VERBOSE:
+                Log.v(tag, message, throwable);
+                break;
+            case LEVEL_INFO:
+                Log.i(tag, message, throwable);
+                break;
+            case LEVEL_WARNING:
+                Log.w(tag, message, throwable);
+                break;
+            case LEVEL_ERROR:
+                Log.e(tag, message, throwable);
+                break;
         }
     };
     private static int sLevel;
@@ -168,7 +162,7 @@ public final class CameraLogger {
             if (object instanceof Throwable) {
                 throwable = (Throwable) object;
             }
-            message.append(String.valueOf(object));
+            message.append(object);
             message.append(" ");
         }
         String string = message.toString().trim();

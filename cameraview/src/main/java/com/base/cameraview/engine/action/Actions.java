@@ -1,16 +1,12 @@
 package com.base.cameraview.engine.action;
 
-import android.os.Build;
-
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 
 import java.util.Arrays;
 
 /**
  * Utilities for creating {@link Action} sequences.
  */
-@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 public class Actions {
 
     /**

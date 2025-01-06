@@ -1,9 +1,6 @@
 package com.base.cameraview.engine.action;
 
-import android.os.Build;
-
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 
 /**
  * A callback for {@link Action} state changes.
@@ -11,7 +8,6 @@ import androidx.annotation.RequiresApi;
  * <p>
  * See also {@link CompletionCallback}.
  */
-@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 public interface ActionCallback {
 
     /**

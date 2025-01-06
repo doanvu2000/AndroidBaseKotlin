@@ -2,16 +2,13 @@ package com.base.cameraview.engine.action;
 
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.TotalCaptureResult;
-import android.os.Build;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 
 /**
  * An {@link Action} that wraps another, and forces the completion
  * after the given timeout in milliseconds is reached.
  */
-@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 class TimeoutAction extends ActionWrapper {
 
     private long startMillis;

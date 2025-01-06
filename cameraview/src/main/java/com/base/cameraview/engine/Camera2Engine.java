@@ -844,10 +844,9 @@ public class Camera2Engine extends CameraBaseEngine implements ImageReader.OnIma
     }
 
     private void doTakeVideo(@NonNull final VideoResult.Stub stub) {
-        if (!(mVideoRecorder instanceof Full2VideoRecorder)) {
+        if (!(mVideoRecorder instanceof Full2VideoRecorder recorder)) {
             throw new IllegalStateException("doTakeVideo called, but video recorder " + "is not a Full2VideoRecorder! " + mVideoRecorder);
         }
-        Full2VideoRecorder recorder = (Full2VideoRecorder) mVideoRecorder;
         try {
             createRepeatingRequestBuilder(CameraDevice.TEMPLATE_RECORD);
             addRepeatingRequestBuilderSurfaces(recorder.getInputSurface());
@@ -868,10 +867,9 @@ public class Camera2Engine extends CameraBaseEngine implements ImageReader.OnIma
     @EngineThread
     @Override
     protected void onTakeVideoSnapshot(@NonNull VideoResult.Stub stub, @NonNull AspectRatio outputRatio) {
-        if (!(mPreview instanceof RendererCameraPreview)) {
+        if (!(mPreview instanceof RendererCameraPreview glPreview)) {
             throw new IllegalStateException("Video snapshots are only supported with GL_SURFACE.");
         }
-        RendererCameraPreview glPreview = (RendererCameraPreview) mPreview;
         Size outputSize = getUncroppedSnapshotSize(Reference.OUTPUT);
         if (outputSize == null) {
             throw new IllegalStateException("outputSize should not be null.");
