@@ -124,7 +124,6 @@ class NetWorkDemoActivity : BaseActivity<ActivityNetWorkDemoBinding>() {
                             }
                         }
 
-                        else -> {}
                     }
                 }
             } catch (e: Exception) {
