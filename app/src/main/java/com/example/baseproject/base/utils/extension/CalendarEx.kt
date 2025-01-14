@@ -48,17 +48,17 @@ fun Calendar.getDay() = this[Calendar.DAY_OF_MONTH]
 fun Calendar.getDayTitle() = dayTitles[this[Calendar.DAY_OF_WEEK]].toString()
 
 //get day title of first day in month
-fun Calendar.getFirstDayInMonth() = this.apply {
+fun Calendar.getFirstDayTitleInMonth() = this.apply {
     set(Calendar.DAY_OF_MONTH, 1)
 }.getDayTitle()
 
 //get day title of first day in year
-fun Calendar.getFirstDayInYear() = this.apply {
+fun Calendar.getFirstDayTitleInYear() = this.apply {
     set(Calendar.DAY_OF_YEAR, 1)
 }.getDayTitle()
 
 //get day title of first day in week
-fun Calendar.getFirstDayInWeek() = this.apply {
+fun Calendar.getFirstDayTitleInWeek() = this.apply {
     set(Calendar.DAY_OF_WEEK, 1)
 }.getDayTitle()
 //endregion
