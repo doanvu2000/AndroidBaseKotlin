@@ -31,4 +31,9 @@
     <color name="p4">#F7B17E</color>
     <color name="p5">#FECDA9</color>
     <color name="p6">#FFF8F3</color>
+
+    <color name="bad_day">#262F19</color>
+    <color name="normal_day">#6C8646</color>
+    <color name="good_day">#BB3D2F</color>
+    <color name="color_stroke">#DBDDCA</color>
 </resources>

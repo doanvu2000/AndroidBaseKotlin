@@ -224,4 +224,9 @@ fun Calendar.getMonth() = this[Calendar.MONTH] + 1
 
 //region year
 fun Calendar.getYear() = this[Calendar.YEAR]
+
+fun getCurrentYear(): Int {
+    val calendar = Calendar.getInstance()
+    return calendar[Calendar.YEAR]
+}
 //endregion

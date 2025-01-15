@@ -130,4 +130,6 @@ dependencies {
 
     //flexbox layout recyclerView
     implementation libs.flexbox
+
+    implementation libs.commons.lang3
 }

@@ -135,7 +135,7 @@ fun Context.openActivity(pClass: Class<out Activity>, isFinish: Boolean = false,
 fun Context.openActivity(
     pClass: Class<out Activity>,
     isFinish: Boolean = false,
-    isAnimation: Boolean = false,
+    isAnimation: Boolean = true,
     bundle: Bundle?
 ) {
     openActivity(pClass, bundle)

@@ -13,6 +13,7 @@ import com.example.baseproject.base.ui.ads.DemoAdsActivity
 import com.example.baseproject.base.ui.demo_viewpager.DemoViewPagerActivity
 import com.example.baseproject.base.ui.flex_box_layout.DemoFlexBoxLayoutActivity
 import com.example.baseproject.base.ui.location.LocationActivity
+import com.example.baseproject.base.ui.lunar_calendar.LunarCalendarActivity
 import com.example.baseproject.base.ui.network_demo.NetWorkDemoActivity
 import com.example.baseproject.base.ui.pick_image.PickImageActivity
 import com.example.baseproject.base.ui.pick_image.TakePictureActivity
@@ -67,41 +68,36 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 removeFragment(it)
             }
         }
+
         binding.btnDemoViewPager.clickSafety {
-            openActivity(DemoViewPagerActivity::class.java, isFinish = false, true, null)
+            openActivity(DemoViewPagerActivity::class.java)
         }
         binding.btnDemoLocation.clickSafety {
-            openActivity(
-                LocationActivity::class.java,
-                isFinish = false,
-                isAnimation = true,
-                bundle = null
-            )
+            openActivity(LocationActivity::class.java)
         }
         binding.btnDemoAds.clickSafety {
-            openActivity(DemoAdsActivity::class.java, false, isAnimation = true, bundle = null)
+            openActivity(DemoAdsActivity::class.java)
         }
         binding.btnTestCoilLib.clickSafety {
-            openActivity(CoilActivity::class.java, false, isAnimation = true, bundle = null)
+            openActivity(CoilActivity::class.java)
         }
         binding.btnFlexBoxManager.clickSafety {
-            openActivity(
-                DemoFlexBoxLayoutActivity::class.java,
-                false,
-                isAnimation = true,
-                bundle = null
-            )
+            openActivity(DemoFlexBoxLayoutActivity::class.java)
         }
         binding.btnPickImage.clickSafety {
-            openActivity(PickImageActivity::class.java, false, isAnimation = true, bundle = null)
+            openActivity(PickImageActivity::class.java)
         }
 
         binding.btnCameraTakePicture.clickSafety {
-            openActivity(TakePictureActivity::class.java, false, isAnimation = true, bundle = null)
+            openActivity(TakePictureActivity::class.java)
         }
 
         binding.btnNetWorkDemo.clickSafety {
             openActivity(NetWorkDemoActivity::class.java)
+        }
+
+        binding.btnLunarCalendar.clickSafety {
+            openActivity(LunarCalendarActivity::class.java)
         }
     }
 

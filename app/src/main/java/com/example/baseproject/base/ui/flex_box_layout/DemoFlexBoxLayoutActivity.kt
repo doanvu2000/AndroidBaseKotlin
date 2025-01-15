@@ -34,7 +34,7 @@ class DemoFlexBoxLayoutActivity : BaseActivity<ActivityDemoFlexBoxLayoutBinding>
     override fun initData() {
         lifecycleScope.launch {
             withContext(Dispatchers.IO) {
-                delay(2000)
+                delay(1000)
             }
             binding.loading.hide()
             dataAdapter.setDataList(getDataList2())
@@ -60,20 +60,38 @@ class DemoFlexBoxLayoutActivity : BaseActivity<ActivityDemoFlexBoxLayoutBinding>
             DataEntity(2, "Ta có năng lực cứu thế nhưng không cứu được nàng thì có ích gì"),
             DataEntity(3, "Ta đi khắp luân hồi chỉ để tìm nàng"),
             DataEntity(4, "Nhất niệm chi gian thành chân tiên, phù dao trực thượng đạp cửu thiên."),
-            DataEntity(5, "Sơn bản vô ưu, nhân tuyết bạch đầu, thủy bản vô sầu, nhân phong khởi trứu"),
+            DataEntity(
+                5,
+                "Sơn bản vô ưu, nhân tuyết bạch đầu, thủy bản vô sầu, nhân phong khởi trứu"
+            ),
             DataEntity(6, "Có đôi khi, cả đời, chỉ vì năm đó một hồi gặp nhau."),
             DataEntity(7, "Năm xưa như gió, một đời người, đã định trước sẽ có rất nhiều nhớ lại."),
-            DataEntity(8, "Mưa sinh ra trên trời, chết rơi về mặt đất, cả quá trình rơi xuống chính là nhân sinh!"),
+            DataEntity(
+                8,
+                "Mưa sinh ra trên trời, chết rơi về mặt đất, cả quá trình rơi xuống chính là nhân sinh!"
+            ),
             DataEntity(9, "Hoa có ngày nở lại, người không còn thiếu niên."),
-            DataEntity(10, "Sống thì thế nào? Chết thì làm sao? Sống chết đều có cơ duyên, muôn vật tự có luân hồi. "),
-            DataEntity(11, "Chờ đợi vốn không phải là điều đáng sợ, đáng sợ là không biết phải chờ đợi đến bao giờ. "),
+            DataEntity(
+                10,
+                "Sống thì thế nào? Chết thì làm sao? Sống chết đều có cơ duyên, muôn vật tự có luân hồi. "
+            ),
+            DataEntity(
+                11,
+                "Chờ đợi vốn không phải là điều đáng sợ, đáng sợ là không biết phải chờ đợi đến bao giờ. "
+            ),
             DataEntity(12, "Đôi khi một thoáng rung động, cũng kéo theo cả đời cố chấp."),
             DataEntity(13, "Bỏ cả giang sơn vì tri kỷ, đâu ngờ tri kỷ thích giang sơn."),
             DataEntity(14, "Yêu thương như phù dù trôi mãi. Có mấy tình là thật lòng thật tâm?"),
-            DataEntity(15, "Có cả thiên hạ không sở nguyện, Mơ ước phu thê hóa hão huyền."),
+            DataEntity(
+                15,
+                "Có cả thiên hạ không sở nguyện, Mơ ước phu thê hóa hão huyền."
+            ),
             DataEntity(16, "Nguyện đắc nhất nhân tâm, bạch thủ bất tương li."),
             DataEntity(17, "Trăm năm mộng ảo, tỉnh dậy phồn hoa đều hóa tro tàn…"),
-            DataEntity(18, "Bốn mùa trầm lặng, ngôn ngữ mất đi màu sắc. Năm tháng tịch liêu, núi sông cũng quên mất hẹn thề."),
+            DataEntity(
+                18,
+                "Bốn mùa trầm lặng, ngôn ngữ mất đi màu sắc. Năm tháng tịch liêu, núi sông cũng quên mất hẹn thề."
+            ),
             DataEntity(
                 19,
                 "Tình yêu không kết quả, chỉ cần nở hoa, màu sắc đã rực rỡ rồi. Được trông thấy màu hoa rực rỡ đó, tuổi trẻ của tôi, không còn gì để hối tiếc...\n"

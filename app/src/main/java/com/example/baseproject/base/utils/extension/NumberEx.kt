@@ -13,6 +13,13 @@ fun Int.toStringFormat(pattern: String? = DECIMAL_PATTERN1): String {
     return decimalFormat.format(this)
 }
 
+fun Int.toStringFormat(): String {
+    if (this < 10) {
+        return "0$this"
+    }
+    return this.toString()
+}
+
 fun Int.toDp(context: Context): Int {
     return context.resources.displayMetrics.density.toInt() * this
 }

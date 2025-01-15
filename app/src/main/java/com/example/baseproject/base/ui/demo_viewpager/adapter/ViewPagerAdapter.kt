@@ -14,28 +14,51 @@ import com.example.baseproject.base.ui.demo_viewpager.fragment.FragmentTab4
 
 class ViewPagerAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle) :
     FragmentStateAdapter(fragmentManager, lifecycle) {
+
+    private val fragmentList = mutableMapOf<Int, Fragment?>()
     override fun getItemCount(): Int {
         return TabInfo.getTabCount()
     }
 
     override fun createFragment(position: Int): Fragment {
+        if (fragmentList[position] != null) {
+            return fragmentList[position]!!
+        }
         val bundle = bundleOf(DemoViewPagerActivity.TAB_KEY to position)
-        return when (TabInfo.getTabByPosition(position)) {
-            TabInfo.Tab1 -> FragmentTab1().apply {
-                arguments = bundle
+        when (TabInfo.getTabByPosition(position)) {
+            TabInfo.Tab1 -> {
+                if (fragmentList[position] == null) {
+                    fragmentList[position] = FragmentTab1().apply {
+                        arguments = bundle
+                    }
+                }
             }
 
-            TabInfo.Tab2 -> FragmentTab2().apply {
-                arguments = bundle
+            TabInfo.Tab2 -> {
+                if (fragmentList[position] == null) {
+                    fragmentList[position] = FragmentTab2().apply {
+                        arguments = bundle
+                    }
+                }
             }
 
-            TabInfo.Tab3 -> FragmentTab3().apply {
-                arguments = bundle
+            TabInfo.Tab3 -> {
+                if (fragmentList[position] == null) {
+                    fragmentList[position] = FragmentTab3().apply {
+                        arguments = bundle
+                    }
+                }
             }
 
-            TabInfo.Tab4 -> FragmentTab4().apply {
-                arguments = bundle
+            TabInfo.Tab4 -> {
+                if (fragmentList[position] == null) {
+                    fragmentList[position] = FragmentTab4().apply {
+                        arguments = bundle
+                    }
+                }
             }
         }
+
+        return fragmentList[position]!!
     }
 }
