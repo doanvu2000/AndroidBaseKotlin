@@ -7,12 +7,12 @@ import com.example.baseproject.base.utils.extension.getCurrentYear
 import com.example.baseproject.base.utils.extension.getDay
 import com.example.baseproject.base.utils.extension.getDayTitle
 import com.example.baseproject.base.utils.extension.getHour
-import com.example.baseproject.base.utils.extension.getLunarDay
-import com.example.baseproject.base.utils.extension.getLunarMonth
-import com.example.baseproject.base.utils.extension.getLunarYear
 import com.example.baseproject.base.utils.extension.getMinutes
 import com.example.baseproject.base.utils.extension.getMonth
 import com.example.baseproject.base.utils.extension.toStringFormat
+import com.example.baseproject.base.utils.lunar.calendar.getLunarDay
+import com.example.baseproject.base.utils.lunar.calendar.getLunarMonth
+import com.example.baseproject.base.utils.lunar.calendar.getLunarYear
 import com.example.baseproject.databinding.ActivityLunarCalendarBinding
 import java.util.Calendar
 

@@ -449,3 +449,26 @@ fun Activity.getNameAndSizeFile(uri: Uri, onQueryFile: (name: String, size: Long
         onQueryFile.invoke(name, size)
     }
 }
+
+const val FLAG_KEEP_SCREEN_ON = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+
+fun Activity.enableScreenOn() {
+    window.addFlags(FLAG_KEEP_SCREEN_ON)
+}
+
+fun Activity.disableScreenOn() {
+    window.clearFlags(FLAG_KEEP_SCREEN_ON)
+}
+
+fun Activity.setLayoutParamFullScreen() {
+    window?.let {
+        it.decorView.apply {
+            systemUiVisibility =
+                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN
+        }
+        it.setFlags(
+            WindowManager.LayoutParams.FLAG_FULLSCREEN,
+            WindowManager.LayoutParams.FLAG_FULLSCREEN
+        )
+    }
+}

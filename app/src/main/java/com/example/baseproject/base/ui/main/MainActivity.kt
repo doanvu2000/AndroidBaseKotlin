@@ -10,6 +10,7 @@ import com.example.baseproject.R
 import com.example.baseproject.base.base_view.screen.BaseActivity
 import com.example.baseproject.base.base_view.screen.HomeFragment
 import com.example.baseproject.base.ui.ads.DemoAdsActivity
+import com.example.baseproject.base.ui.broadcast.DemoBroadcastActivity
 import com.example.baseproject.base.ui.demo_viewpager.DemoViewPagerActivity
 import com.example.baseproject.base.ui.flex_box_layout.DemoFlexBoxLayoutActivity
 import com.example.baseproject.base.ui.location.LocationActivity
@@ -98,6 +99,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
         binding.btnLunarCalendar.clickSafety {
             openActivity(LunarCalendarActivity::class.java)
+        }
+
+        binding.btnBroadcastDemo.clickSafety {
+            openActivity(DemoBroadcastActivity::class.java)
         }
     }
 

@@ -45,12 +45,12 @@ class CustomCalendarV2Adapter(
             if (mConvertSolarToLunar != null) {
                 mConvertSolarToLunar = null
             }
+
+            val mDay = day.calendar.getDay()
+            val mMonth = day.calendar.getMonth()
+            val mYear = day.calendar.getYear()
             mConvertSolarToLunar = LunisolarCalendar()
-            mConvertSolarToLunar?.solar2lunar(
-                day.calendar.getDay(),
-                day.calendar.getMonth(),
-                day.calendar.getYear()
-            )
+            mConvertSolarToLunar?.solar2lunar(mDay, mMonth, mYear)
             if (mConvertSolarToLunar?.day == 1) {
                 binding.txtLunarDay.text =
                     mConvertSolarToLunar?.day.toString() + "/" + mConvertSolarToLunar?.month
@@ -58,14 +58,13 @@ class CustomCalendarV2Adapter(
                 binding.txtLunarDay.text = mConvertSolarToLunar?.day.toString()
             }
 
-            val dayStatus = mConvertSolarToLunar?.getGoodDay(
-                day.calendar.get(Calendar.DAY_OF_MONTH),
-                day.calendar.get(Calendar.MONTH) + 1,
-                day.calendar.get(Calendar.YEAR)
-            )
+            val dayStatus = mConvertSolarToLunar?.getGoodDay(mDay, mMonth, mYear)
+
+            val background: Int
+            val colorId: Int
             when (dayStatus) {
                 GOOD_DAY -> {
-                    val background = if (day.isSelected) {
+                    background = if (day.isSelected) {
                         if (day.isToday) {
                             R.drawable.bg_item_calendar_good_day_select
                         } else {
@@ -78,12 +77,11 @@ class CustomCalendarV2Adapter(
                             R.drawable.bg_item_calendar_default
                         }
                     }
-                    binding.txtSolarDay.setTextColor(context.getColorById(R.color.good_day))
-                    binding.root.setBackgroundResource(background)
+                    colorId = context.getColorById(R.color.good_day)
                 }
 
                 NORMAL_DAY -> {
-                    val background = if (day.isSelected) {
+                    background = if (day.isSelected) {
                         if (day.isToday) {
                             R.drawable.bg_item_calendar_normal_day_select
                         } else {
@@ -96,12 +94,11 @@ class CustomCalendarV2Adapter(
                             R.drawable.bg_item_calendar_default
                         }
                     }
-                    binding.txtSolarDay.setTextColor(context.getColorById(R.color.normal_day))
-                    binding.root.setBackgroundResource(background)
+                    colorId = context.getColorById(R.color.normal_day)
                 }
 
                 else -> {
-                    val background = if (day.isSelected) {
+                    background = if (day.isSelected) {
                         if (day.isToday) {
                             R.drawable.bg_item_calendar_bad_day_select
                         } else {
@@ -114,11 +111,12 @@ class CustomCalendarV2Adapter(
                             R.drawable.bg_item_calendar_default
                         }
                     }
-                    binding.txtSolarDay.setTextColor(context.getColorById(R.color.bad_day))
-                    binding.root.setBackgroundResource(background)
+                    colorId = context.getColorById(R.color.bad_day)
                 }
             }
 
+            binding.txtSolarDay.setTextColor(colorId)
+            binding.root.setBackgroundResource(background)
         } else {
             view.hide()
         }

@@ -90,3 +90,11 @@ fun TextView.setShadow(textShadowEnum: TextShadowEnum) {
         }
     }
 }
+
+fun TextView.showLayerBlur(blurColor: Int) {
+    setShadowLayer(24f, 0f, 0f, blurColor)
+}
+
+fun TextView.clearLayerBlur() {
+    setShadowLayer(0f, 0f, 0f, Color.parseColor("#00000000"))
+}

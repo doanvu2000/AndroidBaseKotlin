@@ -1,6 +1,9 @@
 package com.example.baseproject.base.ui.lunar_calendar
 
 import android.content.Context
+import com.example.baseproject.base.utils.extension.getDayOfWeek
+import com.example.baseproject.base.utils.extension.getMonth
+import com.example.baseproject.base.utils.extension.getYear
 import org.apache.commons.lang3.time.DateUtils
 import java.util.Calendar
 import java.util.Date
@@ -47,14 +50,14 @@ abstract class CalendarCellAdapter :
         this.calendar = calendar
 
         val start = DateUtils.truncate(calendar, Calendar.DAY_OF_MONTH)
-        if (start.get(Calendar.DAY_OF_WEEK) != (startingAt.getDifference() + 2)) {
+        if (start.getDayOfWeek() != (startingAt.getDifference() + 2)) {
             start.set(
                 Calendar.DAY_OF_MONTH,
                 if (startingAt.isLessFirstWeek(calendar)) -startingAt.getDifference() else 0
             )
             start.add(
                 Calendar.DAY_OF_MONTH,
-                -start.get(Calendar.DAY_OF_WEEK) + 2 + startingAt.getDifference()
+                -start.getDayOfWeek() + 2 + startingAt.getDifference()
             )
         }
         startDate = start
@@ -74,11 +77,11 @@ abstract class CalendarCellAdapter :
         val now = Calendar.getInstance()
 
         this.items = (0..itemCount).map {
-            val cal = Calendar.getInstance().apply { time = startDate.time }
-            cal.add(Calendar.DAY_OF_MONTH, it)
+            val calendarStart = Calendar.getInstance().apply { time = startDate.time }
+            calendarStart.add(Calendar.DAY_OF_MONTH, it)
 
-            val thisTime = calendar.get(Calendar.YEAR) * 12 + calendar.get(Calendar.MONTH)
-            val compareTime = cal.get(Calendar.YEAR) * 12 + cal.get(Calendar.MONTH)
+            val thisTime = calendar.getYear() * 12 + (calendar.getMonth() - 1)
+            val compareTime = calendarStart.getYear() * 12 + (calendarStart.getMonth() - 1)
 
             val state = when (thisTime.compareTo(compareTime)) {
                 -1 -> DayState.NextMonth
@@ -88,11 +91,11 @@ abstract class CalendarCellAdapter :
             }
             val isSelected = when (selectedDate) {
                 null -> false
-                else -> DateUtils.isSameDay(cal.time, selectedDate)
+                else -> DateUtils.isSameDay(calendarStart.time, selectedDate)
             }
-            val isToday = DateUtils.isSameDay(cal, now)
+            val isToday = DateUtils.isSameDay(calendarStart, now)
 
-            Day(cal, state, isToday, isSelected)
+            Day(calendarStart, state, isToday, isSelected)
         }
     }
 
