@@ -3,6 +3,8 @@ package com.example.baseproject.base.utils.extension
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Matrix
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.scale
 
 /**
  * append bitmap2 to bottom bitmap_root
@@ -64,8 +66,8 @@ fun mergeBitmapsVertical(bitmap1: Bitmap, bitmap2: Bitmap): Bitmap {
 }
 
 fun overlayBitMap(bmp1: Bitmap, bmp2: Bitmap): Bitmap {
-    val bmOverlay = Bitmap.createBitmap(bmp1.width, bmp1.height, bmp1.config)
-    val bitmap2 = Bitmap.createScaledBitmap(bmp2, bmOverlay.width, bmOverlay.height, false)
+    val bmOverlay = createBitmap(bmp1.width, bmp1.height)
+    val bitmap2 = bmp2.scale(bmOverlay.width, bmOverlay.height, false)
     val canvas = Canvas(bmOverlay)
     canvas.drawBitmap(bmp1, Matrix(), null)
     canvas.drawBitmap(bitmap2, 0f, 0f, null)

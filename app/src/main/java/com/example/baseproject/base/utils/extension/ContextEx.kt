@@ -350,7 +350,7 @@ fun Context.serviceIsRunning(serviceClass: Class<*>): Boolean {
 fun Context.getVersionName(): String {
     return try {
         val packageInfo: PackageInfo = packageManager.getPackageInfo(packageName, 0)
-        packageInfo.versionName
+        packageInfo.versionName ?: BuildConfig.VERSION_NAME
     } catch (e: Exception) {
         BuildConfig.VERSION_NAME
     }
