@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.jin.week_view_event"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 26
