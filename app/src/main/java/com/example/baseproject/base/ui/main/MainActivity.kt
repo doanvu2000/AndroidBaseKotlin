@@ -19,6 +19,7 @@ import com.example.baseproject.base.ui.network_demo.NetWorkDemoActivity
 import com.example.baseproject.base.ui.pick_image.PickImageActivity
 import com.example.baseproject.base.ui.pick_image.TakePictureActivity
 import com.example.baseproject.base.ui.test_coil.CoilActivity
+import com.example.baseproject.base.ui.week_view_event.WeekViewEventActivity
 import com.example.baseproject.base.utils.extension.clear
 import com.example.baseproject.base.utils.extension.hide
 import com.example.baseproject.base.utils.extension.isEmulator
@@ -103,6 +104,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
         binding.btnBroadcastDemo.clickSafety {
             openActivity(DemoBroadcastActivity::class.java)
+        }
+
+        binding.btnWeekViewEventDemo.clickSafety {
+            openActivity(WeekViewEventActivity::class.java)
         }
     }
 

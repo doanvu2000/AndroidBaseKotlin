@@ -1,0 +1,38 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.jin.WeekView
+        android:id="@+id/weekView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:autoLimitTime="false"
+        app:columnGap="8dp"
+        app:dayBackgroundColor="#05000000"
+        app:dropListenerEnabled="true"
+        app:eventTextColor="@android:color/white"
+        app:headerColumnBackground="#ffffffff"
+        app:headerColumnPadding="8dp"
+        app:headerColumnTextColor="@color/toolbar_text"
+        app:headerRowBackgroundColor="@color/toolbar"
+        app:headerRowPadding="12dp"
+        app:hourHeight="60dp"
+        app:minOverlappingMinutes="5"
+        app:newEventTimeResolutionInMinutes="15"
+        app:noOfVisibleDays="7"
+        app:textSize="12sp"
+        app:timeColumnResolution="60"
+        app:todayBackgroundColor="#1848adff"
+        app:todayHeaderTextColor="@color/accent" />
+
+    <TextView
+        android:id="@+id/draggable_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#ffff0000"
+        android:padding="3dp"
+        android:text="@string/txt_drag_me"
+        android:textColor="@android:color/white" />
+
+</RelativeLayout>
