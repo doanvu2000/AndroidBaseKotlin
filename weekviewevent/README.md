@@ -1,7 +1,7 @@
-Some bugs might still get fixed, as we are still using this library. But we do not have the time or in-house skills to actively maintain it.
-
-Revolving Week View (Android)
+Week View Event(Android)
 ===
+### This libs is convert form Java to Kotlin, fork form jlurena-lib and fix some bug.
+### Converter: [PNThang](https://github.com/PNThanggg), Modify: me - doanvu2000
 
 **Android Week View** is an android library to display a static week calendar with options of viewing 1-7 days of the week at a time.
 <div align="center">
@@ -57,6 +57,3 @@ Write the following in your activity
 	        }
 	    });
 	    // There are many other Listeners to choose from as well.
-
-### This libs is convert form Java to Kotlin, fork form [jlurena-lib](https://github.com/jlurena/revolvingweekview).
-### Converter: [PNThang](https://github.com/PNThanggg), Modify: me - doanvu2000
