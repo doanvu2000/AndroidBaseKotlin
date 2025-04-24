@@ -4,20 +4,32 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Outline
+import android.graphics.Path
 import android.graphics.Rect
+import android.graphics.RectF
 import android.graphics.drawable.LayerDrawable
+import android.os.Build
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewOutlineProvider
 import android.view.ViewTreeObserver
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import android.widget.SeekBar
 import androidx.annotation.DrawableRes
+import androidx.annotation.RequiresApi
 import androidx.core.content.res.ResourcesCompat
 import com.base.stickerview.StickerImageView
 import com.example.baseproject.R
+import com.example.baseproject.base.utils.util.AppLogger
+import com.example.baseproject.base.utils.util.Constants
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.shape.CornerFamily
+import com.google.android.material.shape.MaterialShapeDrawable
+import com.google.android.material.shape.ShapeAppearanceModel
 import com.google.android.material.tabs.TabLayout
 
 fun View.hideKeyboard() {
@@ -296,4 +308,136 @@ fun View.setOnTouchAction(
 
 fun StickerImageView.loadSrc(src: Any) {
     ivMain?.loadSrc(src)
+}
+
+/**
+ * This function to set rounded corner for view(all 4 position: topLeft - top Right, bottomLeft - bottomRight)
+ * @param roundedCorner: pass int number, it will convert to px
+ * */
+fun View.setRoundedCornerView(roundedCorner: Int) {
+    try {
+        outlineProvider = object : ViewOutlineProvider() {
+            override fun getOutline(view: View?, outline: Outline?) {
+                view?.let { it ->
+                    outline?.setRoundRect(
+                        0, 0, it.width, it.height, roundedCorner.dpToPx().toFloat()
+                    )
+                }
+            }
+        }
+        clipToOutline = true
+    } catch (e: Exception) {
+        Log.e(Constants.TAG, "Error when set outlineProvider of view - $e")
+    }
+}
+
+/**
+ * Thiết lập độ cong khác nhau cho các góc của View.
+ * Các giá trị bán kính được truyền vào dưới dạng Int (dp) và sẽ được chuyển đổi sang px.
+ *
+ * @param topLeft Bán kính góc trên bên trái (dp).
+ * @param topRight Bán kính góc trên bên phải (dp).
+ * @param bottomLeft Bán kính góc dưới bên trái (dp).
+ * @param bottomRight Bán kính góc dưới bên phải (dp).
+ */
+@RequiresApi(Build.VERSION_CODES.R)
+fun View.setRoundedCorners(
+    topLeft: Int = 0, topRight: Int = 0, bottomLeft: Int = 0, bottomRight: Int = 0
+) {
+    try {
+        outlineProvider = object : ViewOutlineProvider() {
+            override fun getOutline(view: View?, outline: Outline?) {
+                if (view == null || outline == null) return
+
+                // Chuyển đổi dp sang px (Float)
+                val tl = topLeft.dpToPx().toFloat()
+                val tr = topRight.dpToPx().toFloat()
+                val bl = bottomLeft.dpToPx().toFloat()
+                val br = bottomRight.dpToPx().toFloat()
+
+                // Mảng radii theo thứ tự: topLeft, topRight, bottomRight, bottomLeft
+                // Mỗi góc cần 2 giá trị (X và Y), thường là giống nhau.
+                val radii = floatArrayOf(
+                    tl, tl,     // Top left x, y
+                    tr, tr,     // Top right x, y
+                    br, br,     // Bottom right x, y
+                    bl, bl      // Bottom left x, y
+                )
+
+                // Tạo Path
+                val path = Path()
+                val rect = RectF(0f, 0f, view.width.toFloat(), view.height.toFloat())
+                path.addRoundRect(
+                    rect, radii, Path.Direction.CW
+                ) // CW = Clockwise (Chiều kim đồng hồ)
+
+                // Set path cho outline
+                outline.setPath(path)
+            }
+        }
+        clipToOutline = true // Rất quan trọng để clipping hoạt động
+    } catch (e: Exception) {
+        AppLogger.e("ViewExtension", "Error setting rounded corners: $e")
+    }
+}
+
+/**
+ * Thiết lập độ cong khác nhau cho các góc của View bằng cách sử dụng MaterialShapeDrawable làm background.
+ * Yêu cầu thư viện Material Components.
+ *
+ * @param topLeft Bán kính góc trên bên trái (dp).
+ * @param topRight Bán kính góc trên bên phải (dp).
+ * @param bottomLeft Bán kính góc dưới bên trái (dp).
+ * @param bottomRight Bán kính góc dưới bên phải (dp).
+ * @param backgroundColor Màu nền (tùy chọn).
+ * @param strokeWidth Độ rộng đường viền (dp, tùy chọn).
+ * @param strokeColor Màu đường viền (tùy chọn).
+ * @sample: myView.setRoundedCornersMaterial(topLeft = 16, topRight = 8, backgroundColor = Color.RED)
+ * @see View
+ */
+fun View.setRoundedCornersMaterial(
+    topLeft: Int = 0,
+    topRight: Int = 0,
+    bottomLeft: Int = 0,
+    bottomRight: Int = 0,
+    backgroundColor: Int? = null, // ví dụ: ContextCompat.getColor(context, R.color.your_color)
+    strokeWidth: Int = 0, // dp
+    strokeColor: Int? = null
+) {
+    val tl = topLeft.dpToPx().toFloat()
+    val tr = topRight.dpToPx().toFloat()
+    val bl = bottomLeft.dpToPx().toFloat()
+    val br = bottomRight.dpToPx().toFloat()
+
+    // Xây dựng mô hình hình dạng
+    val shapeAppearanceModel = ShapeAppearanceModel.builder()
+        .setTopLeftCorner(CornerFamily.ROUNDED, tl)
+        .setTopRightCorner(CornerFamily.ROUNDED, tr)
+        .setBottomLeftCorner(CornerFamily.ROUNDED, bl)
+        .setBottomRightCorner(CornerFamily.ROUNDED, br).build()
+
+    // Tạo MaterialShapeDrawable
+    val shapeDrawable = MaterialShapeDrawable(shapeAppearanceModel).apply {
+        // Đặt màu nền
+        backgroundColor?.let { color ->
+            fillColor = android.content.res.ColorStateList.valueOf(color)
+        } ?: run {
+            // Nếu không có màu nền, đặt màu fill mặc định là trong suốt
+            // hoặc màu mặc định nào đó nếu cần
+            fillColor =
+                android.content.res.ColorStateList.valueOf(android.graphics.Color.TRANSPARENT)
+        }
+
+        // Đặt đường viền
+        if (strokeWidth > 0 && strokeColor != null) {
+            setStroke(strokeWidth.dpToPx().toFloat(), strokeColor)
+        }
+    }
+
+    // Đặt làm background
+    background = shapeDrawable
+
+    // MaterialShapeDrawable thường xử lý clipping tốt hơn, đặc biệt khi dùng với các component Material khác
+    outlineProvider = ViewOutlineProvider.BACKGROUND
+    clipToOutline = true
 }

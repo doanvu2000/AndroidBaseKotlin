@@ -16,11 +16,13 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Parcelable
 import android.provider.OpenableColumns
+import android.util.TypedValue
 import android.view.PixelCopy
 import android.view.View
 import android.view.Window
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.FileProvider
+import androidx.core.graphics.createBitmap
 import androidx.core.os.LocaleListCompat
 import com.example.baseproject.BuildConfig
 import kotlinx.coroutines.CoroutineScope
@@ -277,7 +279,7 @@ fun clickStatic(action: () -> Unit) {
 fun captureView(view: View, window: Window, bitmapCallback: (Bitmap) -> Unit) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         // Above Android O, use PixelCopy
-        val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+        val bitmap = createBitmap(view.width, view.height)
         val location = IntArray(2)
         view.getLocationInWindow(location)
         PixelCopy.request(
@@ -292,9 +294,7 @@ fun captureView(view: View, window: Window, bitmapCallback: (Bitmap) -> Unit) {
             Handler(Looper.getMainLooper())
         )
     } else {
-        val tBitmap = Bitmap.createBitmap(
-            view.width, view.height, Bitmap.Config.RGB_565
-        )
+        val tBitmap = createBitmap(view.width, view.height, Bitmap.Config.RGB_565)
         val canvas = Canvas(tBitmap)
         view.draw(canvas)
         canvas.setBitmap(null)
@@ -309,3 +309,23 @@ fun tryCatch(action: () -> Unit) {
         e.printStackTrace()
     }
 }
+
+fun tryCatch(tryBlock: () -> Unit, catchBlock: ((e: Exception) -> Unit)? = null) {
+    try {
+        tryBlock()
+    } catch (e: Exception) {
+        catchBlock?.invoke(e)
+    }
+}
+
+fun Int.dpToPx(): Int {
+    return TypedValue.applyDimension(
+        TypedValue.COMPLEX_UNIT_DIP, this.toFloat(), Resources.getSystem().displayMetrics
+    ).toInt()
+}
+
+fun Float.dpToPx(): Int = TypedValue.applyDimension(
+    TypedValue.COMPLEX_UNIT_DIP,
+    this,
+    Resources.getSystem().displayMetrics
+).toInt()
