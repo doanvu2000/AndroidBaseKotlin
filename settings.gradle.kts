@@ -3,7 +3,9 @@ pluginManagement {
         gradlePluginPortal()
         google()
         mavenCentral()
-        maven { url 'https://jitpack.io' }
+        maven {
+            setUrl("https://jitpack.io")
+        }
     }
 }
 dependencyResolutionManagement {
@@ -11,14 +13,16 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url 'https://jitpack.io' }
+        maven {
+            setUrl("https://jitpack.io")
+        }
     }
 }
 rootProject.name = "BaseProject"
-include ':app'
-include ':skeleton'
-include ':sliderview'
-include ':stickerview'
-include ':simplecropview'
-include ':cameraview'
-include ':weekviewevent'
+include(":app")
+include(":skeleton")
+include(":sliderview")
+include(":stickerview")
+include(":simplecropview")
+include(":cameraview")
+include(":weekviewevent")

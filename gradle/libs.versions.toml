@@ -8,7 +8,7 @@ coil = "2.7.0"
 constraintlayout = "2.2.0"
 coreKtx = "1.13.1"
 espressoCore = "3.6.1"
-firebaseCrashlyticsGradle = "3.0.2"
+firebaseCrashlyticsGradle = "3.0.3"
 flexbox = "3.0.0"
 glide = "4.16.0"
 googleServices = "4.4.2"
@@ -67,3 +67,5 @@ commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "co
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+firebaseCrashlyticsGradle = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsGradle" }
+googleService = { id = "com.google.gms.google-services", version.ref = "googleServices" }

@@ -2,10 +2,10 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
+    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.googleService)
+    alias(libs.plugins.firebaseCrashlyticsGradle)
 }
 
 android {
