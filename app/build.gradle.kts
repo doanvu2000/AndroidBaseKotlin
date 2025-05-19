@@ -106,7 +106,7 @@ dependencies {
 //   implementation( "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
     //logging
     implementation(libs.logging.interceptor)
-    //MMKV
+    //M_MKV
     implementation(libs.mmkv.static)
 
     //glide
