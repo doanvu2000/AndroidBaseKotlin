@@ -1,305 +1,265 @@
-package com.base.cameraview.filter;
+package com.base.cameraview.filter
 
-import android.opengl.GLES20;
+import android.opengl.GLES20
+import androidx.annotation.VisibleForTesting
+import com.base.cameraview.size.Size
+import com.otaliastudios.opengl.core.Egloo.IDENTITY_MATRIX
+import com.otaliastudios.opengl.program.GlProgram
+import com.otaliastudios.opengl.program.GlTextureProgram
+import com.otaliastudios.opengl.texture.GlFramebuffer
+import com.otaliastudios.opengl.texture.GlTexture
 
-import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
-
-import com.base.cameraview.size.Size;
-import com.otaliastudios.opengl.core.Egloo;
-import com.otaliastudios.opengl.program.GlProgram;
-import com.otaliastudios.opengl.program.GlTextureProgram;
-import com.otaliastudios.opengl.texture.GlFramebuffer;
-import com.otaliastudios.opengl.texture.GlTexture;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-@SuppressWarnings("unused")
-public class MultiFilter implements Filter, OneParameterFilter, TwoParameterFilter {
+@Suppress("unused")
+class MultiFilter(filters: MutableCollection<Filter>) : Filter, OneParameterFilter,
+    TwoParameterFilter {
+    @VisibleForTesting
+    val filters: MutableList<Filter> = ArrayList()
 
     @VisibleForTesting
-    final List<Filter> filters = new ArrayList<>();
-    @VisibleForTesting
-    final Map<Filter, State> states = new HashMap<>();
-    private final Object lock = new Object();
-    private Size size = null;
-    private float parameter1 = 0F;
-    private float parameter2 = 0F;
+    val states: MutableMap<Filter?, State?> = HashMap<Filter?, State?>()
+    private val lock = Any()
+    private var size: Size? = null
+    override var parameter1: Float = 0f
+        set(parameter1) {
+            field = parameter1
+            synchronized(lock) {
+                for (filter in filters) {
+                    if (filter is OneParameterFilter) {
+                        filter.parameter1 = parameter1
+                    }
+                }
+            }
+        }
+    override var parameter2: Float = 0f
+        set(parameter2) {
+            field = parameter2
+            synchronized(lock) {
+                for (filter in filters) {
+                    if (filter is TwoParameterFilter) {
+                        filter.parameter2 = parameter2
+                    }
+                }
+            }
+        }
 
     /**
      * Creates a new group with the given filters.
      *
      * @param filters children
      */
-    public MultiFilter(@NonNull Filter... filters) {
-        this(Arrays.asList(filters));
-    }
+    constructor(vararg filters: Filter) : this(mutableListOf(*filters))
 
     /**
      * Creates a new group with the given filters.
      *
      * @param filters children
      */
-    @SuppressWarnings("WeakerAccess")
-    public MultiFilter(@NonNull Collection<Filter> filters) {
-        for (Filter filter : filters) {
-            addFilter(filter);
+    init {
+        for (filter in filters) {
+            addFilter(filter)
         }
     }
 
     /**
      * Adds a new filter. It will be used in the next frame.
-     * If the filter is a {@link MultiFilter}, we'll use its children instead.
+     * If the filter is a [MultiFilter], we'll use its children instead.
      *
      * @param filter a new filter
      */
-    @SuppressWarnings("WeakerAccess")
-    public void addFilter(@NonNull Filter filter) {
-        if (filter instanceof MultiFilter) {
-            MultiFilter multiFilter = (MultiFilter) filter;
-            for (Filter multiChild : multiFilter.filters) {
-                addFilter(multiChild);
+    fun addFilter(filter: Filter) {
+        if (filter is MultiFilter) {
+            val multiFilter = filter
+            for (multiChild in multiFilter.filters) {
+                addFilter(multiChild)
             }
-            return;
+            return
         }
-        synchronized (lock) {
+        synchronized(lock) {
             if (!filters.contains(filter)) {
-                filters.add(filter);
-                states.put(filter, new State());
+                filters.add(filter)
+                states.put(filter, State())
             }
         }
     }
 
-    private void maybeCreateProgram(@NonNull Filter filter, boolean isFirst, boolean isLast) {
-        State state = states.get(filter);
-        //noinspection ConstantConditions
-        if (state.isProgramCreated) return;
-        state.isProgramCreated = true;
+    private fun maybeCreateProgram(filter: Filter, isFirst: Boolean, isLast: Boolean) {
+        val state = states[filter]
+        if (state!!.isProgramCreated) return
+        state.isProgramCreated = true
 
         // The first shader actually reads from a OES texture, but the others
         // will read from the 2d framebuffer texture. This is a dirty hack.
-        String fragmentShader = isFirst
-                ? filter.getFragmentShader()
-                : filter.getFragmentShader().replace("samplerExternalOES ", "sampler2D ");
-        String vertexShader = filter.getVertexShader();
-        state.programHandle = GlProgram.create(vertexShader, fragmentShader);
-        filter.onCreate(state.programHandle);
+        val fragmentShader = if (isFirst)
+            filter.fragmentShader
+        else
+            filter.fragmentShader.replace("samplerExternalOES ", "sampler2D ")
+        val vertexShader = filter.vertexShader
+        state.programHandle = GlProgram.create(vertexShader, fragmentShader)
+        filter.onCreate(state.programHandle)
     }
 
     // We don't offer a removeFilter method since that would cause issues
     // with cleanup. Cleanup must happen on the GL thread so we'd have to wait
     // for new rendering call (which might not even happen).
-
-    private void maybeDestroyProgram(@NonNull Filter filter) {
-        State state = states.get(filter);
-        //noinspection ConstantConditions
-        if (!state.isProgramCreated) return;
-        state.isProgramCreated = false;
-        filter.onDestroy();
-        GLES20.glDeleteProgram(state.programHandle);
-        state.programHandle = -1;
+    private fun maybeDestroyProgram(filter: Filter) {
+        val state = states[filter]
+        if (!state!!.isProgramCreated) return
+        state.isProgramCreated = false
+        filter.onDestroy()
+        GLES20.glDeleteProgram(state.programHandle)
+        state.programHandle = -1
     }
 
-    private void maybeCreateFramebuffer(@NonNull Filter filter, boolean isFirst, boolean isLast) {
-        State state = states.get(filter);
+    private fun maybeCreateFramebuffer(filter: Filter, isFirst: Boolean, isLast: Boolean) {
+        val state = states[filter]
         if (isLast) {
-            //noinspection ConstantConditions
-            state.sizeChanged = false;
-            return;
+            state?.sizeChanged = false
+            return
         }
-        //noinspection ConstantConditions
-        if (state.sizeChanged) {
-            maybeDestroyFramebuffer(filter);
-            state.sizeChanged = false;
+        if (state?.sizeChanged == true) {
+            maybeDestroyFramebuffer(filter)
+            state.sizeChanged = false
         }
-        if (!state.isFramebufferCreated) {
-            state.isFramebufferCreated = true;
-            state.outputTexture = new GlTexture(GLES20.GL_TEXTURE0,
-                    GLES20.GL_TEXTURE_2D,
-                    state.size.getWidth(),
-                    state.size.getHeight());
-            state.outputFramebuffer = new GlFramebuffer();
-            state.outputFramebuffer.attach(state.outputTexture);
+        if (!state!!.isFramebufferCreated) {
+            state.isFramebufferCreated = true
+            state.outputTexture = GlTexture(
+                GLES20.GL_TEXTURE0,
+                GLES20.GL_TEXTURE_2D,
+                state.size!!.width,
+                state.size!!.height
+            )
+            state.outputFramebuffer = GlFramebuffer()
+            state.outputFramebuffer!!.attach(state.outputTexture!!)
         }
     }
 
-    private void maybeDestroyFramebuffer(@NonNull Filter filter) {
-        State state = states.get(filter);
-        //noinspection ConstantConditions
-        if (!state.isFramebufferCreated) return;
-        state.isFramebufferCreated = false;
-        state.outputFramebuffer.release();
-        state.outputFramebuffer = null;
-        state.outputTexture.release();
-        state.outputTexture = null;
+    private fun maybeDestroyFramebuffer(filter: Filter) {
+        val state = states[filter]
+        if (!state!!.isFramebufferCreated) return
+        state.isFramebufferCreated = false
+        state.outputFramebuffer!!.release()
+        state.outputFramebuffer = null
+        state.outputTexture!!.release()
+        state.outputTexture = null
     }
 
     // Any thread...
-    private void maybeSetSize(@NonNull Filter filter) {
-        State state = states.get(filter);
-        //noinspection ConstantConditions
-        if (size != null && !size.equals(state.size)) {
-            state.size = size;
-            state.sizeChanged = true;
-            filter.setSize(size.getWidth(), size.getHeight());
+    private fun maybeSetSize(filter: Filter) {
+        val state = states[filter]
+        if (size != null && size != state!!.size) {
+            state.size = size
+            state.sizeChanged = true
+            filter.setSize(size!!.width, size!!.height)
         }
     }
 
-    @Override
-    public void onCreate(int programHandle) {
+    override fun onCreate(programHandle: Int) {
         // We'll create children during the draw() op, since some of them
         // might have been added after this onCreate() is called.
     }
 
-    @NonNull
-    @Override
-    public String getVertexShader() {
-        // Whatever, we won't be using this.
-        return GlTextureProgram.SIMPLE_VERTEX_SHADER;
-    }
+    override val vertexShader: String
+        get() =// Whatever, we won't be using this.
+            GlTextureProgram.Companion.SIMPLE_VERTEX_SHADER
 
-    @NonNull
-    @Override
-    public String getFragmentShader() {
-        // Whatever, we won't be using this.
-        return GlTextureProgram.SIMPLE_FRAGMENT_SHADER;
-    }
+    override val fragmentShader: String
+        get() =// Whatever, we won't be using this.
+            GlTextureProgram.Companion.SIMPLE_FRAGMENT_SHADER
 
-    @Override
-    public void onDestroy() {
-        synchronized (lock) {
-            for (Filter filter : filters) {
-                maybeDestroyFramebuffer(filter);
-                maybeDestroyProgram(filter);
+    override fun onDestroy() {
+        synchronized(lock) {
+            for (filter in filters) {
+                maybeDestroyFramebuffer(filter)
+                maybeDestroyProgram(filter)
             }
         }
     }
 
-    @Override
-    public void setSize(int width, int height) {
-        size = new Size(width, height);
-        synchronized (lock) {
-            for (Filter filter : filters) {
-                maybeSetSize(filter);
+    override fun setSize(width: Int, height: Int) {
+        size = Size(width, height)
+        synchronized(lock) {
+            for (filter in filters) {
+                maybeSetSize(filter)
             }
         }
     }
 
-    @Override
-    public void draw(long timestampUs, @NonNull float[] transformMatrix) {
-        synchronized (lock) {
-            for (int i = 0; i < filters.size(); i++) {
-                boolean isFirst = i == 0;
-                boolean isLast = i == filters.size() - 1;
-                Filter filter = filters.get(i);
-                State state = states.get(filter);
+    override fun draw(timestampUs: Long, transformMatrix: FloatArray) {
+        synchronized(lock) {
+            for (i in filters.indices) {
+                val isFirst = i == 0
+                val isLast = i == filters.size - 1
+                val filter = filters[i]
+                val state = states[filter]
 
-                maybeSetSize(filter);
-                maybeCreateProgram(filter, isFirst, isLast);
-                maybeCreateFramebuffer(filter, isFirst, isLast);
+                maybeSetSize(filter)
+                maybeCreateProgram(filter, isFirst, isLast)
+                maybeCreateFramebuffer(filter, isFirst, isLast)
 
-                //noinspection ConstantConditions
-                GLES20.glUseProgram(state.programHandle);
+                state?.let {
+                    GLES20.glUseProgram(state.programHandle)
+                }
 
                 // Define the output framebuffer.
                 // Each filter outputs into its own framebuffer object, except the
                 // last filter, which outputs into the default framebuffer.
                 if (!isLast) {
-                    state.outputFramebuffer.bind();
-                    GLES20.glClearColor(0, 0, 0, 0);
+                    state?.outputFramebuffer!!.bind()
+                    GLES20.glClearColor(0f, 0f, 0f, 0f)
                 } else {
-                    GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+                    GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0)
                 }
 
                 // Perform the actual drawing.
                 // The first filter should apply all the transformations. Then,
                 // since they are applied, we should use a no-op matrix.
                 if (isFirst) {
-                    filter.draw(timestampUs, transformMatrix);
+                    filter.draw(timestampUs, transformMatrix)
                 } else {
-                    filter.draw(timestampUs, Egloo.IDENTITY_MATRIX);
+                    filter.draw(timestampUs, IDENTITY_MATRIX)
                 }
 
                 // Set the input for the next cycle:
                 // It is the framebuffer texture from this cycle. If this is the last
                 // filter, reset this value just to cleanup.
                 if (!isLast) {
-                    state.outputTexture.bind();
+                    state?.outputTexture!!.bind()
                 } else {
-                    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
-                    GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+                    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0)
+                    GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
                 }
 
-                GLES20.glUseProgram(0);
+                GLES20.glUseProgram(0)
             }
         }
     }
 
-    @NonNull
-    @Override
-    public Filter copy() {
-        synchronized (lock) {
-            MultiFilter copy = new MultiFilter();
+    override fun copy(): Filter {
+        synchronized(lock) {
+            val copy = MultiFilter()
             if (size != null) {
-                copy.setSize(size.getWidth(), size.getHeight());
+                copy.setSize(size!!.width, size!!.height)
             }
-            for (Filter filter : filters) {
-                copy.addFilter(filter.copy());
+            for (filter in filters) {
+                copy.addFilter(filter.copy())
             }
-            return copy;
-        }
-    }
-
-    @Override
-    public float getParameter1() {
-        return parameter1;
-    }
-
-    @Override
-    public void setParameter1(float parameter1) {
-        this.parameter1 = parameter1;
-        synchronized (lock) {
-            for (Filter filter : filters) {
-                if (filter instanceof OneParameterFilter) {
-                    ((OneParameterFilter) filter).setParameter1(parameter1);
-                }
-            }
-        }
-    }
-
-    @Override
-    public float getParameter2() {
-        return parameter2;
-    }
-
-    @Override
-    public void setParameter2(float parameter2) {
-        this.parameter2 = parameter2;
-        synchronized (lock) {
-            for (Filter filter : filters) {
-                if (filter instanceof TwoParameterFilter) {
-                    ((TwoParameterFilter) filter).setParameter2(parameter2);
-                }
-            }
+            return copy
         }
     }
 
     @VisibleForTesting
-    static class State {
+    class State {
         @VisibleForTesting
-        boolean isProgramCreated = false;
+        var isProgramCreated: Boolean = false
+
         @VisibleForTesting
-        boolean isFramebufferCreated = false;
+        var isFramebufferCreated: Boolean = false
+
         @VisibleForTesting
-        Size size = null;
-        private boolean sizeChanged = false;
-        private int programHandle = -1;
-        private GlFramebuffer outputFramebuffer = null;
-        private GlTexture outputTexture = null;
+        var size: Size? = null
+        var sizeChanged = false
+        var programHandle = -1
+        var outputFramebuffer: GlFramebuffer? = null
+        var outputTexture: GlTexture? = null
     }
 }

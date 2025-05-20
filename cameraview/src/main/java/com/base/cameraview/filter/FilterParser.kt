@@ -1,31 +1,25 @@
-package com.base.cameraview.filter;
+package com.base.cameraview.filter
 
-import android.content.res.TypedArray;
-
-import androidx.annotation.NonNull;
-
-import com.base.cameraview.R;
+import android.content.res.TypedArray
+import com.base.cameraview.R
 
 /**
  * Parses filters from XML attributes.
  */
-public class FilterParser {
+class FilterParser(array: TypedArray) {
+    private var filter: Filter? = null
 
-    private Filter filter = null;
-
-    public FilterParser(@NonNull TypedArray array) {
-        String filterName = array.getString(R.styleable.CameraView_cameraFilter);
+    init {
+        val filterName = array.getString(R.styleable.CameraView_cameraFilter)
         try {
-            //noinspection ConstantConditions
-            Class<?> filterClass = Class.forName(filterName);
-            filter = (Filter) filterClass.newInstance();
-        } catch (Exception ignore) {
-            filter = new NoFilter();
+            val filterClass = Class.forName(filterName)
+            filter = filterClass.newInstance() as Filter
+        } catch (ignore: Exception) {
+            filter = NoFilter()
         }
     }
 
-    @NonNull
-    public Filter getFilter() {
-        return filter;
+    fun getFilter(): Filter {
+        return filter!!
     }
 }

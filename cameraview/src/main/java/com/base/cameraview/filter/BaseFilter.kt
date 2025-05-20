@@ -1,201 +1,190 @@
-package com.base.cameraview.filter;
+package com.base.cameraview.filter
 
-import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
-
-import com.base.cameraview.CameraLogger;
-import com.base.cameraview.size.Size;
-import com.otaliastudios.opengl.draw.GlDrawable;
-import com.otaliastudios.opengl.draw.GlRect;
-import com.otaliastudios.opengl.program.GlTextureProgram;
+import androidx.annotation.VisibleForTesting
+import com.base.cameraview.CameraLogger
+import com.base.cameraview.size.Size
+import com.otaliastudios.opengl.draw.GlDrawable
+import com.otaliastudios.opengl.draw.GlRect
+import com.otaliastudios.opengl.program.GlTextureProgram
 
 /**
- * A base implementation of {@link Filter} that just leaves the fragment shader to subclasses.
- * See {@link NoFilter} for a non-abstract implementation.
- * <p>
+ * A base implementation of [Filter] that just leaves the fragment shader to subclasses.
+ * See [NoFilter] for a non-abstract implementation.
+ *
+ *
  * This class offers a default vertex shader implementation which in most cases is not required
  * to be changed. Most effects can be rendered by simply changing the fragment shader, thus
- * by overriding {@link #getFragmentShader()}.
- * <p>
- * All {@link BaseFilter}s should have a no-arguments public constructor.
- * This class will try to automatically implement {@link #copy()} thanks to this.
+ * by overriding [.getFragmentShader].
+ *
+ *
+ * All [BaseFilter]s should have a no-arguments public constructor.
+ * This class will try to automatically implement [.copy] thanks to this.
  * NOTE - This class expects variable to have a certain name:
- * - {@link #vertexPositionName}
- * - {@link #vertexTransformMatrixName}
- * - {@link #vertexModelViewProjectionMatrixName}
- * - {@link #vertexTextureCoordinateName}
- * - {@link #fragmentTextureCoordinateName}
+ * - [.vertexPositionName]
+ * - [.vertexTransformMatrixName]
+ * - [.vertexModelViewProjectionMatrixName]
+ * - [.vertexTextureCoordinateName]
+ * - [.fragmentTextureCoordinateName]
  * You can either change these variables, for example in your constructor, or change your
  * vertex and fragment shader code to use them.
- * <p>
- * NOTE - the {@link android.graphics.SurfaceTexture} restrictions apply:
- * We only support the {@link android.opengl.GLES11Ext#GL_TEXTURE_EXTERNAL_OES} texture target
+ *
+ *
+ * NOTE - the [android.graphics.SurfaceTexture] restrictions apply:
+ * We only support the [android.opengl.GLES11Ext.GL_TEXTURE_EXTERNAL_OES] texture target
  * and it must be specified in the fragment shader as a samplerExternalOES texture.
  * You also have to explicitly require the extension: see
- * {@link #createDefaultFragmentShader(String)}.
+ * [.createDefaultFragmentShader].
  */
-public abstract class BaseFilter implements Filter {
+abstract class BaseFilter : Filter {
+    protected var vertexPositionName: String = DEFAULT_VERTEX_POSITION_NAME
+    protected var vertexTextureCoordinateName: String = DEFAULT_VERTEX_TEXTURE_COORDINATE_NAME
+    protected var vertexModelViewProjectionMatrixName: String = DEFAULT_VERTEX_MVP_MATRIX_NAME
+    protected var vertexTransformMatrixName: String = DEFAULT_VERTEX_TRANSFORM_MATRIX_NAME
 
-    @SuppressWarnings("WeakerAccess")
-    protected final static String DEFAULT_VERTEX_POSITION_NAME = "aPosition";
-    @SuppressWarnings("WeakerAccess")
-    protected final static String DEFAULT_VERTEX_TEXTURE_COORDINATE_NAME = "aTextureCoord";
-    @SuppressWarnings("WeakerAccess")
-    protected final static String DEFAULT_VERTEX_MVP_MATRIX_NAME = "uMVPMatrix";
-    @SuppressWarnings("WeakerAccess")
-    protected final static String DEFAULT_VERTEX_TRANSFORM_MATRIX_NAME = "uTexMatrix";
-    protected final static String DEFAULT_FRAGMENT_TEXTURE_COORDINATE_NAME = "vTextureCoord";
-    private final static String TAG = BaseFilter.class.getSimpleName();
-    private final static CameraLogger LOG = CameraLogger.create(TAG);
-    @SuppressWarnings("WeakerAccess")
-    protected String vertexPositionName = DEFAULT_VERTEX_POSITION_NAME;
-    @SuppressWarnings("WeakerAccess")
-    protected String vertexTextureCoordinateName = DEFAULT_VERTEX_TEXTURE_COORDINATE_NAME;
-    @SuppressWarnings("WeakerAccess")
-    protected String vertexModelViewProjectionMatrixName = DEFAULT_VERTEX_MVP_MATRIX_NAME;
-    @SuppressWarnings("WeakerAccess")
-    protected String vertexTransformMatrixName = DEFAULT_VERTEX_TRANSFORM_MATRIX_NAME;
-    @SuppressWarnings({"unused", "WeakerAccess"})
-    protected String fragmentTextureCoordinateName = DEFAULT_FRAGMENT_TEXTURE_COORDINATE_NAME;
+    @Suppress("unused")
+    protected var fragmentTextureCoordinateName: String = DEFAULT_FRAGMENT_TEXTURE_COORDINATE_NAME
+
     @VisibleForTesting
-    GlTextureProgram program = null;
+    var program: GlTextureProgram? = null
+
     @VisibleForTesting
-    Size size;
-    private GlDrawable programDrawable = null;
+    var size: Size? = null
+    private var programDrawable: GlDrawable? = null
 
-    @NonNull
-    private static String createDefaultVertexShader(
-            @NonNull String vertexPositionName,
-            @NonNull String vertexTextureCoordinateName,
-            @NonNull String vertexModelViewProjectionMatrixName,
-            @NonNull String vertexTransformMatrixName,
-            @NonNull String fragmentTextureCoordinateName) {
-        return "uniform mat4 " + vertexModelViewProjectionMatrixName + ";\n"
-                + "uniform mat4 " + vertexTransformMatrixName + ";\n"
-                + "attribute vec4 " + vertexPositionName + ";\n"
-                + "attribute vec4 " + vertexTextureCoordinateName + ";\n"
-                + "varying vec2 " + fragmentTextureCoordinateName + ";\n"
-                + "void main() {\n"
-                + "    gl_Position = " + vertexModelViewProjectionMatrixName + " * "
-                + vertexPositionName + ";\n"
-                + "    " + fragmentTextureCoordinateName + " = (" + vertexTransformMatrixName + " * "
-                + vertexTextureCoordinateName + ").xy;\n"
-                + "}\n";
+    protected fun createDefaultVertexShader(): String {
+        return createDefaultVertexShader(
+            vertexPositionName,
+            vertexTextureCoordinateName,
+            vertexModelViewProjectionMatrixName,
+            vertexTransformMatrixName,
+            fragmentTextureCoordinateName
+        )
     }
 
-    @NonNull
-    private static String createDefaultFragmentShader(
-            @NonNull String fragmentTextureCoordinateName) {
-        return "#extension GL_OES_EGL_image_external : require\n"
-                + "precision mediump float;\n"
-                + "varying vec2 " + fragmentTextureCoordinateName + ";\n"
-                + "uniform samplerExternalOES sTexture;\n"
-                + "void main() {\n"
-                + "  gl_FragColor = texture2D(sTexture, " + fragmentTextureCoordinateName + ");\n"
-                + "}\n";
+    protected fun createDefaultFragmentShader(): String {
+        return createDefaultFragmentShader(fragmentTextureCoordinateName)
     }
 
-    @SuppressWarnings("WeakerAccess")
-    @NonNull
-    protected String createDefaultVertexShader() {
-        return createDefaultVertexShader(vertexPositionName,
-                vertexTextureCoordinateName,
-                vertexModelViewProjectionMatrixName,
-                vertexTransformMatrixName,
-                fragmentTextureCoordinateName);
+    override fun onCreate(programHandle: Int) {
+        program = GlTextureProgram(
+            programHandle,
+            vertexPositionName,
+            vertexModelViewProjectionMatrixName,
+            vertexTextureCoordinateName,
+            vertexTransformMatrixName
+        )
+        programDrawable = GlRect()
     }
 
-    @SuppressWarnings("WeakerAccess")
-    @NonNull
-    protected String createDefaultFragmentShader() {
-        return createDefaultFragmentShader(fragmentTextureCoordinateName);
-    }
-
-    @Override
-    public void onCreate(int programHandle) {
-        program = new GlTextureProgram(programHandle,
-                vertexPositionName,
-                vertexModelViewProjectionMatrixName,
-                vertexTextureCoordinateName,
-                vertexTransformMatrixName);
-        programDrawable = new GlRect();
-    }
-
-    @Override
-    public void onDestroy() {
+    override fun onDestroy() {
         // Since we used the handle constructor of GlTextureProgram, calling release here
         // will NOT destroy the GL program. This is important because Filters are not supposed
         // to have ownership of programs. Creation and deletion happen outside, and deleting twice
         // would cause an error.
-        program.release();
-        program = null;
-        programDrawable = null;
+        program!!.release()
+        program = null
+        programDrawable = null
     }
 
-    @NonNull
-    @Override
-    public String getVertexShader() {
-        return createDefaultVertexShader();
+    override val vertexShader: String
+        get() = createDefaultVertexShader()
+
+    override fun setSize(width: Int, height: Int) {
+        size = Size(width, height)
     }
 
-    @Override
-    public void setSize(int width, int height) {
-        size = new Size(width, height);
-    }
-
-    @Override
-    public void draw(long timestampUs, @NonNull float[] transformMatrix) {
+    override fun draw(timestampUs: Long, transformMatrix: FloatArray) {
         if (program == null) {
-            LOG.w("Filter.draw() called after destroying the filter. " +
-                    "This can happen rarely because of threading.");
+            LOG.w(
+                "Filter.draw() called after destroying the filter. " +
+                        "This can happen rarely because of threading."
+            )
         } else {
-            onPreDraw(timestampUs, transformMatrix);
-            onDraw(timestampUs);
-            onPostDraw(timestampUs);
+            onPreDraw(timestampUs, transformMatrix)
+            onDraw(timestampUs)
+            onPostDraw(timestampUs)
         }
     }
 
-    protected void onPreDraw(long timestampUs, @NonNull float[] transformMatrix) {
-        program.setTextureTransform(transformMatrix);
-        program.onPreDraw(programDrawable, programDrawable.getModelMatrix());
+    protected open fun onPreDraw(timestampUs: Long, transformMatrix: FloatArray) {
+        program!!.textureTransform = transformMatrix
+        program!!.onPreDraw(programDrawable!!, programDrawable!!.modelMatrix)
     }
 
-    @SuppressWarnings("WeakerAccess")
-    protected void onDraw(@SuppressWarnings("unused") long timestampUs) {
+    protected fun onDraw(@Suppress("unused") timestampUs: Long) {
         try {
-            program.onDraw(programDrawable);
-        } catch (Exception e) {
-            e.printStackTrace();
+            program!!.onDraw(programDrawable!!)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
-    @SuppressWarnings("WeakerAccess")
-    protected void onPostDraw(@SuppressWarnings("unused") long timestampUs) {
-        program.onPostDraw(programDrawable);
+    protected fun onPostDraw(@Suppress("unused") timestampUs: Long) {
+        program!!.onPostDraw(programDrawable!!)
     }
 
-    @NonNull
-    @Override
-    public final BaseFilter copy() {
-        BaseFilter copy = onCopy();
+    override fun copy(): BaseFilter {
+        val copy = onCopy()
         if (size != null) {
-            copy.setSize(size.getWidth(), size.getHeight());
+            copy.setSize(size!!.width, size!!.height)
         }
-        if (this instanceof OneParameterFilter) {
-            ((OneParameterFilter) copy).setParameter1(((OneParameterFilter) this).getParameter1());
+        if (this is OneParameterFilter) {
+            (copy as OneParameterFilter).parameter1 = (this as OneParameterFilter).parameter1
         }
-        if (this instanceof TwoParameterFilter) {
-            ((TwoParameterFilter) copy).setParameter2(((TwoParameterFilter) this).getParameter2());
+        if (this is TwoParameterFilter) {
+            (copy as TwoParameterFilter).parameter2 = (this as TwoParameterFilter).parameter2
         }
-        return copy;
+        return copy
     }
 
-    @NonNull
-    protected BaseFilter onCopy() {
+    protected open fun onCopy(): BaseFilter {
         try {
-            return getClass().newInstance();
-        } catch (IllegalAccessException | InstantiationException e) {
-            throw new RuntimeException("Filters should have a public no-arguments constructor.", e);
+            return javaClass.newInstance()
+        } catch (e: IllegalAccessException) {
+            throw RuntimeException("Filters should have a public no-arguments constructor.", e)
+        } catch (e: InstantiationException) {
+            throw RuntimeException("Filters should have a public no-arguments constructor.", e)
+        }
+    }
+
+    companion object {
+        protected const val DEFAULT_VERTEX_POSITION_NAME: String = "aPosition"
+        protected const val DEFAULT_VERTEX_TEXTURE_COORDINATE_NAME: String = "aTextureCoord"
+        protected const val DEFAULT_VERTEX_MVP_MATRIX_NAME: String = "uMVPMatrix"
+        protected const val DEFAULT_VERTEX_TRANSFORM_MATRIX_NAME: String = "uTexMatrix"
+        protected const val DEFAULT_FRAGMENT_TEXTURE_COORDINATE_NAME: String = "vTextureCoord"
+        private val TAG: String = BaseFilter::class.java.simpleName
+        private val LOG: CameraLogger = CameraLogger.create(TAG)
+        private fun createDefaultVertexShader(
+            vertexPositionName: String,
+            vertexTextureCoordinateName: String,
+            vertexModelViewProjectionMatrixName: String,
+            vertexTransformMatrixName: String,
+            fragmentTextureCoordinateName: String
+        ): String {
+            return ("uniform mat4 " + vertexModelViewProjectionMatrixName + ";\n"
+                    + "uniform mat4 " + vertexTransformMatrixName + ";\n"
+                    + "attribute vec4 " + vertexPositionName + ";\n"
+                    + "attribute vec4 " + vertexTextureCoordinateName + ";\n"
+                    + "varying vec2 " + fragmentTextureCoordinateName + ";\n"
+                    + "void main() {\n"
+                    + "    gl_Position = " + vertexModelViewProjectionMatrixName + " * "
+                    + vertexPositionName + ";\n"
+                    + "    " + fragmentTextureCoordinateName + " = (" + vertexTransformMatrixName + " * "
+                    + vertexTextureCoordinateName + ").xy;\n"
+                    + "}\n")
+        }
+
+        private fun createDefaultFragmentShader(
+            fragmentTextureCoordinateName: String
+        ): String {
+            return ("#extension GL_OES_EGL_image_external : require\n"
+                    + "precision mediump float;\n"
+                    + "varying vec2 " + fragmentTextureCoordinateName + ";\n"
+                    + "uniform samplerExternalOES sTexture;\n"
+                    + "void main() {\n"
+                    + "  gl_FragColor = texture2D(sTexture, " + fragmentTextureCoordinateName + ");\n"
+                    + "}\n")
         }
     }
 }
