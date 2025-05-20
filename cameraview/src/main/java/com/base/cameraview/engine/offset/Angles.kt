@@ -1,50 +1,49 @@
-package com.base.cameraview.engine.offset;
+package com.base.cameraview.engine.offset
 
-import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
-
-import com.base.cameraview.CameraLogger;
-import com.base.cameraview.controls.Facing;
+import androidx.annotation.VisibleForTesting
+import com.base.cameraview.CameraLogger
+import com.base.cameraview.controls.Facing
 
 /**
- * These offsets are computed based on the {@link #setSensorOffset(Facing, int)},
- * {@link #setDisplayOffset(int)} and {@link #setDeviceOrientation(int)} values that are coming
+ * These offsets are computed based on the [.setSensorOffset],
+ * [.setDisplayOffset] and [.setDeviceOrientation] values that are coming
  * from outside.
- * <p>
- * When communicating with the sensor, {@link Axis#RELATIVE_TO_SENSOR} should probably be used.
+ *
+ *
+ * When communicating with the sensor, [Axis.RELATIVE_TO_SENSOR] should probably be used.
  * This means inverting the offset when using the front camera.
  * This is often the case when calling offset(SENSOR, OUTPUT), for example when passing a JPEG
  * rotation to the sensor. That is meant to be consumed as relative to the sensor plane.
- * <p>
- * For all other usages, {@link Axis#ABSOLUTE} is probably a better choice.
+ *
+ *
+ * For all other usages, [Axis.ABSOLUTE] is probably a better choice.
  */
-public class Angles {
+class Angles {
+    @VisibleForTesting
+    var mSensorOffset: Int = 0
 
-    private final static String TAG = Angles.class.getSimpleName();
-    private final static CameraLogger LOG = CameraLogger.create(TAG);
     @VisibleForTesting
-    int mSensorOffset = 0;
+    var mDisplayOffset: Int = 0
+
     @VisibleForTesting
-    int mDisplayOffset = 0;
-    @VisibleForTesting
-    int mDeviceOrientation = 0;
-    private Facing mSensorFacing;
+    var mDeviceOrientation: Int = 0
+    private var mSensorFacing: Facing? = null
 
     /**
-     * We want to keep everything in the {@link Axis#ABSOLUTE} reference,
+     * We want to keep everything in the [Axis.ABSOLUTE] reference,
      * so a front facing sensor offset must be inverted.
      *
      * @param sensorFacing sensor facing value
      * @param sensorOffset sensor offset
      */
-    public void setSensorOffset(@NonNull Facing sensorFacing, int sensorOffset) {
-        sanitizeInput(sensorOffset);
-        mSensorFacing = sensorFacing;
-        mSensorOffset = sensorOffset;
+    fun setSensorOffset(sensorFacing: Facing, sensorOffset: Int) {
+        sanitizeInput(sensorOffset)
+        mSensorFacing = sensorFacing
+        mSensorOffset = sensorOffset
         if (mSensorFacing == Facing.FRONT) {
-            mSensorOffset = sanitizeOutput(360 - mSensorOffset);
+            mSensorOffset = sanitizeOutput(360 - mSensorOffset)
         }
-        print();
+        print()
     }
 
     /**
@@ -52,10 +51,10 @@ public class Angles {
      *
      * @param displayOffset the display offset
      */
-    public void setDisplayOffset(int displayOffset) {
-        sanitizeInput(displayOffset);
-        mDisplayOffset = displayOffset;
-        print();
+    fun setDisplayOffset(displayOffset: Int) {
+        sanitizeInput(displayOffset)
+        mDisplayOffset = displayOffset
+        print()
     }
 
     /**
@@ -63,17 +62,19 @@ public class Angles {
      *
      * @param deviceOrientation the device orientation
      */
-    public void setDeviceOrientation(int deviceOrientation) {
-        sanitizeInput(deviceOrientation);
-        mDeviceOrientation = deviceOrientation;
-        print();
+    fun setDeviceOrientation(deviceOrientation: Int) {
+        sanitizeInput(deviceOrientation)
+        mDeviceOrientation = deviceOrientation
+        print()
     }
 
-    private void print() {
-        LOG.i("Angles changed:",
-                "sensorOffset:", mSensorOffset,
-                "displayOffset:", mDisplayOffset,
-                "deviceOrientation:", mDeviceOrientation);
+    private fun print() {
+        LOG.i(
+            "Angles changed:",
+            "sensorOffset:", mSensorOffset,
+            "displayOffset:", mDisplayOffset,
+            "deviceOrientation:", mDeviceOrientation
+        )
     }
 
     /**
@@ -84,36 +85,33 @@ public class Angles {
      * @param axis the axis
      * @return the offset
      */
-    public int offset(@NonNull Reference from, @NonNull Reference to, @NonNull Axis axis) {
-        int offset = absoluteOffset(from, to);
+    fun offset(from: Reference, to: Reference, axis: Axis): Int {
+        var offset = absoluteOffset(from, to)
         if (axis == Axis.RELATIVE_TO_SENSOR) {
             if (mSensorFacing == Facing.FRONT) {
-                offset = sanitizeOutput(360 - offset);
+                offset = sanitizeOutput(360 - offset)
             }
         }
-        return offset;
+        return offset
     }
 
-    private int absoluteOffset(@NonNull Reference from, @NonNull Reference to) {
+    private fun absoluteOffset(from: Reference, to: Reference): Int {
         if (from == to) {
-            return 0;
+            return 0
         } else if (to == Reference.BASE) {
-            return sanitizeOutput(360 - absoluteOffset(to, from));
+            return sanitizeOutput(360 - absoluteOffset(to, from))
         } else if (from == Reference.BASE) {
-            switch (to) {
-                case VIEW:
-                    return sanitizeOutput(360 - mDisplayOffset);
-                case OUTPUT:
-                    return sanitizeOutput(mDeviceOrientation);
-                case SENSOR:
-                    return sanitizeOutput(360 - mSensorOffset);
-                default:
-                    throw new RuntimeException("Unknown reference: " + to);
+            return when (to) {
+                Reference.VIEW -> sanitizeOutput(360 - mDisplayOffset)
+                Reference.OUTPUT -> sanitizeOutput(mDeviceOrientation)
+                Reference.SENSOR -> sanitizeOutput(360 - mSensorOffset)
+                else -> throw RuntimeException("Unknown reference: $to")
             }
         } else {
             return sanitizeOutput(
-                    absoluteOffset(Reference.BASE, to)
-                            - absoluteOffset(Reference.BASE, from));
+                absoluteOffset(Reference.BASE, to)
+                        - absoluteOffset(Reference.BASE, from)
+            )
         }
     }
 
@@ -124,20 +122,20 @@ public class Angles {
      * @param to   destination
      * @return true if flipped
      */
-    public boolean flip(@NonNull Reference from, @NonNull Reference to) {
-        return offset(from, to, Axis.ABSOLUTE) % 180 != 0;
+    fun flip(from: Reference, to: Reference): Boolean {
+        return offset(from, to, Axis.ABSOLUTE) % 180 != 0
     }
 
-    private void sanitizeInput(int value) {
-        if (value != 0
-                && value != 90
-                && value != 180
-                && value != 270) {
-            throw new IllegalStateException("This value is not sanitized: " + value);
-        }
+    private fun sanitizeInput(value: Int) {
+        check(!(value != 0 && value != 90 && value != 180 && value != 270)) { "This value is not sanitized: $value" }
     }
 
-    private int sanitizeOutput(int value) {
-        return (value + 360) % 360;
+    private fun sanitizeOutput(value: Int): Int {
+        return (value + 360) % 360
+    }
+
+    companion object {
+        private val TAG: String = Angles::class.java.simpleName
+        private val LOG: CameraLogger = CameraLogger.create(TAG)
     }
 }
