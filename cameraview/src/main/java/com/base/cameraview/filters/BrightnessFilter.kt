@@ -1,44 +1,28 @@
-package com.base.cameraview.filters;
+package com.base.cameraview.filters
 
-import android.opengl.GLES20;
-
-import androidx.annotation.NonNull;
-
-import com.base.cameraview.filter.BaseFilter;
-import com.base.cameraview.filter.OneParameterFilter;
-import com.otaliastudios.opengl.core.Egloo;
+import android.opengl.GLES20
+import com.base.cameraview.filter.BaseFilter
+import com.base.cameraview.filter.OneParameterFilter
+import com.otaliastudios.opengl.core.Egloo.checkGlError
+import com.otaliastudios.opengl.core.Egloo.checkGlProgramLocation
 
 /**
  * Adjusts the brightness of the frames.
  */
-public class BrightnessFilter extends BaseFilter implements OneParameterFilter {
+class BrightnessFilter : BaseFilter(), OneParameterFilter {
+    private var brightness = 2.0f // 1.0F...2.0F
+    private var brightnessLocation = -1
 
-    private final static String FRAGMENT_SHADER = "#extension GL_OES_EGL_image_external : require\n"
-            + "precision mediump float;\n"
-            + "uniform samplerExternalOES sTexture;\n"
-            + "uniform float brightness;\n"
-            + "varying vec2 " + DEFAULT_FRAGMENT_TEXTURE_COORDINATE_NAME + ";\n"
-            + "void main() {\n"
-            + "  vec4 color = texture2D(sTexture, " + DEFAULT_FRAGMENT_TEXTURE_COORDINATE_NAME + ");\n"
-            + "  gl_FragColor = brightness * color;\n"
-            + "}\n";
-
-    private float brightness = 2.0f; // 1.0F...2.0F
-    private int brightnessLocation = -1;
-
-
-    public BrightnessFilter() {
-    }
 
     /**
      * Returns the current brightness.
      *
      * @return brightness
-     * @see #setBrightness(float)
+     * @see .setBrightness
      */
-    @SuppressWarnings({"unused", "WeakerAccess"})
-    public float getBrightness() {
-        return brightness;
+    @Suppress("unused")
+    fun getBrightness(): Float {
+        return brightness
     }
 
     /**
@@ -48,48 +32,48 @@ public class BrightnessFilter extends BaseFilter implements OneParameterFilter {
      *
      * @param brightness brightness.
      */
-    @SuppressWarnings({"WeakerAccess", "unused"})
-    public void setBrightness(float brightness) {
-        if (brightness < 1.0f) brightness = 1.0f;
-        if (brightness > 2.0f) brightness = 2.0f;
-        this.brightness = brightness;
+    @Suppress("unused")
+    fun setBrightness(brightness: Float) {
+        var brightness = brightness
+        if (brightness < 1.0f) brightness = 1.0f
+        if (brightness > 2.0f) brightness = 2.0f
+        this.brightness = brightness
     }
 
-    @Override
-    public float getParameter1() {
-        // parameter is 0...1, brightness is 1...2.
-        return getBrightness() - 1F;
+    override var parameter1: Float
+        get() =// parameter is 0...1, brightness is 1...2.
+            getBrightness() - 1f
+        set(value) {
+            // parameter is 0...1, brightness is 1...2.
+            setBrightness(value + 1)
+        }
+
+    override fun onCreate(programHandle: Int) {
+        super.onCreate(programHandle)
+        brightnessLocation = GLES20.glGetUniformLocation(programHandle, "brightness")
+        checkGlProgramLocation(brightnessLocation, "brightness")
     }
 
-    @Override
-    public void setParameter1(float value) {
-        // parameter is 0...1, brightness is 1...2.
-        setBrightness(value + 1);
+    override fun onDestroy() {
+        super.onDestroy()
+        brightnessLocation = -1
     }
 
-    @NonNull
-    @Override
-    public String getFragmentShader() {
-        return FRAGMENT_SHADER;
+    override fun onPreDraw(timestampUs: Long, transformMatrix: FloatArray) {
+        super.onPreDraw(timestampUs, transformMatrix)
+        GLES20.glUniform1f(brightnessLocation, brightness)
+        checkGlError("glUniform1f")
     }
 
-    @Override
-    public void onCreate(int programHandle) {
-        super.onCreate(programHandle);
-        brightnessLocation = GLES20.glGetUniformLocation(programHandle, "brightness");
-        Egloo.checkGlProgramLocation(brightnessLocation, "brightness");
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        brightnessLocation = -1;
-    }
-
-    @Override
-    protected void onPreDraw(long timestampUs, @NonNull float[] transformMatrix) {
-        super.onPreDraw(timestampUs, transformMatrix);
-        GLES20.glUniform1f(brightnessLocation, brightness);
-        Egloo.checkGlError("glUniform1f");
-    }
+    override val fragmentShader: String = """
+        #extension GL_OES_EGL_image_external : require
+        precision mediump float;
+        uniform samplerExternalOES sTexture;
+        uniform float brightness;
+        varying vec2 $DEFAULT_FRAGMENT_TEXTURE_COORDINATE_NAME;
+        void main() {
+          vec4 color = texture2D(sTexture, $DEFAULT_FRAGMENT_TEXTURE_COORDINATE_NAME);
+          gl_FragColor = brightness * color;
+        }
+        """.trimIndent()
 }

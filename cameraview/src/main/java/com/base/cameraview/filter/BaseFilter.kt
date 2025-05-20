@@ -96,8 +96,7 @@ abstract class BaseFilter : Filter {
     override fun draw(timestampUs: Long, transformMatrix: FloatArray) {
         if (program == null) {
             LOG.w(
-                "Filter.draw() called after destroying the filter. " +
-                        "This can happen rarely because of threading."
+                "Filter.draw() called after destroying the filter. " + "This can happen rarely because of threading."
             )
         } else {
             onPreDraw(timestampUs, transformMatrix)
@@ -148,11 +147,11 @@ abstract class BaseFilter : Filter {
     }
 
     companion object {
-        protected const val DEFAULT_VERTEX_POSITION_NAME: String = "aPosition"
-        protected const val DEFAULT_VERTEX_TEXTURE_COORDINATE_NAME: String = "aTextureCoord"
-        protected const val DEFAULT_VERTEX_MVP_MATRIX_NAME: String = "uMVPMatrix"
-        protected const val DEFAULT_VERTEX_TRANSFORM_MATRIX_NAME: String = "uTexMatrix"
-        protected const val DEFAULT_FRAGMENT_TEXTURE_COORDINATE_NAME: String = "vTextureCoord"
+        const val DEFAULT_VERTEX_POSITION_NAME: String = "aPosition"
+        const val DEFAULT_VERTEX_TEXTURE_COORDINATE_NAME: String = "aTextureCoord"
+        const val DEFAULT_VERTEX_MVP_MATRIX_NAME: String = "uMVPMatrix"
+        const val DEFAULT_VERTEX_TRANSFORM_MATRIX_NAME: String = "uTexMatrix"
+        const val DEFAULT_FRAGMENT_TEXTURE_COORDINATE_NAME: String = "vTextureCoord"
         private val TAG: String = BaseFilter::class.java.simpleName
         private val LOG: CameraLogger = CameraLogger.create(TAG)
         private fun createDefaultVertexShader(
@@ -162,29 +161,13 @@ abstract class BaseFilter : Filter {
             vertexTransformMatrixName: String,
             fragmentTextureCoordinateName: String
         ): String {
-            return ("uniform mat4 " + vertexModelViewProjectionMatrixName + ";\n"
-                    + "uniform mat4 " + vertexTransformMatrixName + ";\n"
-                    + "attribute vec4 " + vertexPositionName + ";\n"
-                    + "attribute vec4 " + vertexTextureCoordinateName + ";\n"
-                    + "varying vec2 " + fragmentTextureCoordinateName + ";\n"
-                    + "void main() {\n"
-                    + "    gl_Position = " + vertexModelViewProjectionMatrixName + " * "
-                    + vertexPositionName + ";\n"
-                    + "    " + fragmentTextureCoordinateName + " = (" + vertexTransformMatrixName + " * "
-                    + vertexTextureCoordinateName + ").xy;\n"
-                    + "}\n")
+            return ("uniform mat4 $vertexModelViewProjectionMatrixName;\nuniform mat4 $vertexTransformMatrixName;\nattribute vec4 $vertexPositionName;\nattribute vec4 $vertexTextureCoordinateName;\nvarying vec2 $fragmentTextureCoordinateName;\nvoid main() {\n    gl_Position = $vertexModelViewProjectionMatrixName * $vertexPositionName;\n    $fragmentTextureCoordinateName = ($vertexTransformMatrixName * $vertexTextureCoordinateName).xy;\n}\n")
         }
 
         private fun createDefaultFragmentShader(
             fragmentTextureCoordinateName: String
         ): String {
-            return ("#extension GL_OES_EGL_image_external : require\n"
-                    + "precision mediump float;\n"
-                    + "varying vec2 " + fragmentTextureCoordinateName + ";\n"
-                    + "uniform samplerExternalOES sTexture;\n"
-                    + "void main() {\n"
-                    + "  gl_FragColor = texture2D(sTexture, " + fragmentTextureCoordinateName + ");\n"
-                    + "}\n")
+            return ("#extension GL_OES_EGL_image_external : require\nprecision mediump float;\nvarying vec2 $fragmentTextureCoordinateName;\nuniform samplerExternalOES sTexture;\nvoid main() {\n  gl_FragColor = texture2D(sTexture, $fragmentTextureCoordinateName);\n}\n")
         }
     }
 }

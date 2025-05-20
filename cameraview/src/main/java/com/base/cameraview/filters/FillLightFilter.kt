@@ -1,52 +1,28 @@
-package com.base.cameraview.filters;
+package com.base.cameraview.filters
 
-import android.opengl.GLES20;
-
-import androidx.annotation.NonNull;
-
-import com.base.cameraview.filter.BaseFilter;
-import com.base.cameraview.filter.OneParameterFilter;
-import com.otaliastudios.opengl.core.Egloo;
+import android.opengl.GLES20
+import com.base.cameraview.filter.BaseFilter
+import com.base.cameraview.filter.OneParameterFilter
+import com.otaliastudios.opengl.core.Egloo.checkGlError
+import com.otaliastudios.opengl.core.Egloo.checkGlProgramLocation
 
 /**
  * Applies back-light filling to the frames.
  */
-public class FillLightFilter extends BaseFilter implements OneParameterFilter {
-
-    private final static String FRAGMENT_SHADER = "#extension GL_OES_EGL_image_external : require\n"
-            + "precision mediump float;\n"
-            + "uniform samplerExternalOES sTexture;\n"
-            + "uniform float mult;\n"
-            + "uniform float igamma;\n"
-            + "varying vec2 " + DEFAULT_FRAGMENT_TEXTURE_COORDINATE_NAME + ";\n"
-            + "void main() {\n"
-            + "  const vec3 color_weights = vec3(0.25, 0.5, 0.25);\n"
-            + "  vec4 color = texture2D(sTexture, " + DEFAULT_FRAGMENT_TEXTURE_COORDINATE_NAME + ");\n"
-            + "  float lightmask = dot(color.rgb, color_weights);\n"
-            + "  float backmask = (1.0 - lightmask);\n"
-            + "  vec3 ones = vec3(1.0, 1.0, 1.0);\n"
-            + "  vec3 diff = pow(mult * color.rgb, igamma * ones) - color.rgb;\n"
-            + "  diff = min(diff, 1.0);\n"
-            + "  vec3 new_color = min(color.rgb + diff * backmask, 1.0);\n"
-            + "  gl_FragColor = vec4(new_color, color.a);\n"
-            + "}\n";
-
-    private float strength = 0.5f;
-    private int multiplierLocation = -1;
-    private int gammaLocation = -1;
-
-    public FillLightFilter() {
-    }
+class FillLightFilter : BaseFilter(), OneParameterFilter {
+    private var strength = 0.5f
+    private var multiplierLocation = -1
+    private var gammaLocation = -1
 
     /**
      * Returns the current strength.
      *
      * @return strength
-     * @see #setStrength(float)
+     * @see .setStrength
      */
-    @SuppressWarnings({"unused", "WeakerAccess"})
-    public float getStrength() {
-        return strength;
+    @Suppress("unused")
+    fun getStrength(): Float {
+        return strength
     }
 
     /**
@@ -56,57 +32,64 @@ public class FillLightFilter extends BaseFilter implements OneParameterFilter {
      *
      * @param strength strength
      */
-    @SuppressWarnings("WeakerAccess")
-    public void setStrength(float strength) {
-        if (strength < 0.0f) strength = 0f;
-        if (strength > 1.0f) strength = 1f;
-        this.strength = strength;
+    fun setStrength(strength: Float) {
+        var strength = strength
+        if (strength < 0.0f) strength = 0f
+        if (strength > 1.0f) strength = 1f
+        this.strength = strength
     }
 
-    @Override
-    public float getParameter1() {
-        return getStrength();
+    override var parameter1: Float
+        get() = getStrength()
+        set(value) {
+            setStrength(value)
+        }
+
+    override fun onCreate(programHandle: Int) {
+        super.onCreate(programHandle)
+        multiplierLocation = GLES20.glGetUniformLocation(programHandle, "mult")
+        checkGlProgramLocation(multiplierLocation, "mult")
+        gammaLocation = GLES20.glGetUniformLocation(programHandle, "igamma")
+        checkGlProgramLocation(gammaLocation, "igamma")
     }
 
-    @Override
-    public void setParameter1(float value) {
-        setStrength(value);
+    override fun onDestroy() {
+        super.onDestroy()
+        multiplierLocation = -1
+        gammaLocation = -1
     }
 
-    @NonNull
-    @Override
-    public String getFragmentShader() {
-        return FRAGMENT_SHADER;
+    override fun onPreDraw(timestampUs: Long, transformMatrix: FloatArray) {
+        super.onPreDraw(timestampUs, transformMatrix)
+        val amount = 1.0f - strength
+        val multiplier = 1.0f / (amount * 0.7f + 0.3f)
+        GLES20.glUniform1f(multiplierLocation, multiplier)
+        checkGlError("glUniform1f")
+
+        val fadeGamma = 0.3f
+        val faded = fadeGamma + (1.0f - fadeGamma) * multiplier
+        val gamma = 1.0f / faded
+        GLES20.glUniform1f(gammaLocation, gamma)
+        checkGlError("glUniform1f")
     }
 
-    @Override
-    public void onCreate(int programHandle) {
-        super.onCreate(programHandle);
-        multiplierLocation = GLES20.glGetUniformLocation(programHandle, "mult");
-        Egloo.checkGlProgramLocation(multiplierLocation, "mult");
-        gammaLocation = GLES20.glGetUniformLocation(programHandle, "igamma");
-        Egloo.checkGlProgramLocation(gammaLocation, "igamma");
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        multiplierLocation = -1;
-        gammaLocation = -1;
-    }
-
-    @Override
-    protected void onPreDraw(long timestampUs, @NonNull float[] transformMatrix) {
-        super.onPreDraw(timestampUs, transformMatrix);
-        float amount = 1.0f - strength;
-        float multiplier = 1.0f / (amount * 0.7f + 0.3f);
-        GLES20.glUniform1f(multiplierLocation, multiplier);
-        Egloo.checkGlError("glUniform1f");
-
-        float fadeGamma = 0.3f;
-        float faded = fadeGamma + (1.0f - fadeGamma) * multiplier;
-        float gamma = 1.0f / faded;
-        GLES20.glUniform1f(gammaLocation, gamma);
-        Egloo.checkGlError("glUniform1f");
-    }
+    override val fragmentShader: String = """
+        #extension GL_OES_EGL_image_external : require
+        precision mediump float;
+        uniform samplerExternalOES sTexture;
+        uniform float mult;
+        uniform float igamma;
+        varying vec2 $DEFAULT_FRAGMENT_TEXTURE_COORDINATE_NAME;
+        void main() {
+          const vec3 color_weights = vec3(0.25, 0.5, 0.25);
+          vec4 color = texture2D(sTexture, $DEFAULT_FRAGMENT_TEXTURE_COORDINATE_NAME);
+          float lightmask = dot(color.rgb, color_weights);
+          float backmask = (1.0 - lightmask);
+          vec3 ones = vec3(1.0, 1.0, 1.0);
+          vec3 diff = pow(mult * color.rgb, igamma * ones) - color.rgb;
+          diff = min(diff, 1.0);
+          vec3 new_color = min(color.rgb + diff * backmask, 1.0);
+          gl_FragColor = vec4(new_color, color.a);
+        }
+        """.trimIndent()
 }

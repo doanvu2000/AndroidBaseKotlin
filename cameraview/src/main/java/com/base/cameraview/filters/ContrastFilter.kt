@@ -1,46 +1,27 @@
-package com.base.cameraview.filters;
+package com.base.cameraview.filters
 
-import android.opengl.GLES20;
-
-import androidx.annotation.NonNull;
-
-import com.base.cameraview.filter.BaseFilter;
-import com.base.cameraview.filter.OneParameterFilter;
-import com.otaliastudios.opengl.core.Egloo;
+import android.opengl.GLES20
+import com.base.cameraview.filter.BaseFilter
+import com.base.cameraview.filter.OneParameterFilter
+import com.otaliastudios.opengl.core.Egloo.checkGlError
+import com.otaliastudios.opengl.core.Egloo.checkGlProgramLocation
 
 /**
  * Adjusts the contrast.
  */
-public class ContrastFilter extends BaseFilter implements OneParameterFilter {
-
-    private final static String FRAGMENT_SHADER = "#extension GL_OES_EGL_image_external : require\n"
-            + "precision mediump float;\n"
-            + "uniform samplerExternalOES sTexture;\n"
-            + "uniform float contrast;\n"
-            + "varying vec2 " + DEFAULT_FRAGMENT_TEXTURE_COORDINATE_NAME + ";\n"
-            + "void main() {\n"
-            + "  vec4 color = texture2D(sTexture, " + DEFAULT_FRAGMENT_TEXTURE_COORDINATE_NAME + ");\n"
-            + "  color -= 0.5;\n"
-            + "  color *= contrast;\n"
-            + "  color += 0.5;\n"
-            + "  gl_FragColor = color;\n"
-            + "}\n";
-
-    private float contrast = 2F;
-    private int contrastLocation = -1;
-
-    public ContrastFilter() {
-    }
+class ContrastFilter : BaseFilter(), OneParameterFilter {
+    private var contrast = 2f
+    private var contrastLocation = -1
 
     /**
      * Returns the current contrast.
      *
      * @return contrast
-     * @see #setContrast(float)
+     * @see .setContrast
      */
-    @SuppressWarnings({"unused", "WeakerAccess"})
-    public float getContrast() {
-        return contrast;
+    @Suppress("unused")
+    fun getContrast(): Float {
+        return contrast
     }
 
     /**
@@ -50,48 +31,50 @@ public class ContrastFilter extends BaseFilter implements OneParameterFilter {
      *
      * @param contrast contrast
      */
-    @SuppressWarnings("WeakerAccess")
-    public void setContrast(float contrast) {
-        if (contrast < 1.0f) contrast = 1.0f;
-        if (contrast > 2.0f) contrast = 2.0f;
-        this.contrast = contrast;
+    fun setContrast(contrast: Float) {
+        var contrast = contrast
+        if (contrast < 1.0f) contrast = 1.0f
+        if (contrast > 2.0f) contrast = 2.0f
+        this.contrast = contrast
     }
 
-    @Override
-    public float getParameter1() {
-        // parameter is 0...1, contrast is 1...2.
-        return getContrast() - 1F;
+    override var parameter1: Float
+        get() =// parameter is 0...1, contrast is 1...2.
+            getContrast() - 1f
+        set(value) {
+            // parameter is 0...1, contrast is 1...2.
+            setContrast(value + 1)
+        }
+
+    override fun onCreate(programHandle: Int) {
+        super.onCreate(programHandle)
+        contrastLocation = GLES20.glGetUniformLocation(programHandle, "contrast")
+        checkGlProgramLocation(contrastLocation, "contrast")
     }
 
-    @Override
-    public void setParameter1(float value) {
-        // parameter is 0...1, contrast is 1...2.
-        setContrast(value + 1);
+    override fun onDestroy() {
+        super.onDestroy()
+        contrastLocation = -1
     }
 
-    @NonNull
-    @Override
-    public String getFragmentShader() {
-        return FRAGMENT_SHADER;
+    override fun onPreDraw(timestampUs: Long, transformMatrix: FloatArray) {
+        super.onPreDraw(timestampUs, transformMatrix)
+        GLES20.glUniform1f(contrastLocation, contrast)
+        checkGlError("glUniform1f")
     }
 
-    @Override
-    public void onCreate(int programHandle) {
-        super.onCreate(programHandle);
-        contrastLocation = GLES20.glGetUniformLocation(programHandle, "contrast");
-        Egloo.checkGlProgramLocation(contrastLocation, "contrast");
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        contrastLocation = -1;
-    }
-
-    @Override
-    protected void onPreDraw(long timestampUs, @NonNull float[] transformMatrix) {
-        super.onPreDraw(timestampUs, transformMatrix);
-        GLES20.glUniform1f(contrastLocation, contrast);
-        Egloo.checkGlError("glUniform1f");
-    }
+    override val fragmentShader: String = """
+        #extension GL_OES_EGL_image_external : require
+        precision mediump float;
+        uniform samplerExternalOES sTexture;
+        uniform float contrast;
+        varying vec2 $DEFAULT_FRAGMENT_TEXTURE_COORDINATE_NAME;
+        void main() {
+          vec4 color = texture2D(sTexture, $DEFAULT_FRAGMENT_TEXTURE_COORDINATE_NAME);
+          color -= 0.5;
+          color *= contrast;
+          color += 0.5;
+          gl_FragColor = color;
+        }
+    """.trimIndent()
 }

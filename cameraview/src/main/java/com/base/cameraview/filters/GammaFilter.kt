@@ -1,44 +1,26 @@
-package com.base.cameraview.filters;
+package com.base.cameraview.filters
 
-import android.opengl.GLES20;
-
-import androidx.annotation.NonNull;
-
-import com.base.cameraview.filter.BaseFilter;
-import com.base.cameraview.filter.OneParameterFilter;
-import com.otaliastudios.opengl.core.Egloo;
+import android.opengl.GLES20
+import com.base.cameraview.filter.BaseFilter
+import com.base.cameraview.filter.OneParameterFilter
+import com.otaliastudios.opengl.core.Egloo.checkGlError
+import com.otaliastudios.opengl.core.Egloo.checkGlProgramLocation
 
 /**
  * Applies gamma correction to the frames.
  */
-public class GammaFilter extends BaseFilter implements OneParameterFilter {
-
-    private final static String FRAGMENT_SHADER = "#extension GL_OES_EGL_image_external : require\n"
-            + "precision mediump float;\n"
-            + "varying vec2 " + DEFAULT_FRAGMENT_TEXTURE_COORDINATE_NAME + ";\n"
-            + "uniform samplerExternalOES sTexture;\n"
-            + "uniform float gamma;\n"
-            + "void main() {\n"
-            + "  vec4 textureColor = texture2D(sTexture, " + DEFAULT_FRAGMENT_TEXTURE_COORDINATE_NAME
-            + ");\n"
-            + "  gl_FragColor = vec4(pow(textureColor.rgb, vec3(gamma)), textureColor.w);\n"
-            + "}\n";
-
-    private float gamma = 2.0f;
-    private int gammaLocation = -1;
-
-    public GammaFilter() {
-    }
+class GammaFilter : BaseFilter(), OneParameterFilter {
+    private var gamma = 2.0f
+    private var gammaLocation = -1
 
     /**
      * Returns the current gamma.
      *
      * @return gamma
-     * @see #setGamma(float)
+     * @see .setGamma
      */
-    @SuppressWarnings("WeakerAccess")
-    public float getGamma() {
-        return gamma;
+    fun getGamma(): Float {
+        return gamma
     }
 
     /**
@@ -47,46 +29,45 @@ public class GammaFilter extends BaseFilter implements OneParameterFilter {
      *
      * @param gamma gamma value
      */
-    @SuppressWarnings("WeakerAccess")
-    public void setGamma(float gamma) {
-        if (gamma < 0.0f) gamma = 0.0f;
-        if (gamma > 2.0f) gamma = 2.0f;
-        this.gamma = gamma;
+    fun setGamma(gamma: Float) {
+        var gamma = gamma
+        if (gamma < 0.0f) gamma = 0.0f
+        if (gamma > 2.0f) gamma = 2.0f
+        this.gamma = gamma
     }
 
-    @Override
-    public float getParameter1() {
-        return getGamma() / 2F;
+    override var parameter1: Float
+        get() = getGamma() / 2f
+        set(value) {
+            setGamma(value * 2f)
+        }
+
+    override fun onCreate(programHandle: Int) {
+        super.onCreate(programHandle)
+        gammaLocation = GLES20.glGetUniformLocation(programHandle, "gamma")
+        checkGlProgramLocation(gammaLocation, "gamma")
     }
 
-    @Override
-    public void setParameter1(float value) {
-        setGamma(value * 2F);
+    override fun onDestroy() {
+        super.onDestroy()
+        gammaLocation = -1
     }
 
-    @NonNull
-    @Override
-    public String getFragmentShader() {
-        return FRAGMENT_SHADER;
+    override fun onPreDraw(timestampUs: Long, transformMatrix: FloatArray) {
+        super.onPreDraw(timestampUs, transformMatrix)
+        GLES20.glUniform1f(gammaLocation, gamma)
+        checkGlError("glUniform1f")
     }
 
-    @Override
-    public void onCreate(int programHandle) {
-        super.onCreate(programHandle);
-        gammaLocation = GLES20.glGetUniformLocation(programHandle, "gamma");
-        Egloo.checkGlProgramLocation(gammaLocation, "gamma");
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        gammaLocation = -1;
-    }
-
-    @Override
-    protected void onPreDraw(long timestampUs, @NonNull float[] transformMatrix) {
-        super.onPreDraw(timestampUs, transformMatrix);
-        GLES20.glUniform1f(gammaLocation, gamma);
-        Egloo.checkGlError("glUniform1f");
-    }
+    override val fragmentShader: String = """
+                #extension GL_OES_EGL_image_external : require
+                precision mediump float;
+                varying vec2 $DEFAULT_FRAGMENT_TEXTURE_COORDINATE_NAME;
+                uniform samplerExternalOES sTexture;
+                uniform float gamma;
+                void main() {
+                  vec4 textureColor = texture2D(sTexture, $DEFAULT_FRAGMENT_TEXTURE_COORDINATE_NAME);
+                  gl_FragColor = vec4(pow(textureColor.rgb, vec3(gamma)), textureColor.w);
+                }
+                """.trimIndent()
 }
