@@ -32,10 +32,6 @@ class CameraViewLibDemoActivity : BaseActivity<ActivityCameraViewLibDemoBinding>
             permission.add(Manifest.permission.READ_EXTERNAL_STORAGE)
             permission.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
         }
-
-//    if (isSdk33()) {
-//        permission.add(Manifest.permission.READ_MEDIA_VIDEO)
-//    }
         return permission
     }
 
@@ -57,9 +53,22 @@ class CameraViewLibDemoActivity : BaseActivity<ActivityCameraViewLibDemoBinding>
         binding.btnBack.clickSafe(isAnimationClick = true) {
             onBack()
         }
+
+        binding.btnSwitchCamera.clickSafe(isAnimationClick = true) {
+            switchCamera()
+        }
+    }
+
+    private fun switchCamera() {
+        showDialogInitCamera()
+        binding.cameraView.toggleFacing()
+        delayToAction(1000L) {
+            hideDialogInitCamera()
+        }
     }
 
     private fun setupCamera() {
+        showDialogInitCamera()
         binding.cameraView.apply {
             setLifecycleOwner(this@CameraViewLibDemoActivity)
             clearCameraListeners()
@@ -68,6 +77,24 @@ class CameraViewLibDemoActivity : BaseActivity<ActivityCameraViewLibDemoBinding>
             addFrameProcessor(frameProcessor)
         }
     }
+
+    //region dialogInitCamera
+    private val dialogInitCamera by lazy {
+        DialogInitializeCamera(this)
+    }
+
+    private fun showDialogInitCamera() {
+        launchCoroutineMain {
+            dialogInitCamera.show()
+        }
+    }
+
+    private fun hideDialogInitCamera() {
+        launchCoroutineMain {
+            dialogInitCamera.hide()
+        }
+    }
+    //endregion
 
     private val frameProcessor = object : FrameProcessor {
         override fun process(frame: Frame) {
@@ -78,16 +105,19 @@ class CameraViewLibDemoActivity : BaseActivity<ActivityCameraViewLibDemoBinding>
         override fun onCameraOpened(options: CameraOptions) {
             super.onCameraOpened(options)
             AppLogger.i(TAG, "onCameraOpened")
+            hideDialogInitCamera()
         }
 
         override fun onCameraClosed() {
             super.onCameraClosed()
             AppLogger.e(TAG, "onCameraOpened")
+            hideDialogInitCamera()
         }
 
         override fun onCameraError(exception: CameraException) {
             super.onCameraError(exception)
             AppLogger.e(TAG, "onCameraOpened")
+            hideDialogInitCamera()
         }
 
         override fun onVideoRecordingStart() {

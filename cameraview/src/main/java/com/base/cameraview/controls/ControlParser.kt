@@ -1,108 +1,91 @@
-package com.base.cameraview.controls;
+package com.base.cameraview.controls
 
-import android.content.Context;
-import android.content.res.TypedArray;
-
-import androidx.annotation.NonNull;
-
-import com.base.cameraview.R;
+import android.content.Context
+import android.content.res.TypedArray
+import com.base.cameraview.R
+import com.base.cameraview.controls.Facing.Companion.defaultFacing
 
 /**
  * Parses controls from XML attributes.
  */
-public class ControlParser {
+class ControlParser(context: Context, array: TypedArray) {
+    private val preview: Int =
+        array.getInteger(R.styleable.CameraView_cameraPreview, Preview.DEFAULT.value)
+    private val facing: Int = array.getInteger(
+        R.styleable.CameraView_cameraFacing,
+        defaultFacing(context).value
+    )
+    private val flash: Int =
+        array.getInteger(R.styleable.CameraView_cameraFlash, Flash.DEFAULT.value)
+    private val grid: Int = array.getInteger(R.styleable.CameraView_cameraGrid, Grid.DEFAULT.value)
+    private val whiteBalance: Int = array.getInteger(
+        R.styleable.CameraView_cameraWhiteBalance,
+        WhiteBalance.DEFAULT.value
+    )
+    private val mode: Int = array.getInteger(R.styleable.CameraView_cameraMode, Mode.DEFAULT.value)
+    private val hdr: Int = array.getInteger(R.styleable.CameraView_cameraHdr, Hdr.DEFAULT.value)
+    private val audio: Int =
+        array.getInteger(R.styleable.CameraView_cameraAudio, Audio.DEFAULT.value)
+    private val videoCodec: Int = array.getInteger(
+        R.styleable.CameraView_cameraVideoCodec,
+        VideoCodec.DEFAULT.value
+    )
+    private val audioCodec: Int = array.getInteger(
+        R.styleable.CameraView_cameraAudioCodec,
+        AudioCodec.DEFAULT.value
+    )
+    private val engine: Int =
+        array.getInteger(R.styleable.CameraView_cameraEngine, Engine.DEFAULT.value)
+    private val pictureFormat: Int = array.getInteger(
+        R.styleable.CameraView_cameraPictureFormat,
+        PictureFormat.DEFAULT.value
+    )
 
-    private int preview;
-    private int facing;
-    private int flash;
-    private int grid;
-    private int whiteBalance;
-    private int mode;
-    private int hdr;
-    private int audio;
-    private int videoCodec;
-    private int audioCodec;
-    private int engine;
-    private int pictureFormat;
-
-    public ControlParser(@NonNull Context context, @NonNull TypedArray array) {
-        preview = array.getInteger(R.styleable.CameraView_cameraPreview, Preview.DEFAULT.getValue());
-        facing = array.getInteger(R.styleable.CameraView_cameraFacing,
-                Facing.defaultFacing(context).getValue());
-        flash = array.getInteger(R.styleable.CameraView_cameraFlash, Flash.DEFAULT.getValue());
-        grid = array.getInteger(R.styleable.CameraView_cameraGrid, Grid.DEFAULT.getValue());
-        whiteBalance = array.getInteger(R.styleable.CameraView_cameraWhiteBalance,
-                WhiteBalance.DEFAULT.getValue());
-        mode = array.getInteger(R.styleable.CameraView_cameraMode, Mode.DEFAULT.getValue());
-        hdr = array.getInteger(R.styleable.CameraView_cameraHdr, Hdr.DEFAULT.getValue());
-        audio = array.getInteger(R.styleable.CameraView_cameraAudio, Audio.DEFAULT.getValue());
-        videoCodec = array.getInteger(R.styleable.CameraView_cameraVideoCodec,
-                VideoCodec.DEFAULT.getValue());
-        audioCodec = array.getInteger(R.styleable.CameraView_cameraAudioCodec,
-                AudioCodec.DEFAULT.getValue());
-        engine = array.getInteger(R.styleable.CameraView_cameraEngine, Engine.DEFAULT.getValue());
-        pictureFormat = array.getInteger(R.styleable.CameraView_cameraPictureFormat,
-                PictureFormat.DEFAULT.getValue());
+    fun getPreview(): Preview {
+        return Preview.fromValue(preview)
     }
 
-    @NonNull
-    public Preview getPreview() {
-        return Preview.fromValue(preview);
+    fun getFacing(): Facing {
+        return Facing.fromValue(facing)!!
     }
 
-    @NonNull
-    public Facing getFacing() {
-        //noinspection ConstantConditions
-        return Facing.fromValue(facing);
+    fun getFlash(): Flash {
+        return Flash.fromValue(flash)
     }
 
-    @NonNull
-    public Flash getFlash() {
-        return Flash.fromValue(flash);
+    fun getGrid(): Grid {
+        return Grid.fromValue(grid)
     }
 
-    @NonNull
-    public Grid getGrid() {
-        return Grid.fromValue(grid);
+    fun getMode(): Mode {
+        return Mode.fromValue(mode)
     }
 
-    @NonNull
-    public Mode getMode() {
-        return Mode.fromValue(mode);
+    fun getWhiteBalance(): WhiteBalance {
+        return WhiteBalance.fromValue(whiteBalance)
     }
 
-    @NonNull
-    public WhiteBalance getWhiteBalance() {
-        return WhiteBalance.fromValue(whiteBalance);
+    fun getHdr(): Hdr {
+        return Hdr.fromValue(hdr)
     }
 
-    @NonNull
-    public Hdr getHdr() {
-        return Hdr.fromValue(hdr);
+    fun getAudio(): Audio {
+        return Audio.fromValue(audio)
     }
 
-    @NonNull
-    public Audio getAudio() {
-        return Audio.fromValue(audio);
+    fun getAudioCodec(): AudioCodec {
+        return AudioCodec.fromValue(audioCodec)
     }
 
-    @NonNull
-    public AudioCodec getAudioCodec() {
-        return AudioCodec.fromValue(audioCodec);
+    fun getVideoCodec(): VideoCodec {
+        return VideoCodec.fromValue(videoCodec)
     }
 
-    @NonNull
-    public VideoCodec getVideoCodec() {
-        return VideoCodec.fromValue(videoCodec);
+    fun getEngine(): Engine {
+        return Engine.fromValue(engine)
     }
 
-    @NonNull
-    public Engine getEngine() {
-        return Engine.fromValue(engine);
-    }
-
-    @NonNull
-    public PictureFormat getPictureFormat() {
-        return PictureFormat.fromValue(pictureFormat);
+    fun getPictureFormat(): PictureFormat {
+        return PictureFormat.fromValue(pictureFormat)
     }
 }
