@@ -1,12 +1,9 @@
-package com.base.cameraview.controls;
-
-import androidx.annotation.NonNull;
+package com.base.cameraview.controls
 
 /**
  * The engine to be used.
  */
-public enum Engine implements Control {
-
+enum class Engine(val value: Int) : Control {
     /**
      * Camera1 based engine.
      */
@@ -14,30 +11,23 @@ public enum Engine implements Control {
 
     /**
      * Camera2 based engine. For API versions older than 21,
-     * the system falls back to {@link #CAMERA1}.
+     * the system falls back to [.CAMERA1].
      */
     CAMERA2(1);
 
-    final static Engine DEFAULT = CAMERA1;
+    companion object {
+        @JvmField
+        val DEFAULT: Engine = Engine.CAMERA1
 
-    private int value;
-
-    Engine(int value) {
-        this.value = value;
-    }
-
-    @NonNull
-    static Engine fromValue(int value) {
-        Engine[] list = Engine.values();
-        for (Engine action : list) {
-            if (action.value() == value) {
-                return action;
+        @JvmStatic
+        fun fromValue(value: Int): Engine {
+            val list = Engine.entries.toTypedArray()
+            for (action in list) {
+                if (action.value == value) {
+                    return action
+                }
             }
+            return DEFAULT
         }
-        return DEFAULT;
-    }
-
-    int value() {
-        return value;
     }
 }

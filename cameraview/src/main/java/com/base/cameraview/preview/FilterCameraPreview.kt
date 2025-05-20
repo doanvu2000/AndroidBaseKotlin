@@ -1,32 +1,22 @@
-package com.base.cameraview.preview;
+package com.base.cameraview.preview
 
-
-import androidx.annotation.NonNull;
-
-import com.base.cameraview.filter.Filter;
+import com.base.cameraview.filter.Filter
 
 
 /**
- * A preview that support GL filters defined through the {@link Filter} interface.
- * <p>
- * The preview has the responsibility of calling {@link Filter#setSize(int, int)}
+ * A preview that support GL filters defined through the [Filter] interface.
+ *
+ *
+ * The preview has the responsibility of calling [Filter.setSize]
  * whenever the preview size changes and as soon as the filter is applied.
  */
-public interface FilterCameraPreview {
-
+interface FilterCameraPreview {
     /**
      * Sets a new filter.
      *
      * @param filter new filter
      */
-    void setFilter(@NonNull Filter filter);
+    fun setFilter(filter: Filter)
 
-    /**
-     * Returns the currently used filter.
-     *
-     * @return currently used filter
-     */
-    @SuppressWarnings("unused")
-    @NonNull
-    Filter getCurrentFilter();
+    val currentFilter: Filter
 }

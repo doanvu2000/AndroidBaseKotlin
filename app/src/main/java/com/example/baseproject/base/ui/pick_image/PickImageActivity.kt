@@ -49,11 +49,11 @@ class PickImageActivity : BaseActivity<ActivityPickImageBinding>() {
     }
 
     override fun initListener() {
-        binding.btnPick.clickSafety {
+        binding.btnPick.clickSafe {
             clickPickImage()
         }
 
-        binding.btnBack.clickSafety {
+        binding.btnBack.clickSafe {
             onBack()
         }
     }

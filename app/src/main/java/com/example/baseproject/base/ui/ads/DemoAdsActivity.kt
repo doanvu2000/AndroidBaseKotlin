@@ -43,7 +43,7 @@ class DemoAdsActivity : BaseActivity<ActivityDemoAdsBinding>() {
     }
 
     override fun initListener() {
-        binding.btnShowInter.clickSafety {
+        binding.btnShowInter.clickSafe {
             AdmobUtils.getInstance(this).showInter(onDone = {
             }, showInterFailed = {
                 showSnackBar(it ?: "Error when show inter", 3000, true)

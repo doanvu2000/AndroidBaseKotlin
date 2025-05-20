@@ -11,6 +11,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.viewbinding.ViewBinding
+import com.example.baseproject.base.ui.main.MyApplication
+import com.example.baseproject.base.utils.extension.clickAnimation
 import com.example.baseproject.base.utils.extension.finishWithSlide
 import com.example.baseproject.base.utils.extension.getScreenHeight
 import com.example.baseproject.base.utils.extension.getScreenWidth
@@ -36,6 +38,10 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
 
     var screenWidth = 0
     var screenHeight = 0
+
+    val myApplication by lazy {
+        application as MyApplication
+    }
     //endregion
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,9 +100,21 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
         }
     }
 
-    fun View.clickSafety(action: () -> Unit) {
+//    fun View.clickSafe(action: () -> Unit) {
+//        this.setOnClickListener {
+//            if (isAvailableClick) {
+//                action()
+//                delayClick()
+//            }
+//        }
+//    }
+
+    fun View.clickSafe(isAnimationClick: Boolean = false, action: () -> Unit) {
         this.setOnClickListener {
             if (isAvailableClick) {
+                if (isAnimationClick) {
+                    clickAnimation()
+                }
                 action()
                 delayClick()
             }
@@ -165,5 +183,10 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
             }
             insets
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        isAvailableClick = true
     }
 }

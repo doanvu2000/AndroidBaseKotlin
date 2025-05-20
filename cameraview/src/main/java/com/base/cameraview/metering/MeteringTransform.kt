@@ -1,14 +1,10 @@
-package com.base.cameraview.metering;
+package com.base.cameraview.metering
 
-import android.graphics.PointF;
-import android.graphics.RectF;
+import android.graphics.PointF
+import android.graphics.RectF
 
-import androidx.annotation.NonNull;
+interface MeteringTransform<T> {
+    fun transformMeteringPoint(point: PointF): PointF
 
-public interface MeteringTransform<T> {
-    @NonNull
-    PointF transformMeteringPoint(@NonNull PointF point);
-
-    @NonNull
-    T transformMeteringRegion(@NonNull RectF region, int weight);
+    fun transformMeteringRegion(region: RectF, weight: Int): T
 }

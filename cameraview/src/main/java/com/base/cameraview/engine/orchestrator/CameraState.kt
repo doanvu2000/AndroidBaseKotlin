@@ -1,17 +1,9 @@
-package com.base.cameraview.engine.orchestrator;
+package com.base.cameraview.engine.orchestrator
 
-import androidx.annotation.NonNull;
-
-public enum CameraState {
+enum class CameraState(private val mState: Int) {
     OFF(0), ENGINE(1), BIND(2), PREVIEW(3);
 
-    private int mState;
-
-    CameraState(int state) {
-        mState = state;
-    }
-
-    public boolean isAtLeast(@NonNull CameraState reference) {
-        return mState >= reference.mState;
+    fun isAtLeast(reference: CameraState): Boolean {
+        return mState >= reference.mState
     }
 }

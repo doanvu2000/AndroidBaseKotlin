@@ -1,14 +1,9 @@
-package com.base.cameraview.controls;
-
-import androidx.annotation.NonNull;
-
-import com.base.cameraview.CameraOptions;
+package com.base.cameraview.controls
 
 /**
  * Flash value indicates the flash mode to be used.
  */
-public enum Flash implements Control {
-
+enum class Flash(val value: Int) : Control {
     /**
      * Flash is always off.
      */
@@ -18,7 +13,7 @@ public enum Flash implements Control {
      * Flash will be on when capturing.
      * This is not guaranteed to be supported.
      *
-     * @see CameraOptions#getSupportedFlash()
+     * @see com.base.cameraview.CameraOptions.getSupportedFlash
      */
     ON(1),
 
@@ -27,7 +22,7 @@ public enum Flash implements Control {
      * Flash mode is chosen by the camera.
      * This is not guaranteed to be supported.
      *
-     * @see CameraOptions#getSupportedFlash()
+     * @see com.base.cameraview.CameraOptions.getSupportedFlash
      */
     AUTO(2),
 
@@ -36,30 +31,23 @@ public enum Flash implements Control {
      * Flash is always on, working as a torch.
      * This is not guaranteed to be supported.
      *
-     * @see CameraOptions#getSupportedFlash()
+     * @see com.base.cameraview.CameraOptions.getSupportedFlash
      */
     TORCH(3);
 
-    static final Flash DEFAULT = OFF;
+    companion object {
+        @JvmField
+        val DEFAULT: Flash = OFF
 
-    private int value;
-
-    Flash(int value) {
-        this.value = value;
-    }
-
-    @NonNull
-    static Flash fromValue(int value) {
-        Flash[] list = Flash.values();
-        for (Flash action : list) {
-            if (action.value() == value) {
-                return action;
+        @JvmStatic
+        fun fromValue(value: Int): Flash {
+            val list = Flash.entries.toTypedArray()
+            for (action in list) {
+                if (action.value == value) {
+                    return action
+                }
             }
+            return DEFAULT
         }
-        return DEFAULT;
-    }
-
-    int value() {
-        return value;
     }
 }

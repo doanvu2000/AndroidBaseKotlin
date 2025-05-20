@@ -1,80 +1,71 @@
-package com.base.cameraview.engine.action;
+package com.base.cameraview.engine.action
 
-import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.TotalCaptureResult;
-import android.os.Build;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-
+import android.hardware.camera2.CameraAccessException
+import android.hardware.camera2.CameraCharacteristics
+import android.hardware.camera2.CaptureRequest
+import android.hardware.camera2.TotalCaptureResult
 
 /**
- * The holder of {@link Action}.
- * <p>
+ * The holder of [Action].
+ *
+ *
  * This class should keep a list or set of currently running actions, and offers
  * to them the base Camera2 objects that are needed to apply changes.
- * <p>
+ *
+ *
  * This class, or an holder of it, should also forward the capture callbacks
  * our implementation.
  */
-@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-public interface ActionHolder {
-
+interface ActionHolder {
     /**
      * Adds a new action
      *
      * @param action action
      */
-    void addAction(@NonNull Action action);
+    fun addAction(action: Action)
 
     /**
      * Removes a previously added action
      *
      * @param action action
      */
-    void removeAction(@NonNull Action action);
+    fun removeAction(action: Action)
 
     /**
-     * Returns the {@link CameraCharacteristics} of the current
+     * Returns the [CameraCharacteristics] of the current
      * camera device.
      *
      * @param action action
      * @return characteristics
      */
-    @NonNull
-    CameraCharacteristics getCharacteristics(@NonNull Action action);
+    fun getCharacteristics(action: Action): CameraCharacteristics
 
     /**
-     * Returns the latest {@link TotalCaptureResult}. Can be used
+     * Returns the latest [TotalCaptureResult]. Can be used
      * by actions to start querying the state before receiving their
      * first frame.
      *
      * @param action action
      * @return last result
      */
-    @Nullable
-    TotalCaptureResult getLastResult(@NonNull Action action);
+    fun getLastResult(action: Action): TotalCaptureResult?
 
     /**
-     * Returns the current {@link CaptureRequest.Builder} so that
+     * Returns the current [CaptureRequest.Builder] so that
      * actions can apply changes to it and later submit them.
      *
      * @param action action
      * @return the builder
      */
-    @NonNull
-    CaptureRequest.Builder getBuilder(@NonNull Action action);
+    fun getBuilder(action: Action): CaptureRequest.Builder
 
     /**
-     * Applies the current builder (as per {@link #getBuilder(Action)})
+     * Applies the current builder (as per [.getBuilder])
      * as a repeating request on the preview.
      *
      * @param source action
      */
-    void applyBuilder(@NonNull Action source);
+    fun applyBuilder(source: Action)
 
     /**
      * Applies the given builder as a single capture request.
@@ -84,6 +75,6 @@ public interface ActionHolder {
      * @param builder builder
      * @throws CameraAccessException camera exception
      */
-    void applyBuilder(@NonNull Action source, @NonNull CaptureRequest.Builder builder)
-            throws CameraAccessException;
+    @Throws(CameraAccessException::class)
+    fun applyBuilder(source: Action, builder: CaptureRequest.Builder)
 }

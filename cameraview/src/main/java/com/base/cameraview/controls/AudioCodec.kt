@@ -1,15 +1,11 @@
-package com.base.cameraview.controls;
-
-
-import androidx.annotation.NonNull;
+package com.base.cameraview.controls
 
 
 /**
  * Constants for selecting the encoder of audio recordings.
- * https://developer.android.com/guide/topics/media/media-formats.html#audio-formats
+ * [...](https://developer.android.com/guide/topics/media/media-formats.html#audio-formats)
  */
-public enum AudioCodec implements Control {
-
+enum class AudioCodec(val value: Int) : Control {
     /**
      * Let the device choose its codec.
      */
@@ -30,26 +26,19 @@ public enum AudioCodec implements Control {
      */
     AAC_ELD(3);
 
-    static final AudioCodec DEFAULT = DEVICE_DEFAULT;
+    companion object {
+        @JvmField
+        val DEFAULT: AudioCodec = DEVICE_DEFAULT
 
-    private int value;
-
-    AudioCodec(int value) {
-        this.value = value;
-    }
-
-    @NonNull
-    static AudioCodec fromValue(int value) {
-        AudioCodec[] list = AudioCodec.values();
-        for (AudioCodec action : list) {
-            if (action.value() == value) {
-                return action;
+        @JvmStatic
+        fun fromValue(value: Int): AudioCodec {
+            val list = AudioCodec.entries.toTypedArray()
+            for (action in list) {
+                if (action.value == value) {
+                    return action
+                }
             }
+            return DEFAULT
         }
-        return DEFAULT;
-    }
-
-    int value() {
-        return value;
     }
 }

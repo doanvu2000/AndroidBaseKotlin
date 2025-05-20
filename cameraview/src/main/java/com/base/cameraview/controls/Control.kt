@@ -1,9 +1,8 @@
-package com.base.cameraview.controls;
+package com.base.cameraview.controls
 
 
 /**
- * Base interface for controls like {@link Audio},
- * {@link Facing}, {@link Flash} and so on.
+ * Base interface for controls like [Audio],
+ * [Facing], [Flash] and so on.
  */
-public interface Control {
-}
+interface Control 

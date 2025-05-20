@@ -1,28 +1,23 @@
-package com.base.cameraview.filter;
+package com.base.cameraview.filter
 
-import androidx.annotation.NonNull;
-
-public interface Filter {
-
+interface Filter {
     /**
      * Returns a String containing the vertex shader.
-     * Together with {@link #getFragmentShader()}, this will be used to
+     * Together with [.getFragmentShader], this will be used to
      * create the OpenGL program.
      *
      * @return vertex shader
      */
-    @NonNull
-    String getVertexShader();
+    val vertexShader: String
 
     /**
      * Returns a String containing the fragment shader.
-     * Together with {@link #getVertexShader()}, this will be used to
+     * Together with [.getVertexShader], this will be used to
      * create the OpenGL program.
      *
      * @return fragment shader
      */
-    @NonNull
-    String getFragmentShader();
+    val fragmentShader: String
 
     /**
      * The filter program was just created. We pass in a handle to the OpenGL
@@ -30,12 +25,12 @@ public interface Filter {
      *
      * @param programHandle handle
      */
-    void onCreate(int programHandle);
+    fun onCreate(programHandle: Int)
 
     /**
      * The filter program is about to be destroyed.
      */
-    void onDestroy();
+    fun onDestroy()
 
     /**
      * Called to render the actual texture. The given transformation matrix
@@ -44,7 +39,7 @@ public interface Filter {
      * @param timestampUs     timestamp in microseconds
      * @param transformMatrix matrix
      */
-    void draw(long timestampUs, @NonNull float[] transformMatrix);
+    fun draw(timestampUs: Long, transformMatrix: FloatArray)
 
     /**
      * Called anytime the output size changes.
@@ -52,7 +47,7 @@ public interface Filter {
      * @param width  width
      * @param height height
      */
-    void setSize(int width, int height);
+    fun setSize(width: Int, height: Int)
 
     /**
      * Clones this filter creating a new instance of it.
@@ -61,6 +56,5 @@ public interface Filter {
      *
      * @return a clone
      */
-    @NonNull
-    Filter copy();
+    fun copy(): Filter
 }

@@ -1,14 +1,10 @@
-package com.base.cameraview.controls;
+package com.base.cameraview.controls
 
-
-import androidx.annotation.NonNull;
 
 /**
  * Grid values can be used to draw grid lines over the camera preview.
  */
-public enum Grid implements Control {
-
-
+enum class Grid(val value: Int) : Control {
     /**
      * No grid is drawn.
      */
@@ -30,26 +26,19 @@ public enum Grid implements Control {
      */
     DRAW_PHI(3);
 
-    static final Grid DEFAULT = OFF;
+    companion object {
+        @JvmField
+        val DEFAULT: Grid = OFF
 
-    private int value;
-
-    Grid(int value) {
-        this.value = value;
-    }
-
-    @NonNull
-    static Grid fromValue(int value) {
-        Grid[] list = Grid.values();
-        for (Grid action : list) {
-            if (action.value() == value) {
-                return action;
+        @JvmStatic
+        fun fromValue(value: Int): Grid {
+            val list = Grid.entries.toTypedArray()
+            for (action in list) {
+                if (action.value == value) {
+                    return action
+                }
             }
+            return DEFAULT
         }
-        return DEFAULT;
-    }
-
-    int value() {
-        return value;
     }
 }

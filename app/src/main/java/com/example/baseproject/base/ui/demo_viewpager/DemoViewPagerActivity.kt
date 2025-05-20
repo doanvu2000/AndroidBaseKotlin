@@ -30,7 +30,7 @@ class DemoViewPagerActivity : BaseActivity<ActivityDemoViewPagerBinding>() {
     }
 
     override fun initListener() {
-        binding.btnBack.clickSafety {
+        binding.btnBack.clickSafe {
             onBack()
         }
     }

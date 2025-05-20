@@ -100,7 +100,7 @@ class DemoFlexBoxLayoutActivity : BaseActivity<ActivityDemoFlexBoxLayoutBinding>
     }
 
     override fun initListener() {
-        binding.btnBack.clickSafety {
+        binding.btnBack.clickSafe {
             onBack()
         }
         dataAdapter.setOnClickItem { _, position ->

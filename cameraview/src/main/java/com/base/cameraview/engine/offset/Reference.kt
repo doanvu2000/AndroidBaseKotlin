@@ -1,7 +1,6 @@
-package com.base.cameraview.engine.offset;
+package com.base.cameraview.engine.offset
 
-public enum Reference {
-
+enum class Reference {
     /**
      * The base reference system has its 'north' aligned with the device natural
      * orientation.
@@ -15,7 +14,7 @@ public enum Reference {
 
     /**
      * This reference system has its 'north' aligned with the View hierarchy.
-     * This can be different than {@link #BASE} if the activity is allowed to rotate
+     * This can be different than [.BASE] if the activity is allowed to rotate
      * (or forced into a non natural position).
      */
     VIEW,

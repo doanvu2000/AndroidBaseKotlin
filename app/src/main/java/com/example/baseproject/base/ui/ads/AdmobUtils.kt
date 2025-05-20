@@ -51,8 +51,7 @@ class AdmobUtils constructor(val context: Activity) {
     fun loadBannerCollapsible(activity: Activity, collapsible: String?) {
         val extras = Bundle()
         extras.putString(COLLAPSIBLE, collapsible)
-        val adRequest: AdRequest
-        adRequest = if (collapsible != null) {
+        val adRequest: AdRequest = if (collapsible != null) {
             AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter::class.java, extras).build()
         } else {
             AdRequest.Builder().build()

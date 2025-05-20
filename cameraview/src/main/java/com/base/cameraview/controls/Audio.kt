@@ -1,12 +1,9 @@
-package com.base.cameraview.controls;
-
-import androidx.annotation.NonNull;
+package com.base.cameraview.controls
 
 /**
  * Audio values indicate whether to record audio stream when record video.
  */
-public enum Audio implements Control {
-
+enum class Audio(val value: Int) : Control {
     /**
      * No audio.
      */
@@ -29,26 +26,19 @@ public enum Audio implements Control {
      */
     STEREO(3);
 
-    final static Audio DEFAULT = ON;
+    companion object {
+        @JvmField
+        val DEFAULT: Audio = Audio.ON
 
-    private int value;
-
-    Audio(int value) {
-        this.value = value;
-    }
-
-    @NonNull
-    static Audio fromValue(int value) {
-        Audio[] list = Audio.values();
-        for (Audio action : list) {
-            if (action.value() == value) {
-                return action;
+        @JvmStatic
+        fun fromValue(value: Int): Audio {
+            val list = Audio.entries.toTypedArray()
+            for (action in list) {
+                if (action.value == value) {
+                    return action
+                }
             }
+            return DEFAULT
         }
-        return DEFAULT;
-    }
-
-    int value() {
-        return value;
     }
 }

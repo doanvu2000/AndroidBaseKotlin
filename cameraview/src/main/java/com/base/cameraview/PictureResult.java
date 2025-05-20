@@ -2,7 +2,6 @@ package com.base.cameraview;
 
 import android.graphics.BitmapFactory;
 import android.location.Location;
-import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -118,7 +117,7 @@ public class PictureResult {
         if (format == PictureFormat.JPEG) {
             CameraUtils.decodeBitmap(getData(), maxWidth, maxHeight, new BitmapFactory.Options(),
                     rotation, callback);
-        } else if (format == PictureFormat.DNG && Build.VERSION.SDK_INT >= 24) {
+        } else if (format == PictureFormat.DNG) {
             // Apparently: BitmapFactory added DNG support in API 24.
             // https://github.com/aosp-mirror/platform_frameworks_base/blob/nougat-mr1-release/core/jni/android/graphics/BitmapFactory.cpp
             CameraUtils.decodeBitmap(getData(), maxWidth, maxHeight, new BitmapFactory.Options(),

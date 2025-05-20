@@ -1,20 +1,15 @@
-package com.base.cameraview.controls;
+package com.base.cameraview.controls
 
-
-import androidx.annotation.NonNull;
-
-import com.base.cameraview.CameraOptions;
 
 /**
  * White balance values control the white balance settings.
  */
-public enum WhiteBalance implements Control {
-
+enum class WhiteBalance(val value: Int) : Control {
     /**
      * Automatic white balance selection (AWB).
      * This is not guaranteed to be supported.
      *
-     * @see CameraOptions#getSupportedWhiteBalance()
+     * @see com.base.cameraview.CameraOptions.getSupportedWhiteBalance
      */
     AUTO(0),
 
@@ -22,7 +17,7 @@ public enum WhiteBalance implements Control {
      * White balance appropriate for incandescent light.
      * This is not guaranteed to be supported.
      *
-     * @see CameraOptions#getSupportedWhiteBalance()
+     * @see com.base.cameraview.CameraOptions.getSupportedWhiteBalance
      */
     INCANDESCENT(1),
 
@@ -30,7 +25,7 @@ public enum WhiteBalance implements Control {
      * White balance appropriate for fluorescent light.
      * This is not guaranteed to be supported.
      *
-     * @see CameraOptions#getSupportedWhiteBalance()
+     * @see com.base.cameraview.CameraOptions.getSupportedWhiteBalance
      */
     FLUORESCENT(2),
 
@@ -38,7 +33,7 @@ public enum WhiteBalance implements Control {
      * White balance appropriate for daylight captures.
      * This is not guaranteed to be supported.
      *
-     * @see CameraOptions#getSupportedWhiteBalance()
+     * @see com.base.cameraview.CameraOptions.getSupportedWhiteBalance
      */
     DAYLIGHT(3),
 
@@ -46,30 +41,23 @@ public enum WhiteBalance implements Control {
      * White balance appropriate for pictures in cloudy conditions.
      * This is not guaranteed to be supported.
      *
-     * @see CameraOptions#getSupportedWhiteBalance()
+     * @see com.base.cameraview.CameraOptions.getSupportedWhiteBalance
      */
     CLOUDY(4);
 
-    static final WhiteBalance DEFAULT = AUTO;
+    companion object {
+        @JvmField
+        val DEFAULT: WhiteBalance = AUTO
 
-    private int value;
-
-    WhiteBalance(int value) {
-        this.value = value;
-    }
-
-    @NonNull
-    static WhiteBalance fromValue(int value) {
-        WhiteBalance[] list = WhiteBalance.values();
-        for (WhiteBalance action : list) {
-            if (action.value() == value) {
-                return action;
+        @JvmStatic
+        fun fromValue(value: Int): WhiteBalance {
+            val list = WhiteBalance.entries.toTypedArray()
+            for (action in list) {
+                if (action.value == value) {
+                    return action
+                }
             }
+            return DEFAULT
         }
-        return DEFAULT;
-    }
-
-    int value() {
-        return value;
     }
 }

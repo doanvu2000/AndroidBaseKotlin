@@ -1,15 +1,10 @@
-package com.base.cameraview.size;
-
-import androidx.annotation.NonNull;
-
-import java.util.List;
+package com.base.cameraview.size
 
 /**
- * A size selector receives a list of {@link Size}s and returns another list with
+ * A size selector receives a list of [Size]s and returns another list with
  * sizes that are considered acceptable.
  */
-public interface SizeSelector {
-
+interface SizeSelector {
     /**
      * Returns a list of acceptable sizes from the given input.
      * The final size will be the first element in the output list.
@@ -17,6 +12,5 @@ public interface SizeSelector {
      * @param source input list
      * @return output list
      */
-    @NonNull
-    List<Size> select(@NonNull List<Size> source);
+    fun select(source: MutableList<Size?>): MutableList<Size?>
 }

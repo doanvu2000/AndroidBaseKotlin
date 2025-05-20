@@ -1,27 +1,23 @@
-package com.base.cameraview.markers;
+package com.base.cameraview.markers
 
-import android.graphics.PointF;
-
-import androidx.annotation.NonNull;
-
-import com.base.cameraview.CameraView;
+import android.graphics.PointF
 
 /**
  * A marker for the autofocus operations. Receives callback when focus starts,
  * ends successfully or failed, and can be used to draw on screen.
- * <p>
- * The point coordinates are meant with respect to {@link CameraView} width and height,
+ *
+ *
+ * The point coordinates are meant with respect to [com.base.cameraview.CameraView] width and height,
  * so a 0, 0 point means that focus is happening on the top-left visible corner.
  */
-public interface AutoFocusMarker extends Marker {
-
+interface AutoFocusMarker : Marker {
     /**
      * Called when the autofocus process has started.
      *
      * @param trigger the autofocus trigger
      * @param point   coordinates
      */
-    void onAutoFocusStart(@NonNull AutoFocusTrigger trigger, @NonNull PointF point);
+    fun onAutoFocusStart(trigger: AutoFocusTrigger, point: PointF)
 
 
     /**
@@ -32,9 +28,9 @@ public interface AutoFocusMarker extends Marker {
      * @param successful whether the operation succeeded
      * @param point      coordinates
      */
-    void onAutoFocusEnd(@NonNull AutoFocusTrigger trigger,
-                        boolean successful,
-                        @NonNull PointF point);
-
-
+    fun onAutoFocusEnd(
+        trigger: AutoFocusTrigger,
+        successful: Boolean,
+        point: PointF
+    )
 }

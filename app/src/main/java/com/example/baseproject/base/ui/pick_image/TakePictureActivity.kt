@@ -47,11 +47,11 @@ class TakePictureActivity : BaseActivity<ActivityTakePictureBinding>() {
     }
 
     override fun initListener() {
-        binding.btnBack.clickSafety {
+        binding.btnBack.clickSafe {
             onBack()
         }
 
-        binding.btnCamera.clickSafety {
+        binding.btnCamera.clickSafe {
             clickCamera()
         }
     }

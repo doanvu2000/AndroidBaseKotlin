@@ -1,20 +1,18 @@
-package com.base.cameraview.engine.action;
-
-import androidx.annotation.NonNull;
+package com.base.cameraview.engine.action
 
 /**
- * A callback for {@link Action} state changes.
+ * A callback for [Action] state changes.
  * See the action class.
- * <p>
- * See also {@link CompletionCallback}.
+ *
+ *
+ * See also [CompletionCallback].
  */
-public interface ActionCallback {
-
+interface ActionCallback {
     /**
      * Action state has just changed.
      *
      * @param action action
      * @param state  new state
      */
-    void onActionStateChanged(@NonNull Action action, int state);
+    fun onActionStateChanged(action: Action, state: Int)
 }

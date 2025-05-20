@@ -1,16 +1,12 @@
-package com.base.cameraview.preview;
+package com.base.cameraview.preview
 
-import android.graphics.SurfaceTexture;
-
-import androidx.annotation.NonNull;
-
-import com.base.cameraview.filter.Filter;
+import android.graphics.SurfaceTexture
+import com.base.cameraview.filter.Filter
 
 /**
  * Callback for renderer frames.
  */
-public interface RendererFrameCallback {
-
+interface RendererFrameCallback {
     /**
      * Called on the renderer thread, hopefully only once, to notify that
      * the texture was created (or to inform a new callback of the old texture).
@@ -18,7 +14,7 @@ public interface RendererFrameCallback {
      * @param textureId the GL texture linked to the image stream
      */
     @RendererThread
-    void onRendererTextureCreated(int textureId);
+    fun onRendererTextureCreated(textureId: Int)
 
     /**
      * Called on the renderer thread after each frame was drawn.
@@ -31,14 +27,14 @@ public interface RendererFrameCallback {
      * @param scaleY         the scaleY (in REF_VIEW) value
      */
     @RendererThread
-    void onRendererFrame(@NonNull SurfaceTexture surfaceTexture, int rotation, float scaleX, float scaleY);
+    fun onRendererFrame(surfaceTexture: SurfaceTexture, rotation: Int, scaleX: Float, scaleY: Float)
 
     /**
      * Called when the renderer filter changes. This is guaranteed to be called at least once
-     * before the first {@link #onRendererFrame(SurfaceTexture, int, float, float)}.
+     * before the first [.onRendererFrame].
      *
      * @param filter the new filter
      */
     @RendererThread
-    void onRendererFilterChanged(@NonNull Filter filter);
+    fun onRendererFilterChanged(filter: Filter)
 }

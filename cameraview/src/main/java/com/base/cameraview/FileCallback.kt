@@ -1,15 +1,12 @@
-package com.base.cameraview;
+package com.base.cameraview
 
-import androidx.annotation.Nullable;
-import androidx.annotation.UiThread;
-
-import java.io.File;
+import androidx.annotation.UiThread
+import java.io.File
 
 /**
  * Receives callbacks about a file saving operation.
  */
-public interface FileCallback {
-
+interface FileCallback {
     /**
      * Notifies that the data was succesfully written to file.
      * This is run on the UI thread.
@@ -19,5 +16,5 @@ public interface FileCallback {
      * @param file the written file, or null
      */
     @UiThread
-    void onFileReady(@Nullable File file);
+    fun onFileReady(file: File?)
 }

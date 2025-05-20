@@ -1,12 +1,9 @@
-package com.base.cameraview.controls;
-
-import androidx.annotation.NonNull;
+package com.base.cameraview.controls
 
 /**
  * Hdr values indicate whether to use high dynamic range techniques when capturing pictures.
  */
-public enum Hdr implements Control {
-
+enum class Hdr(val value: Int) : Control {
     /**
      * No HDR.
      */
@@ -17,26 +14,19 @@ public enum Hdr implements Control {
      */
     ON(1);
 
-    final static Hdr DEFAULT = OFF;
+    companion object {
+        @JvmField
+        val DEFAULT: Hdr = OFF
 
-    private int value;
-
-    Hdr(int value) {
-        this.value = value;
-    }
-
-    @NonNull
-    static Hdr fromValue(int value) {
-        Hdr[] list = Hdr.values();
-        for (Hdr action : list) {
-            if (action.value() == value) {
-                return action;
+        @JvmStatic
+        fun fromValue(value: Int): Hdr {
+            val list = Hdr.entries.toTypedArray()
+            for (action in list) {
+                if (action.value == value) {
+                    return action
+                }
             }
+            return DEFAULT
         }
-        return DEFAULT;
-    }
-
-    int value() {
-        return value;
     }
 }

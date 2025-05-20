@@ -22,6 +22,9 @@ import android.widget.SeekBar
 import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.createBitmap
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import com.base.stickerview.StickerImageView
 import com.example.baseproject.R
 import com.example.baseproject.base.utils.util.AppLogger
@@ -119,11 +122,38 @@ fun View.gone() {
     }
 }
 
+fun clickAnimation(mContext: Context?, view: View) {
+    //  return new AlphaAnimation(1F, 0.4F); // Change "0.4F" as per your recruitment.
+    if (mContext != null) {
+        val myAnim = AnimationUtils.loadAnimation(mContext, R.anim.bounce)
+        view.startAnimation(myAnim)
+    }
+}
+
+fun View.clickAnimation() {
+    try {
+        if (!isAttachedToWindow) {
+            return
+        }
+        context ?: return
+        clickAnimation(context, this)
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+}
+
+fun View.clickWithAnimation(action: (View) -> Unit) {
+    setOnClickListener {
+        clickAnimation()
+        action.invoke(this)
+    }
+}
+
 val View.isShow: Boolean
-    get() = this.visibility == View.VISIBLE
+    get() = this.isVisible
 
 val View.isHide: Boolean
-    get() = this.visibility == View.INVISIBLE
+    get() = this.isInvisible
 val View.isGone: Boolean
     get() = this.visibility == View.GONE
 
@@ -145,7 +175,7 @@ fun View.showOrHide(isShow: Boolean) {
 
 fun View.getBitmapFromView(done: (Bitmap) -> Unit) {
     post {
-        val b = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val b = createBitmap(width, height)
         val c = Canvas(b)
         layout(left, top, right, bottom)
         draw(c)

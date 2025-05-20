@@ -1,23 +1,17 @@
-package com.base.cameraview.markers;
+package com.base.cameraview.markers
 
-import android.content.Context;
-import android.view.View;
-import android.view.ViewGroup;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import com.base.cameraview.CameraView;
+import android.content.Context
+import android.view.View
+import android.view.ViewGroup
 
 /**
- * A marker is an overlay over the {@link CameraView} preview, which should be drawn
+ * A marker is an overlay over the [com.base.cameraview.CameraView] preview, which should be drawn
  * at specific times during the camera lifecycle.
- * Currently only {@link AutoFocusMarker} is available.
+ * Currently only [AutoFocusMarker] is available.
  */
-public interface Marker {
-
+interface Marker {
     /**
-     * Marker is being attached to the CameraView. If a {@link View} is returned,
+     * Marker is being attached to the CameraView. If a [View] is returned,
      * it becomes part of the hierarchy and is automatically translated (if possible)
      * to match the event place on screen, for example the point where autofocus was started
      * by the user finger.
@@ -26,6 +20,5 @@ public interface Marker {
      * @param container a container
      * @return a view or null
      */
-    @Nullable
-    View onAttach(@NonNull Context context, @NonNull ViewGroup container);
+    fun onAttach(context: Context, container: ViewGroup): View?
 }

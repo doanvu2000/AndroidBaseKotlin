@@ -26,10 +26,10 @@ class LocationActivity : BaseActivity<ActivityLocationBinding>() {
     }
 
     override fun initListener() {
-        binding.btnBack.clickSafety {
+        binding.btnBack.clickSafe {
             onBack()
         }
-        binding.btnGetLocation.clickSafety {
+        binding.btnGetLocation.clickSafe {
             if (isGpsEnable() && isInternetAvailable()) {
                 getLocation()
             } else {

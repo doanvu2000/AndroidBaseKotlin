@@ -1,25 +1,22 @@
-package com.base.cameraview.preview;
-
-import androidx.annotation.NonNull;
+package com.base.cameraview.preview
 
 /**
  * Base interface for previews that support renderer frame callbacks,
- * see {@link RendererFrameCallback}.
+ * see [RendererFrameCallback].
  */
-public interface RendererCameraPreview {
-
+interface RendererCameraPreview {
     /**
-     * Adds a {@link RendererFrameCallback} to receive renderer frame events.
+     * Adds a [RendererFrameCallback] to receive renderer frame events.
      *
      * @param callback a callback
      */
-    void addRendererFrameCallback(@NonNull final RendererFrameCallback callback);
+    fun addRendererFrameCallback(callback: RendererFrameCallback)
 
     /**
-     * Removes a {@link RendererFrameCallback} that was previously added to receive renderer
+     * Removes a [RendererFrameCallback] that was previously added to receive renderer
      * frame events.
      *
      * @param callback a callback
      */
-    void removeRendererFrameCallback(@NonNull final RendererFrameCallback callback);
+    fun removeRendererFrameCallback(callback: RendererFrameCallback)
 }

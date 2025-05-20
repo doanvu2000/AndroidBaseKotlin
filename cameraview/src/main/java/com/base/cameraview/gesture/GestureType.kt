@@ -1,12 +1,11 @@
-package com.base.cameraview.gesture;
+package com.base.cameraview.gesture
 
 
 /**
  * Gestures and gesture actions can both have a type. For a gesture to be able to be mapped to
- * a certain {@link GestureAction}, both of them might be of the same type.
+ * a certain [GestureAction], both of them might be of the same type.
  */
-public enum GestureType {
-
+enum class GestureType {
     /**
      * Defines gestures or gesture actions that consist of a single operation.
      * Gesture example: a tap.

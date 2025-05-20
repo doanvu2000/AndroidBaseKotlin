@@ -194,9 +194,7 @@ public abstract class BaseFilter implements Filter {
     protected BaseFilter onCopy() {
         try {
             return getClass().newInstance();
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException("Filters should have a public no-arguments constructor.", e);
-        } catch (InstantiationException e) {
+        } catch (IllegalAccessException | InstantiationException e) {
             throw new RuntimeException("Filters should have a public no-arguments constructor.", e);
         }
     }

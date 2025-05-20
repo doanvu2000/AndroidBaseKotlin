@@ -77,15 +77,11 @@ public class CameraException extends RuntimeException {
      */
     @SuppressWarnings("unused")
     public boolean isUnrecoverable() {
-        switch (getReason()) {
-            case REASON_FAILED_TO_CONNECT:
-                return true;
-            case REASON_FAILED_TO_START_PREVIEW:
-                return true;
-            case REASON_DISCONNECTED:
-                return true;
-            default:
-                return false;
-        }
+        return switch (getReason()) {
+            case REASON_FAILED_TO_CONNECT -> true;
+            case REASON_FAILED_TO_START_PREVIEW -> true;
+            case REASON_DISCONNECTED -> true;
+            default -> false;
+        };
     }
 }

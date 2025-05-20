@@ -31,16 +31,16 @@ class NetWorkDemoActivity : BaseActivity<ActivityNetWorkDemoBinding>() {
     }
 
     override fun initListener() {
-        binding.fetchButton.clickSafety {
+        binding.fetchButton.clickSafe {
             fetchData()
         }
 
-        binding.cancelButton.clickSafety {
+        binding.cancelButton.clickSafe {
             viewModel.cancelFetch()
             resetUi()
         }
 
-        binding.clearCacheButton.clickSafety {
+        binding.clearCacheButton.clickSafe {
             viewModel.clearCache()
             binding.resultTextView.text = "Cache cleared"
         }

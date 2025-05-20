@@ -46,12 +46,12 @@ class LunarCalendarActivity : BaseActivity<ActivityLunarCalendarBinding>() {
     }
 
     override fun initListener() {
-        binding.btnNextPage.clickSafety {
+        binding.btnNextPage.clickSafe {
             val currentPage = binding.calendarViewPager.currentItem
             binding.calendarViewPager.currentItem = currentPage + 1
         }
 
-        binding.btnPreviousPage.clickSafety {
+        binding.btnPreviousPage.clickSafe {
             val currentPage = binding.calendarViewPager.currentItem
             binding.calendarViewPager.currentItem = currentPage - 1
         }

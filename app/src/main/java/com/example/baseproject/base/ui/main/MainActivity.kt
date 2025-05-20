@@ -11,6 +11,7 @@ import com.example.baseproject.base.base_view.screen.BaseActivity
 import com.example.baseproject.base.base_view.screen.HomeFragment
 import com.example.baseproject.base.ui.ads.DemoAdsActivity
 import com.example.baseproject.base.ui.broadcast.DemoBroadcastActivity
+import com.example.baseproject.base.ui.camerademo.CameraViewLibDemoActivity
 import com.example.baseproject.base.ui.demo_viewpager.DemoViewPagerActivity
 import com.example.baseproject.base.ui.flex_box_layout.DemoFlexBoxLayoutActivity
 import com.example.baseproject.base.ui.location.LocationActivity
@@ -71,43 +72,47 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             }
         }
 
-        binding.btnDemoViewPager.clickSafety {
+        binding.btnDemoViewPager.clickSafe {
             openActivity(DemoViewPagerActivity::class.java)
         }
-        binding.btnDemoLocation.clickSafety {
+        binding.btnDemoLocation.clickSafe {
             openActivity(LocationActivity::class.java)
         }
-        binding.btnDemoAds.clickSafety {
+        binding.btnDemoAds.clickSafe {
             openActivity(DemoAdsActivity::class.java)
         }
-        binding.btnTestCoilLib.clickSafety {
+        binding.btnTestCoilLib.clickSafe {
             openActivity(CoilActivity::class.java)
         }
-        binding.btnFlexBoxManager.clickSafety {
+        binding.btnFlexBoxManager.clickSafe {
             openActivity(DemoFlexBoxLayoutActivity::class.java)
         }
-        binding.btnPickImage.clickSafety {
+        binding.btnPickImage.clickSafe {
             openActivity(PickImageActivity::class.java)
         }
 
-        binding.btnCameraTakePicture.clickSafety {
+        binding.btnCameraTakePicture.clickSafe {
             openActivity(TakePictureActivity::class.java)
         }
 
-        binding.btnNetWorkDemo.clickSafety {
+        binding.btnNetWorkDemo.clickSafe {
             openActivity(NetWorkDemoActivity::class.java)
         }
 
-        binding.btnLunarCalendar.clickSafety {
+        binding.btnLunarCalendar.clickSafe {
             openActivity(LunarCalendarActivity::class.java)
         }
 
-        binding.btnBroadcastDemo.clickSafety {
+        binding.btnBroadcastDemo.clickSafe {
             openActivity(DemoBroadcastActivity::class.java)
         }
 
-        binding.btnWeekViewEventDemo.clickSafety {
+        binding.btnWeekViewEventDemo.clickSafe {
             openActivity(WeekViewEventActivity::class.java)
+        }
+
+        binding.btnCameraViewDemo.clickSafe {
+            openActivity(CameraViewLibDemoActivity::class.java)
         }
     }
 

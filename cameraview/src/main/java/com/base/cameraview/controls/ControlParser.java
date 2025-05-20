@@ -26,23 +26,23 @@ public class ControlParser {
     private int pictureFormat;
 
     public ControlParser(@NonNull Context context, @NonNull TypedArray array) {
-        preview = array.getInteger(R.styleable.CameraView_cameraPreview, Preview.DEFAULT.value());
+        preview = array.getInteger(R.styleable.CameraView_cameraPreview, Preview.DEFAULT.getValue());
         facing = array.getInteger(R.styleable.CameraView_cameraFacing,
-                Facing.DEFAULT(context).value());
-        flash = array.getInteger(R.styleable.CameraView_cameraFlash, Flash.DEFAULT.value());
-        grid = array.getInteger(R.styleable.CameraView_cameraGrid, Grid.DEFAULT.value());
+                Facing.defaultFacing(context).getValue());
+        flash = array.getInteger(R.styleable.CameraView_cameraFlash, Flash.DEFAULT.getValue());
+        grid = array.getInteger(R.styleable.CameraView_cameraGrid, Grid.DEFAULT.getValue());
         whiteBalance = array.getInteger(R.styleable.CameraView_cameraWhiteBalance,
-                WhiteBalance.DEFAULT.value());
-        mode = array.getInteger(R.styleable.CameraView_cameraMode, Mode.DEFAULT.value());
-        hdr = array.getInteger(R.styleable.CameraView_cameraHdr, Hdr.DEFAULT.value());
-        audio = array.getInteger(R.styleable.CameraView_cameraAudio, Audio.DEFAULT.value());
+                WhiteBalance.DEFAULT.getValue());
+        mode = array.getInteger(R.styleable.CameraView_cameraMode, Mode.DEFAULT.getValue());
+        hdr = array.getInteger(R.styleable.CameraView_cameraHdr, Hdr.DEFAULT.getValue());
+        audio = array.getInteger(R.styleable.CameraView_cameraAudio, Audio.DEFAULT.getValue());
         videoCodec = array.getInteger(R.styleable.CameraView_cameraVideoCodec,
-                VideoCodec.DEFAULT.value());
+                VideoCodec.DEFAULT.getValue());
         audioCodec = array.getInteger(R.styleable.CameraView_cameraAudioCodec,
-                AudioCodec.DEFAULT.value());
-        engine = array.getInteger(R.styleable.CameraView_cameraEngine, Engine.DEFAULT.value());
+                AudioCodec.DEFAULT.getValue());
+        engine = array.getInteger(R.styleable.CameraView_cameraEngine, Engine.DEFAULT.getValue());
         pictureFormat = array.getInteger(R.styleable.CameraView_cameraPictureFormat,
-                PictureFormat.DEFAULT.value());
+                PictureFormat.DEFAULT.getValue());
     }
 
     @NonNull

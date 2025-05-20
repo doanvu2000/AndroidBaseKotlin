@@ -1,23 +1,17 @@
-package com.base.cameraview.controls;
+package com.base.cameraview.controls
 
-
-import androidx.annotation.NonNull;
-
-import com.base.cameraview.CameraView;
-
-import java.io.File;
 
 /**
  * Type of the session to be opened or to move to.
  * Session modes have influence over the capture and preview size, ability to shoot pictures,
  * focus modes, runtime permissions needed.
  */
-public enum Mode implements Control {
-
+enum class Mode(val value: Int) : Control {
     /**
      * Session used to capture pictures.
-     * <p>
-     * - {@link CameraView#takeVideo(File)} will throw an exception
+     *
+     *
+     * - [com.base.cameraview.CameraView.takeVideo] will throw an exception
      * - Only the camera permission is requested
      * - Capture size is chosen according to the current picture size selector
      */
@@ -25,33 +19,28 @@ public enum Mode implements Control {
 
     /**
      * Session used to capture videos.
-     * <p>
-     * - {@link CameraView#takePicture()} will throw an exception
+     *
+     *
+     * - [com.base.cameraview.CameraView.takePicture] will throw an exception
      * - Camera and audio record permissions are requested
      * - Capture size is chosen according to the current video size selector
      */
     VIDEO(1);
 
-    static final Mode DEFAULT = PICTURE;
 
-    private int value;
+    companion object {
+        @JvmField
+        val DEFAULT: Mode = PICTURE
 
-    Mode(int value) {
-        this.value = value;
-    }
-
-    @NonNull
-    static Mode fromValue(int value) {
-        Mode[] list = Mode.values();
-        for (Mode action : list) {
-            if (action.value() == value) {
-                return action;
+        @JvmStatic
+        fun fromValue(value: Int): Mode {
+            val list = Mode.entries.toTypedArray()
+            for (action in list) {
+                if (action.value == value) {
+                    return action
+                }
             }
+            return DEFAULT
         }
-        return DEFAULT;
-    }
-
-    int value() {
-        return value;
     }
 }

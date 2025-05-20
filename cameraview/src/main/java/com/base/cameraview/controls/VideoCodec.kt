@@ -1,15 +1,11 @@
-package com.base.cameraview.controls;
+package com.base.cameraview.controls
 
-
-import androidx.annotation.NonNull;
 
 /**
  * Constants for selecting the encoder of video recordings.
  * https://developer.android.com/guide/topics/media/media-formats.html#video-formats
  */
-public enum VideoCodec implements Control {
-
-
+enum class VideoCodec(val value: Int) : Control {
     /**
      * Let the device choose its codec.
      */
@@ -25,26 +21,19 @@ public enum VideoCodec implements Control {
      */
     H_264(2);
 
-    static final VideoCodec DEFAULT = DEVICE_DEFAULT;
+    companion object {
+        @JvmField
+        val DEFAULT: VideoCodec = DEVICE_DEFAULT
 
-    private int value;
-
-    VideoCodec(int value) {
-        this.value = value;
-    }
-
-    @NonNull
-    static VideoCodec fromValue(int value) {
-        VideoCodec[] list = VideoCodec.values();
-        for (VideoCodec action : list) {
-            if (action.value() == value) {
-                return action;
+        @JvmStatic
+        fun fromValue(value: Int): VideoCodec {
+            val list = VideoCodec.entries.toTypedArray()
+            for (action in list) {
+                if (action.value == value) {
+                    return action
+                }
             }
+            return DEFAULT
         }
-        return DEFAULT;
-    }
-
-    int value() {
-        return value;
     }
 }
