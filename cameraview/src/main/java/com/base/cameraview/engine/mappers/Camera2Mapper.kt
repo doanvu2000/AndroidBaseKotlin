@@ -12,8 +12,8 @@ import com.base.cameraview.controls.WhiteBalance
  * A Mapper maps camera engine constants to CameraView constants.
  */
 class Camera2Mapper private constructor() {
-    fun mapFlash(flash: Flash): MutableList<Pair<Int?, Int?>?> {
-        val result: MutableList<Pair<Int?, Int?>?> = ArrayList<Pair<Int?, Int?>?>()
+    fun mapFlash(flash: Flash): MutableList<Pair<Int?, Int?>> {
+        val result: MutableList<Pair<Int?, Int?>> = ArrayList<Pair<Int?, Int?>>()
         when (flash) {
             Flash.ON -> {
                 result.add(
