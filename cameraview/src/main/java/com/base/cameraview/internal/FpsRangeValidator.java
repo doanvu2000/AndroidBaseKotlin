@@ -3,8 +3,6 @@ package com.base.cameraview.internal;
 import android.os.Build;
 import android.util.Range;
 
-import androidx.annotation.RequiresApi;
-
 import com.base.cameraview.CameraLogger;
 
 import java.util.Arrays;
@@ -12,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@RequiresApi(21)
 public class FpsRangeValidator {
 
     private final static CameraLogger LOG = CameraLogger.create("FpsRangeValidator");

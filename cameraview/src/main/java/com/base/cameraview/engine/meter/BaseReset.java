@@ -3,17 +3,13 @@ package com.base.cameraview.engine.meter;
 import android.graphics.Rect;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.params.MeteringRectangle;
-import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 
 import com.base.cameraview.engine.action.ActionHolder;
 import com.base.cameraview.engine.action.BaseAction;
 
-
-@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 public abstract class BaseReset extends BaseAction {
 
     private boolean resetArea;

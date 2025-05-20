@@ -7,10 +7,8 @@ import android.hardware.camera2.DngCreator;
 import android.hardware.camera2.TotalCaptureResult;
 import android.media.Image;
 import android.media.ImageReader;
-import android.os.Build;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.exifinterface.media.ExifInterface;
 
 import com.base.cameraview.PictureResult;
@@ -31,7 +29,6 @@ import java.nio.ByteBuffer;
 /**
  * A {@link PictureResult} that uses standard APIs.
  */
-@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 public class Full2PictureRecorder extends FullPictureRecorder
         implements ImageReader.OnImageAvailableListener {
 

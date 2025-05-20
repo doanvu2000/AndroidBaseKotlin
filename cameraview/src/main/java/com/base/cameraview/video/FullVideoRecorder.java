@@ -2,7 +2,6 @@ package com.base.cameraview.video;
 
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
-import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -111,11 +110,9 @@ public abstract class FullVideoRecorder extends VideoRecorder {
         // Set audio codec if the user has specified a specific codec.
         if (stub.audioCodec == AudioCodec.AAC) {
             mProfile.audioCodec = MediaRecorder.AudioEncoder.AAC;
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN
-                && stub.audioCodec == AudioCodec.HE_AAC) {
+        } else if (stub.audioCodec == AudioCodec.HE_AAC) {
             mProfile.audioCodec = MediaRecorder.AudioEncoder.HE_AAC;
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN
-                && stub.audioCodec == AudioCodec.AAC_ELD) {
+        } else if (stub.audioCodec == AudioCodec.AAC_ELD) {
             mProfile.audioCodec = MediaRecorder.AudioEncoder.AAC_ELD;
         }
         mMediaRecorder.setOutputFormat(mProfile.fileFormat);

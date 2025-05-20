@@ -1,12 +1,10 @@
 package com.base.cameraview.engine.mappers;
 
 import android.hardware.camera2.CameraCharacteristics;
-import android.os.Build;
 import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 
 import com.base.cameraview.controls.Control;
 import com.base.cameraview.controls.Facing;
@@ -24,7 +22,6 @@ import java.util.Set;
 /**
  * A Mapper maps camera engine constants to CameraView constants.
  */
-@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 public class Camera2Mapper {
 
     private static final Map<Facing, Integer> FACING = new HashMap<>();

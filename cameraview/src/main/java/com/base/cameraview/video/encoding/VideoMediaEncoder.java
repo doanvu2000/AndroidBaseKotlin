@@ -3,7 +3,6 @@ package com.base.cameraview.video.encoding;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.Surface;
 
@@ -112,11 +111,9 @@ abstract class VideoMediaEncoder<C extends VideoConfig> extends MediaEncoder {
                 super.onWriteOutput(pool, buffer);
             } else {
                 LOG.w("onWriteOutput:", "DROPPING FRAME and requesting a sync frame soon.");
-                if (Build.VERSION.SDK_INT >= 19) {
-                    Bundle params = new Bundle();
-                    params.putInt(MediaCodec.PARAMETER_KEY_REQUEST_SYNC_FRAME, 0);
-                    mMediaCodec.setParameters(params);
-                }
+                Bundle params = new Bundle();
+                params.putInt(MediaCodec.PARAMETER_KEY_REQUEST_SYNC_FRAME, 0);
+                mMediaCodec.setParameters(params);
                 pool.recycle(buffer);
             }
         } else {

@@ -3,12 +3,10 @@ package com.base.cameraview.video.encoding;
 import android.annotation.SuppressLint;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
-import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 
 import com.base.cameraview.CameraLogger;
 import com.base.cameraview.internal.WorkerHandler;
@@ -52,7 +50,6 @@ import java.util.Map;
  * call {@link Controller#requestStop(int)}. Once all MediaEncoders have stopped, we will
  * actually call {@link #stop()} on ourselves.
  */
-@RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class MediaEncoderEngine {
 
     @SuppressWarnings("WeakerAccess")

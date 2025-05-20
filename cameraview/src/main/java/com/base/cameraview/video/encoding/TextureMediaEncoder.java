@@ -2,11 +2,9 @@ package com.base.cameraview.video.encoding;
 
 import android.graphics.SurfaceTexture;
 import android.opengl.Matrix;
-import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 
 import com.base.cameraview.CameraLogger;
 import com.base.cameraview.filter.Filter;
@@ -18,7 +16,6 @@ import com.otaliastudios.opengl.surface.EglWindowSurface;
 /**
  * Default implementation for video encoding.
  */
-@RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class TextureMediaEncoder extends VideoMediaEncoder<TextureConfig> {
 
     public final static String FRAME_EVENT = "frame";

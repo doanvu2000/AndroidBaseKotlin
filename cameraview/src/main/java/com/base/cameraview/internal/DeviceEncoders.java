@@ -6,7 +6,6 @@ import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.media.MediaFormat;
-import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -70,7 +69,7 @@ public class DeviceEncoders {
     private final static String TAG = DeviceEncoders.class.getSimpleName();
     private final static CameraLogger LOG = CameraLogger.create(TAG);
     @VisibleForTesting
-    static boolean ENABLED = Build.VERSION.SDK_INT >= 21;
+    static boolean ENABLED = true;
     @SuppressWarnings("FieldCanBeLocal")
     private final MediaCodecInfo mVideoEncoder;
     @SuppressWarnings("FieldCanBeLocal")

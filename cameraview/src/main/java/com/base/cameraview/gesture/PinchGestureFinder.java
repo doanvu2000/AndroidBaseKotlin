@@ -1,6 +1,5 @@
 package com.base.cameraview.gesture;
 
-import android.os.Build;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 
@@ -20,16 +19,14 @@ public class PinchGestureFinder extends GestureFinder {
         mDetector = new ScaleGestureDetector(controller.getContext(),
                 new ScaleGestureDetector.SimpleOnScaleGestureListener() {
                     @Override
-                    public boolean onScale(ScaleGestureDetector detector) {
+                    public boolean onScale(@NonNull ScaleGestureDetector detector) {
                         mNotify = true;
                         mFactor = ((detector.getScaleFactor() - 1) * ADD_SENSITIVITY);
                         return true;
                     }
                 });
 
-        if (Build.VERSION.SDK_INT >= 19) {
-            mDetector.setQuickScaleEnabled(false);
-        }
+        mDetector.setQuickScaleEnabled(false);
     }
 
     @Override

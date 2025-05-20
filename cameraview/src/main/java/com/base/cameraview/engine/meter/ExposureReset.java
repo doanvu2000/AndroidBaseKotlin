@@ -5,17 +5,13 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.MeteringRectangle;
-import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 
 import com.base.cameraview.CameraLogger;
 import com.base.cameraview.engine.action.ActionHolder;
 
-
-@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 public class ExposureReset extends BaseReset {
 
     private static final String TAG = ExposureReset.class.getSimpleName();
@@ -44,9 +40,7 @@ public class ExposureReset extends BaseReset {
         LOG.i("onStarted:", "last precapture trigger is", trigger);
         if (trigger != null && trigger == CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START) {
             LOG.i("onStarted:", "canceling precapture.");
-            int newTrigger = Build.VERSION.SDK_INT >= 23
-                    ? CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_CANCEL
-                    : CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_IDLE;
+            int newTrigger = CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_CANCEL;
             holder.getBuilder(this).set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER,
                     newTrigger);
         }

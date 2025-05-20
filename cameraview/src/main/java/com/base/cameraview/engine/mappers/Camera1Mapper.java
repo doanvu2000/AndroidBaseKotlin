@@ -1,7 +1,6 @@
 package com.base.cameraview.engine.mappers;
 
 import android.hardware.Camera;
-import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -39,11 +38,7 @@ public class Camera1Mapper {
         WB.put(WhiteBalance.DAYLIGHT, Camera.Parameters.WHITE_BALANCE_DAYLIGHT);
         WB.put(WhiteBalance.CLOUDY, Camera.Parameters.WHITE_BALANCE_CLOUDY_DAYLIGHT);
         HDR.put(Hdr.OFF, Camera.Parameters.SCENE_MODE_AUTO);
-        if (Build.VERSION.SDK_INT >= 17) {
-            HDR.put(Hdr.ON, Camera.Parameters.SCENE_MODE_HDR);
-        } else {
-            HDR.put(Hdr.ON, "hdr");
-        }
+        HDR.put(Hdr.ON, Camera.Parameters.SCENE_MODE_HDR);
     }
 
     private Camera1Mapper() {

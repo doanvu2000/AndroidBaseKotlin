@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.hardware.SensorManager;
 import android.hardware.display.DisplayManager;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.Display;
@@ -96,27 +95,23 @@ public class OrientationHelper {
                 }
             }
         };
-        if (Build.VERSION.SDK_INT >= 17) {
-            mDisplayOffsetListener = new DisplayManager.DisplayListener() {
-                public void onDisplayAdded(int displayId) {
-                }
+        mDisplayOffsetListener = new DisplayManager.DisplayListener() {
+            public void onDisplayAdded(int displayId) {
+            }
 
-                public void onDisplayRemoved(int displayId) {
-                }
+            public void onDisplayRemoved(int displayId) {
+            }
 
-                @Override
-                public void onDisplayChanged(int displayId) {
-                    int oldDisplayOffset = mDisplayOffset;
-                    int newDisplayOffset = findDisplayOffset();
-                    if (newDisplayOffset != oldDisplayOffset) {
-                        mDisplayOffset = newDisplayOffset;
-                        mCallback.onDisplayOffsetChanged();
-                    }
+            @Override
+            public void onDisplayChanged(int displayId) {
+                int oldDisplayOffset = mDisplayOffset;
+                int newDisplayOffset = findDisplayOffset();
+                if (newDisplayOffset != oldDisplayOffset) {
+                    mDisplayOffset = newDisplayOffset;
+                    mCallback.onDisplayOffsetChanged();
                 }
-            };
-        } else {
-            mDisplayOffsetListener = null;
-        }
+            }
+        };
     }
 
     /**
@@ -126,12 +121,10 @@ public class OrientationHelper {
         if (mEnabled) return;
         mEnabled = true;
         mDisplayOffset = findDisplayOffset();
-        if (Build.VERSION.SDK_INT >= 17) {
-            DisplayManager manager = (DisplayManager)
-                    mContext.getSystemService(Context.DISPLAY_SERVICE);
-            // Without the handler, this can crash if called from a thread without a looper
-            manager.registerDisplayListener(mDisplayOffsetListener, mHandler);
-        }
+        DisplayManager manager = (DisplayManager)
+                mContext.getSystemService(Context.DISPLAY_SERVICE);
+        // Without the handler, this can crash if called from a thread without a looper
+        manager.registerDisplayListener(mDisplayOffsetListener, mHandler);
         mDeviceOrientationListener.enable();
     }
 
@@ -142,11 +135,9 @@ public class OrientationHelper {
         if (!mEnabled) return;
         mEnabled = false;
         mDeviceOrientationListener.disable();
-        if (Build.VERSION.SDK_INT >= 17) {
-            DisplayManager manager = (DisplayManager)
-                    mContext.getSystemService(Context.DISPLAY_SERVICE);
-            manager.unregisterDisplayListener(mDisplayOffsetListener);
-        }
+        DisplayManager manager = (DisplayManager)
+                mContext.getSystemService(Context.DISPLAY_SERVICE);
+        manager.unregisterDisplayListener(mDisplayOffsetListener);
         mDisplayOffset = -1;
         mDeviceOrientation = -1;
     }

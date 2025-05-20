@@ -4,16 +4,13 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
-import android.os.Build;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 
 import com.base.cameraview.CameraLogger;
 import com.base.cameraview.engine.action.ActionHolder;
 
 
-@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 public class ExposureLock extends BaseLock {
 
     private final static String TAG = ExposureLock.class.getSimpleName();
@@ -55,9 +52,7 @@ public class ExposureLock extends BaseLock {
 
     @Override
     protected void onStarted(@NonNull ActionHolder holder) {
-        int cancelTrigger = Build.VERSION.SDK_INT >= 23
-                ? CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_CANCEL
-                : CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_IDLE;
+        int cancelTrigger = CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_CANCEL;
         holder.getBuilder(this).set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER,
                 cancelTrigger);
         holder.getBuilder(this).set(CaptureRequest.CONTROL_AE_LOCK, true);

@@ -185,49 +185,35 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
         if (mInEditor) return;
 
         setWillNotDraw(false);
-        TypedArray a = context.getTheme().obtainStyledAttributes(attrs, R.styleable.CameraView,
-                0, 0);
+        TypedArray a = context.getTheme().obtainStyledAttributes(attrs, R.styleable.CameraView, 0, 0);
         ControlParser controls = new ControlParser(context, a);
 
         // Self managed
-        boolean playSounds = a.getBoolean(R.styleable.CameraView_cameraPlaySounds,
-                DEFAULT_PLAY_SOUNDS);
-        boolean useDeviceOrientation = a.getBoolean(
-                R.styleable.CameraView_cameraUseDeviceOrientation, DEFAULT_USE_DEVICE_ORIENTATION);
+        boolean playSounds = a.getBoolean(R.styleable.CameraView_cameraPlaySounds, DEFAULT_PLAY_SOUNDS);
+        boolean useDeviceOrientation = a.getBoolean(R.styleable.CameraView_cameraUseDeviceOrientation, DEFAULT_USE_DEVICE_ORIENTATION);
         mExperimental = a.getBoolean(R.styleable.CameraView_cameraExperimental, false);
-        mRequestPermissions = a.getBoolean(R.styleable.CameraView_cameraRequestPermissions,
-                DEFAULT_REQUEST_PERMISSIONS);
+        mRequestPermissions = a.getBoolean(R.styleable.CameraView_cameraRequestPermissions, DEFAULT_REQUEST_PERMISSIONS);
         mPreview = controls.getPreview();
         mEngine = controls.getEngine();
 
         // Camera engine params
-        int gridColor = a.getColor(R.styleable.CameraView_cameraGridColor,
-                GridLinesLayout.DEFAULT_COLOR);
-        long videoMaxSize = (long) a.getFloat(R.styleable.CameraView_cameraVideoMaxSize,
-                0);
-        int videoMaxDuration = a.getInteger(R.styleable.CameraView_cameraVideoMaxDuration,
-                0);
+        int gridColor = a.getColor(R.styleable.CameraView_cameraGridColor, GridLinesLayout.DEFAULT_COLOR);
+        long videoMaxSize = (long) a.getFloat(R.styleable.CameraView_cameraVideoMaxSize, 0);
+        int videoMaxDuration = a.getInteger(R.styleable.CameraView_cameraVideoMaxDuration, 0);
         int videoBitRate = a.getInteger(R.styleable.CameraView_cameraVideoBitRate, 0);
         int audioBitRate = a.getInteger(R.styleable.CameraView_cameraAudioBitRate, 0);
         float videoFrameRate = a.getFloat(R.styleable.CameraView_cameraPreviewFrameRate, 0);
         boolean videoFrameRateExact = a.getBoolean(R.styleable.CameraView_cameraPreviewFrameRateExact, false);
-        long autoFocusResetDelay = (long) a.getInteger(
-                R.styleable.CameraView_cameraAutoFocusResetDelay,
-                (int) DEFAULT_AUTOFOCUS_RESET_DELAY_MILLIS);
-        boolean pictureMetering = a.getBoolean(R.styleable.CameraView_cameraPictureMetering,
-                DEFAULT_PICTURE_METERING);
-        boolean pictureSnapshotMetering = a.getBoolean(
-                R.styleable.CameraView_cameraPictureSnapshotMetering,
-                DEFAULT_PICTURE_SNAPSHOT_METERING);
+        long autoFocusResetDelay = (long) a.getInteger(R.styleable.CameraView_cameraAutoFocusResetDelay, (int) DEFAULT_AUTOFOCUS_RESET_DELAY_MILLIS);
+        boolean pictureMetering = a.getBoolean(R.styleable.CameraView_cameraPictureMetering, DEFAULT_PICTURE_METERING);
+        boolean pictureSnapshotMetering = a.getBoolean(R.styleable.CameraView_cameraPictureSnapshotMetering, DEFAULT_PICTURE_SNAPSHOT_METERING);
         int snapshotMaxWidth = a.getInteger(R.styleable.CameraView_cameraSnapshotMaxWidth, 0);
         int snapshotMaxHeight = a.getInteger(R.styleable.CameraView_cameraSnapshotMaxHeight, 0);
         int frameMaxWidth = a.getInteger(R.styleable.CameraView_cameraFrameProcessingMaxWidth, 0);
         int frameMaxHeight = a.getInteger(R.styleable.CameraView_cameraFrameProcessingMaxHeight, 0);
         int frameFormat = a.getInteger(R.styleable.CameraView_cameraFrameProcessingFormat, 0);
-        int framePoolSize = a.getInteger(R.styleable.CameraView_cameraFrameProcessingPoolSize,
-                DEFAULT_FRAME_PROCESSING_POOL_SIZE);
-        int frameExecutors = a.getInteger(R.styleable.CameraView_cameraFrameProcessingExecutors,
-                DEFAULT_FRAME_PROCESSING_EXECUTORS);
+        int framePoolSize = a.getInteger(R.styleable.CameraView_cameraFrameProcessingPoolSize, DEFAULT_FRAME_PROCESSING_POOL_SIZE);
+        int frameExecutors = a.getInteger(R.styleable.CameraView_cameraFrameProcessingExecutors, DEFAULT_FRAME_PROCESSING_EXECUTORS);
 
         boolean drawHardwareOverlays = a.getBoolean(R.styleable.CameraView_cameraDrawHardwareOverlays, false);
 
@@ -320,8 +306,7 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
     private void doInstantiateEngine() {
         LOG.w("doInstantiateEngine:", "instantiating. engine:", mEngine);
         mCameraEngine = instantiateCameraEngine(mEngine, mCameraCallbacks);
-        LOG.w("doInstantiateEngine:", "instantiated. engine:",
-                mCameraEngine.getClass().getSimpleName());
+        LOG.w("doInstantiateEngine:", "instantiated. engine:", mCameraEngine.getClass().getSimpleName());
         mCameraEngine.setOverlay(mOverlayLayout);
     }
 
@@ -334,8 +319,7 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
     void doInstantiatePreview() {
         LOG.w("doInstantiateEngine:", "instantiating. preview:", mPreview);
         mCameraPreview = instantiatePreview(mPreview, getContext(), this);
-        LOG.w("doInstantiateEngine:", "instantiated. preview:",
-                mCameraPreview.getClass().getSimpleName());
+        LOG.w("doInstantiateEngine:", "instantiated. preview:", mCameraPreview.getClass().getSimpleName());
         mCameraEngine.setPreview(mCameraPreview);
         if (mPendingFilter != null) {
             setFilter(mPendingFilter);
@@ -351,8 +335,7 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
      * @return the engine
      */
     @NonNull
-    protected CameraEngine instantiateCameraEngine(@NonNull Engine engine,
-                                                   @NonNull CameraEngine.Callback callback) {
+    protected CameraEngine instantiateCameraEngine(@NonNull Engine engine, @NonNull CameraEngine.Callback callback) {
         if (mExperimental && engine == Engine.CAMERA2) {
             return new Camera2Engine(callback);
         } else {
@@ -370,9 +353,7 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
      * @return the preview
      */
     @NonNull
-    protected CameraPreview instantiatePreview(@NonNull Preview preview,
-                                               @NonNull Context context,
-                                               @NonNull ViewGroup container) {
+    protected CameraPreview instantiatePreview(@NonNull Preview preview, @NonNull Context context, @NonNull ViewGroup container) {
         switch (preview) {
             case SURFACE:
                 return new SurfaceCameraPreview(context, container);
@@ -444,8 +425,7 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
         if (mInEditor) {
             final int width = MeasureSpec.getSize(widthMeasureSpec);
             final int height = MeasureSpec.getSize(heightMeasureSpec);
-            super.onMeasure(MeasureSpec.makeMeasureSpec(width, EXACTLY),
-                    MeasureSpec.makeMeasureSpec(height, EXACTLY));
+            super.onMeasure(MeasureSpec.makeMeasureSpec(width, EXACTLY), MeasureSpec.makeMeasureSpec(height, EXACTLY));
             return;
         }
 
@@ -477,19 +457,15 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
             if (heightMode == AT_MOST && lp.height == MATCH_PARENT) heightMode = EXACTLY;
         }
 
-        LOG.i("onMeasure:", "requested dimensions are ("
-                + widthValue + "[" + ms(widthMode) + "]x"
-                + heightValue + "[" + ms(heightMode) + "])");
-        LOG.i("onMeasure:", "previewSize is", "("
-                + previewWidth + "x" + previewHeight + ")");
+        LOG.i("onMeasure:", "requested dimensions are (" + widthValue + "[" + ms(widthMode) + "]x" + heightValue + "[" + ms(heightMode) + "])");
+        LOG.i("onMeasure:", "previewSize is", "(" + previewWidth + "x" + previewHeight + ")");
 
         // (1) If we have fixed dimensions (either 300dp or MATCH_PARENT), there's nothing we
         // should do, other than respect it. The preview will eventually be cropped at the sides
         // (by Preview scaling) except the case in which these fixed dimensions manage to fit
         // exactly the preview aspect ratio.
         if (widthMode == EXACTLY && heightMode == EXACTLY) {
-            LOG.i("onMeasure:", "both are MATCH_PARENT or fixed value. We adapt.",
-                    "This means CROP_CENTER.", "(" + widthValue + "x" + heightValue + ")");
+            LOG.i("onMeasure:", "both are MATCH_PARENT or fixed value. We adapt.", "This means CROP_CENTER.", "(" + widthValue + "x" + heightValue + ")");
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
             return;
         }
@@ -497,12 +473,8 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
         // (2) If both dimensions are free, with no limits, then our size will be exactly the
         // preview size. This can happen rarely, for example in 2d scrollable containers.
         if (widthMode == UNSPECIFIED && heightMode == UNSPECIFIED) {
-            LOG.i("onMeasure:", "both are completely free.",
-                    "We respect that and extend to the whole preview size.",
-                    "(" + previewWidth + "x" + previewHeight + ")");
-            super.onMeasure(
-                    MeasureSpec.makeMeasureSpec((int) previewWidth, EXACTLY),
-                    MeasureSpec.makeMeasureSpec((int) previewHeight, EXACTLY));
+            LOG.i("onMeasure:", "both are completely free.", "We respect that and extend to the whole preview size.", "(" + previewWidth + "x" + previewHeight + ")");
+            super.onMeasure(MeasureSpec.makeMeasureSpec((int) previewWidth, EXACTLY), MeasureSpec.makeMeasureSpec((int) previewHeight, EXACTLY));
             return;
         }
 
@@ -523,10 +495,8 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
                 width = widthValue;
                 height = Math.round(width * ratio);
             }
-            LOG.i("onMeasure:", "one dimension was free, we adapted it to fit the ratio.",
-                    "(" + width + "x" + height + ")");
-            super.onMeasure(MeasureSpec.makeMeasureSpec(width, EXACTLY),
-                    MeasureSpec.makeMeasureSpec(height, EXACTLY));
+            LOG.i("onMeasure:", "one dimension was free, we adapted it to fit the ratio.", "(" + width + "x" + height + ")");
+            super.onMeasure(MeasureSpec.makeMeasureSpec(width, EXACTLY), MeasureSpec.makeMeasureSpec(height, EXACTLY));
             return;
         }
 
@@ -544,11 +514,8 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
                 width = widthValue;
                 height = Math.min(Math.round(width * ratio), heightValue);
             }
-            LOG.i("onMeasure:", "one dimension was EXACTLY, another AT_MOST.",
-                    "We have TRIED to fit the aspect ratio, but it's not guaranteed.",
-                    "(" + width + "x" + height + ")");
-            super.onMeasure(MeasureSpec.makeMeasureSpec(width, EXACTLY),
-                    MeasureSpec.makeMeasureSpec(height, EXACTLY));
+            LOG.i("onMeasure:", "one dimension was EXACTLY, another AT_MOST.", "We have TRIED to fit the aspect ratio, but it's not guaranteed.", "(" + width + "x" + height + ")");
+            super.onMeasure(MeasureSpec.makeMeasureSpec(width, EXACTLY), MeasureSpec.makeMeasureSpec(height, EXACTLY));
             return;
         }
 
@@ -564,11 +531,8 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
             height = heightValue;
             width = Math.round(height / ratio);
         }
-        LOG.i("onMeasure:", "both dimension were AT_MOST.",
-                "We fit the preview aspect ratio.",
-                "(" + width + "x" + height + ")");
-        super.onMeasure(MeasureSpec.makeMeasureSpec(width, EXACTLY),
-                MeasureSpec.makeMeasureSpec(height, EXACTLY));
+        LOG.i("onMeasure:", "both dimension were AT_MOST.", "We fit the preview aspect ratio.", "(" + width + "x" + height + ")");
+        super.onMeasure(MeasureSpec.makeMeasureSpec(width, EXACTLY), MeasureSpec.makeMeasureSpec(height, EXACTLY));
     }
 
     //endregion
@@ -601,16 +565,13 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
                 case TAP:
                     // case DOUBLE_TAP:
                 case LONG_TAP:
-                    mTapGestureFinder.setActive(
-                            mGestureMap.get(Gesture.TAP) != none ||
-                                    // mGestureMap.get(Gesture.DOUBLE_TAP) != none ||
-                                    mGestureMap.get(Gesture.LONG_TAP) != none);
+                    mTapGestureFinder.setActive(mGestureMap.get(Gesture.TAP) != none ||
+                            // mGestureMap.get(Gesture.DOUBLE_TAP) != none ||
+                            mGestureMap.get(Gesture.LONG_TAP) != none);
                     break;
                 case SCROLL_HORIZONTAL:
                 case SCROLL_VERTICAL:
-                    mScrollGestureFinder.setActive(
-                            mGestureMap.get(Gesture.SCROLL_HORIZONTAL) != none ||
-                                    mGestureMap.get(Gesture.SCROLL_VERTICAL) != none);
+                    mScrollGestureFinder.setActive(mGestureMap.get(Gesture.SCROLL_HORIZONTAL) != none || mGestureMap.get(Gesture.SCROLL_VERTICAL) != none);
                     break;
             }
 
@@ -762,13 +723,11 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
      * @return whether the camera has started
      */
     public boolean isOpened() {
-        return mCameraEngine.getState().isAtLeast(CameraState.ENGINE)
-                && mCameraEngine.getTargetState().isAtLeast(CameraState.ENGINE);
+        return mCameraEngine.getState().isAtLeast(CameraState.ENGINE) && mCameraEngine.getTargetState().isAtLeast(CameraState.ENGINE);
     }
 
     private boolean isClosed() {
-        return mCameraEngine.getState() == CameraState.OFF
-                && !mCameraEngine.isChangingState();
+        return mCameraEngine.getState() == CameraState.OFF && !mCameraEngine.isChangingState();
     }
 
     /**
@@ -825,16 +784,13 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
     protected boolean checkPermissions(@NonNull Audio audio) {
         checkPermissionsManifestOrThrow(audio);
         // Manifest is OK at this point. Let's check runtime permissions.
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return true;
 
         Context c = getContext();
         boolean needsCamera = true;
         boolean needsAudio = audio == Audio.ON || audio == Audio.MONO || audio == Audio.STEREO;
 
-        needsCamera = needsCamera && c.checkSelfPermission(Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED;
-        needsAudio = needsAudio && c.checkSelfPermission(Manifest.permission.RECORD_AUDIO)
-                != PackageManager.PERMISSION_GRANTED;
+        needsCamera = needsCamera && c.checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED;
+        needsAudio = needsAudio && c.checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED;
 
         if (!needsCamera && !needsAudio) {
             return true;
@@ -854,15 +810,13 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
         if (audio == Audio.ON || audio == Audio.MONO || audio == Audio.STEREO) {
             try {
                 PackageManager manager = getContext().getPackageManager();
-                PackageInfo info = manager.getPackageInfo(getContext().getPackageName(),
-                        PackageManager.GET_PERMISSIONS);
+                PackageInfo info = manager.getPackageInfo(getContext().getPackageName(), PackageManager.GET_PERMISSIONS);
                 for (String requestedPermission : info.requestedPermissions) {
                     if (requestedPermission.equals(Manifest.permission.RECORD_AUDIO)) {
                         return;
                     }
                 }
-                String message = LOG.e("Permission error: when audio is enabled (Audio.ON)" +
-                        " the RECORD_AUDIO permission should be added to the app manifest file.");
+                String message = LOG.e("Permission error: when audio is enabled (Audio.ON)" + " the RECORD_AUDIO permission should be added to the app manifest file.");
                 throw new IllegalStateException(message);
             } catch (PackageManager.NameNotFoundException e) {
                 // Not possible.
@@ -1433,8 +1387,7 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
         }
         Size size = new Size(getWidth(), getHeight());
         MeteringRegions regions = MeteringRegions.fromArea(size, region);
-        mCameraEngine.startAutoFocus(null, regions,
-                new PointF(region.centerX(), region.centerY()));
+        mCameraEngine.startAutoFocus(null, regions, new PointF(region.centerX(), region.centerY()));
     }
 
     /**
@@ -1814,8 +1767,7 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
         takeVideo(null, fileDescriptor, durationMillis);
     }
 
-    private void takeVideo(@Nullable File file, @Nullable FileDescriptor fileDescriptor,
-                           int durationMillis) {
+    private void takeVideo(@Nullable File file, @Nullable FileDescriptor fileDescriptor, int durationMillis) {
         final int old = getVideoMaxDuration();
         addCameraListener(new CameraListener() {
             @Override
@@ -2028,8 +1980,7 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
         if (requestCamera) permissions.add(Manifest.permission.CAMERA);
         if (requestAudio) permissions.add(Manifest.permission.RECORD_AUDIO);
         if (activity != null) {
-            activity.requestPermissions(permissions.toArray(new String[0]),
-                    PERMISSION_REQUEST_CODE);
+            activity.requestPermissions(permissions.toArray(new String[0]), PERMISSION_REQUEST_CODE);
         }
     }
 
@@ -2060,7 +2011,7 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
      * @param playSounds whether to play sound effects
      */
     public void setPlaySounds(boolean playSounds) {
-        mPlaySounds = playSounds && Build.VERSION.SDK_INT >= 16;
+        mPlaySounds = playSounds;
         mCameraEngine.setPlaySounds(playSounds);
     }
 
@@ -2356,21 +2307,14 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
             throw new IllegalArgumentException("Need at least 1 executor, got " + executors);
         }
         mFrameProcessingExecutors = executors;
-        ThreadPoolExecutor executor = new ThreadPoolExecutor(
-                executors,
-                executors,
-                4,
-                TimeUnit.SECONDS,
-                new LinkedBlockingQueue<Runnable>(),
-                new ThreadFactory() {
-                    private final AtomicInteger mCount = new AtomicInteger(1);
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(executors, executors, 4, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), new ThreadFactory() {
+            private final AtomicInteger mCount = new AtomicInteger(1);
 
-                    @Override
-                    public Thread newThread(@NonNull Runnable r) {
-                        return new Thread(r, "FrameExecutor #" + mCount.getAndIncrement());
-                    }
-                }
-        );
+            @Override
+            public Thread newThread(@NonNull Runnable r) {
+                return new Thread(r, "FrameExecutor #" + mCount.getAndIncrement());
+            }
+        });
         executor.allowCoreThreadTimeOut(true);
         mFrameProcessingExecutor = executor;
     }
@@ -2422,8 +2366,7 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
         } else if (mCameraPreview instanceof FilterCameraPreview) {
             return ((FilterCameraPreview) mCameraPreview).getCurrentFilter();
         } else {
-            throw new RuntimeException("Filters are only supported by the GL_SURFACE preview. " +
-                    "Current:" + mPreview);
+            throw new RuntimeException("Filters are only supported by the GL_SURFACE preview. " + "Current:" + mPreview);
         }
 
     }
@@ -2457,8 +2400,7 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
             boolean isFilterPreview = mCameraPreview instanceof FilterCameraPreview;
             // If not a filter preview, we only allow NoFilter (called on creation).
             if (!isNoFilter && !isFilterPreview) {
-                throw new RuntimeException("Filters are only supported by the GL_SURFACE preview." +
-                        " Current preview:" + mPreview);
+                throw new RuntimeException("Filters are only supported by the GL_SURFACE preview." + " Current preview:" + mPreview);
             }
             // If we have a filter preview, apply.
             if (isFilterPreview) {
@@ -2469,10 +2411,7 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
     }
 
     @VisibleForTesting
-    class CameraCallbacks implements
-            CameraEngine.Callback,
-            OrientationHelper.Callback,
-            GestureFinder.Controller {
+    class CameraCallbacks implements CameraEngine.Callback, OrientationHelper.Callback, GestureFinder.Controller {
 
         private final String TAG = CameraCallbacks.class.getSimpleName();
         private final CameraLogger LOG = CameraLogger.create(TAG);
@@ -2523,11 +2462,9 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
             if (previewSize == null) {
                 throw new RuntimeException("Preview stream size should not be null here.");
             } else if (previewSize.equals(mLastPreviewStreamSize)) {
-                LOG.i("onCameraPreviewStreamSizeChanged:",
-                        "swallowing because the preview size has not changed.", previewSize);
+                LOG.i("onCameraPreviewStreamSizeChanged:", "swallowing because the preview size has not changed.", previewSize);
             } else {
-                LOG.i("onCameraPreviewStreamSizeChanged: posting a requestLayout call.",
-                        "Preview stream size:", previewSize);
+                LOG.i("onCameraPreviewStreamSizeChanged: posting a requestLayout call.", "Preview stream size:", previewSize);
                 mUiHandler.post(CameraView.this::requestLayout);
             }
         }
@@ -2567,14 +2504,12 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
         }
 
         @Override
-        public void dispatchOnFocusStart(@Nullable final Gesture gesture,
-                                         @NonNull final PointF point) {
+        public void dispatchOnFocusStart(@Nullable final Gesture gesture, @NonNull final PointF point) {
             LOG.i("dispatchOnFocusStart", gesture, point);
             mUiHandler.post(() -> {
                 mMarkerLayout.onEvent(MarkerLayout.TYPE_AUTOFOCUS, new PointF[]{point});
                 if (mAutoFocusMarker != null) {
-                    AutoFocusTrigger trigger = gesture != null ?
-                            AutoFocusTrigger.GESTURE : AutoFocusTrigger.METHOD;
+                    AutoFocusTrigger trigger = gesture != null ? AutoFocusTrigger.GESTURE : AutoFocusTrigger.METHOD;
                     mAutoFocusMarker.onAutoFocusStart(trigger, point);
                 }
 
@@ -2585,9 +2520,7 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
         }
 
         @Override
-        public void dispatchOnFocusEnd(@Nullable final Gesture gesture,
-                                       final boolean success,
-                                       @NonNull final PointF point) {
+        public void dispatchOnFocusEnd(@Nullable final Gesture gesture, final boolean success, @NonNull final PointF point) {
             LOG.i("dispatchOnFocusEnd", gesture, success, point);
             mUiHandler.post(() -> {
                 if (success && mPlaySounds) {
@@ -2595,8 +2528,7 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
                 }
 
                 if (mAutoFocusMarker != null) {
-                    AutoFocusTrigger trigger = gesture != null ?
-                            AutoFocusTrigger.GESTURE : AutoFocusTrigger.METHOD;
+                    AutoFocusTrigger trigger = gesture != null ? AutoFocusTrigger.GESTURE : AutoFocusTrigger.METHOD;
                     mAutoFocusMarker.onAutoFocusEnd(trigger, success, point);
                 }
 
@@ -2648,9 +2580,7 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
         }
 
         @Override
-        public void dispatchOnExposureCorrectionChanged(final float newValue,
-                                                        @NonNull final float[] bounds,
-                                                        @Nullable final PointF[] fingers) {
+        public void dispatchOnExposureCorrectionChanged(final float newValue, @NonNull final float[] bounds, @Nullable final PointF[] fingers) {
             LOG.i("dispatchOnExposureCorrectionChanged", newValue);
             mUiHandler.post(() -> {
                 for (CameraListener listener : mListeners) {
@@ -2670,8 +2600,7 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
             } else {
                 // Dispatch this frame to frame processors.
                 mFrameProcessingExecutor.execute(() -> {
-                    LOG.v("dispatchFrame: executing. Passing", frame.getTime(),
-                            "to processors.");
+                    LOG.v("dispatchFrame: executing. Passing", frame.getTime(), "to processors.");
                     for (FrameProcessor processor : mFrameProcessors) {
                         try {
                             processor.process(frame);

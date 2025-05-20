@@ -2,7 +2,6 @@ package com.base.cameraview.internal;
 
 import android.annotation.SuppressLint;
 import android.media.CamcorderProfile;
-import android.os.Build;
 
 import androidx.annotation.NonNull;
 
@@ -10,8 +9,6 @@ import com.base.cameraview.CameraLogger;
 import com.base.cameraview.size.Size;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,10 +31,8 @@ public class CamcorderProfiles {
         sizeToProfileMap.put(new Size(720, 480), CamcorderProfile.QUALITY_480P);
         sizeToProfileMap.put(new Size(1280, 720), CamcorderProfile.QUALITY_720P);
         sizeToProfileMap.put(new Size(1920, 1080), CamcorderProfile.QUALITY_1080P);
-        if (Build.VERSION.SDK_INT >= 21) {
-            sizeToProfileMap.put(new Size(3840, 2160),
-                    CamcorderProfile.QUALITY_2160P);
-        }
+        sizeToProfileMap.put(new Size(3840, 2160),
+                CamcorderProfile.QUALITY_2160P);
     }
 
 
@@ -75,16 +70,13 @@ public class CamcorderProfiles {
     public static CamcorderProfile get(int cameraId, @NonNull Size targetSize) {
         final long targetArea = (long) targetSize.getWidth() * targetSize.getHeight();
         List<Size> sizes = new ArrayList<>(sizeToProfileMap.keySet());
-        Collections.sort(sizes, new Comparator<Size>() {
-            @Override
-            public int compare(Size s1, Size s2) {
-                long a1 = Math.abs(s1.getWidth() * s1.getHeight() - targetArea);
-                long a2 = Math.abs(s2.getWidth() * s2.getHeight() - targetArea);
-                //noinspection UseCompareMethod
-                return (a1 < a2) ? -1 : ((a1 == a2) ? 0 : 1);
-            }
+        sizes.sort((s1, s2) -> {
+            long a1 = Math.abs((long) s1.getWidth() * s1.getHeight() - targetArea);
+            long a2 = Math.abs((long) s2.getWidth() * s2.getHeight() - targetArea);
+            //noinspection UseCompareMethod
+            return (a1 < a2) ? -1 : ((a1 == a2) ? 0 : 1);
         });
-        while (sizes.size() > 0) {
+        while (!sizes.isEmpty()) {
             Size candidate = sizes.remove(0);
             //noinspection ConstantConditions
             int quality = sizeToProfileMap.get(candidate);

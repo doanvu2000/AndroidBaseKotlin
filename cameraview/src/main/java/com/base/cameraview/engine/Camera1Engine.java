@@ -1,14 +1,12 @@
 package com.base.cameraview.engine;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.graphics.ImageFormat;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.location.Location;
-import android.os.Build;
 import android.view.SurfaceHolder;
 
 import androidx.annotation.NonNull;
@@ -397,7 +395,7 @@ public class Camera1Engine extends CameraBaseEngine implements
         LOG.i("onTakePictureSnapshot:", "executing.");
         // Not the real size: it will be cropped to match the view ratio
         stub.size = getUncroppedSnapshotSize(Reference.OUTPUT);
-        if (mPreview instanceof RendererCameraPreview && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        if (mPreview instanceof RendererCameraPreview) {
             stub.rotation = getAngles().offset(Reference.VIEW, Reference.OUTPUT, Axis.ABSOLUTE);
             mPictureRecorder = new SnapshotGlPictureRecorder(stub, this,
                     (RendererCameraPreview) mPreview, outputRatio, getOverlay());
@@ -721,18 +719,15 @@ public class Camera1Engine extends CameraBaseEngine implements
     }
 
     @SuppressWarnings("UnusedReturnValue")
-    @TargetApi(17)
     private boolean applyPlaySounds(boolean oldPlaySound) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            Camera.CameraInfo info = new Camera.CameraInfo();
-            Camera.getCameraInfo(mCameraId, info);
-            if (info.canDisableShutterSound) {
-                try {
-                    // this method is documented to throw on some occasions. #377
-                    return mCamera.enableShutterSound(mPlaySounds);
-                } catch (RuntimeException exception) {
-                    return false;
-                }
+        Camera.CameraInfo info = new Camera.CameraInfo();
+        Camera.getCameraInfo(mCameraId, info);
+        if (info.canDisableShutterSound) {
+            try {
+                // this method is documented to throw on some occasions. #377
+                return mCamera.enableShutterSound(mPlaySounds);
+            } catch (RuntimeException exception) {
+                return false;
             }
         }
         if (mPlaySounds) {

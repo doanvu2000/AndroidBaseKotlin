@@ -1,10 +1,8 @@
 package com.base.cameraview.engine.meter;
 
 import android.hardware.camera2.params.MeteringRectangle;
-import android.os.Build;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 
 import com.base.cameraview.CameraLogger;
 import com.base.cameraview.engine.action.ActionHolder;
@@ -12,7 +10,6 @@ import com.base.cameraview.engine.action.BaseAction;
 
 import java.util.List;
 
-@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 public abstract class BaseMeter extends BaseAction {
 
     private final static String TAG = BaseMeter.class.getSimpleName();

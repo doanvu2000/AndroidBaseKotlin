@@ -6,11 +6,9 @@ import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.media.MediaRecorder;
-import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 
 import com.base.cameraview.CameraLogger;
 
@@ -23,7 +21,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 /**
  * Default implementation for audio encoding.
  */
-@RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class AudioMediaEncoder extends MediaEncoder {
 
     private static final String TAG = AudioMediaEncoder.class.getSimpleName();

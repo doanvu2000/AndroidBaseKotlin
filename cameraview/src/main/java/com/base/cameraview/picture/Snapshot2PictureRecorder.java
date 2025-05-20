@@ -4,10 +4,8 @@ import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
-import android.os.Build;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 
 import com.base.cameraview.PictureResult;
 import com.base.cameraview.engine.Camera2Engine;
@@ -37,7 +35,6 @@ import com.base.cameraview.size.AspectRatio;
  * open the torch, if requested to do so. Then wait for exposure to settle again and finally
  * take a snapshot. I'd still love to use the capture intent instead of this, but was not able yet.
  */
-@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 public class Snapshot2PictureRecorder extends SnapshotGlPictureRecorder {
 
     private final static long LOCK_TIMEOUT = 2500;

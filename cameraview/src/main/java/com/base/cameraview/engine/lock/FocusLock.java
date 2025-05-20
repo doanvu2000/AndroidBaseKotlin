@@ -4,16 +4,12 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
-import android.os.Build;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 
 import com.base.cameraview.CameraLogger;
 import com.base.cameraview.engine.action.ActionHolder;
 
-
-@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 public class FocusLock extends BaseLock {
 
     private final static String TAG = FocusLock.class.getSimpleName();

@@ -6,10 +6,8 @@ import android.graphics.RectF;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.MeteringRectangle;
-import android.os.Build;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 
 import com.base.cameraview.CameraLogger;
 import com.base.cameraview.engine.offset.Angles;
@@ -19,7 +17,6 @@ import com.base.cameraview.metering.MeteringTransform;
 import com.base.cameraview.size.AspectRatio;
 import com.base.cameraview.size.Size;
 
-@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 public class Camera2MeteringTransform implements MeteringTransform<MeteringRectangle> {
 
     protected static final String TAG = Camera2MeteringTransform.class.getSimpleName();

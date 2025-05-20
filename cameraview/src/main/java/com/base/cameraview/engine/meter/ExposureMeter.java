@@ -5,17 +5,14 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.MeteringRectangle;
-import android.os.Build;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 
 import com.base.cameraview.CameraLogger;
 import com.base.cameraview.engine.action.ActionHolder;
 
 import java.util.List;
 
-@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 public class ExposureMeter extends BaseMeter {
 
     private static final String TAG = ExposureMeter.class.getSimpleName();
