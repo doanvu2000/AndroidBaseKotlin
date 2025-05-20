@@ -16,8 +16,8 @@ import com.base.cameraview.controls.Mode
 import com.base.cameraview.frame.Frame
 import com.base.cameraview.frame.FrameProcessor
 import com.example.baseproject.base.base_view.screen.BaseActivity
+import com.example.baseproject.base.utils.extension.finishWithSlide
 import com.example.baseproject.base.utils.extension.loadSrc
-import com.example.baseproject.base.utils.extension.pretty
 import com.example.baseproject.base.utils.util.AppLogger
 import com.example.baseproject.databinding.ActivityCameraViewLibDemoBinding
 
@@ -54,7 +54,7 @@ class CameraViewLibDemoActivity : BaseActivity<ActivityCameraViewLibDemoBinding>
 
     override fun initListener() {
         binding.btnBack.clickSafe(isAnimationClick = true) {
-            onBack()
+            finishWithSlide()
         }
 
         binding.btnSwitchCamera.clickSafe(isAnimationClick = true) {
@@ -100,9 +100,24 @@ class CameraViewLibDemoActivity : BaseActivity<ActivityCameraViewLibDemoBinding>
     }
     //endregion
 
+    override fun onPause() {
+        super.onPause()
+        AppLogger.d(TAG, "-------------------CameraView onPause-------------------")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        AppLogger.w(TAG, "-------------------CameraView onStop-------------------")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        AppLogger.e(TAG, "-------------------CameraView onDestroy-------------------")
+    }
+
     private val frameProcessor = object : FrameProcessor {
         override fun process(frame: Frame) {
-            AppLogger.d(TAG, frame.pretty())
+//            AppLogger.d(TAG, frame.dataClass.toString())
         }
     }
 
@@ -115,8 +130,8 @@ class CameraViewLibDemoActivity : BaseActivity<ActivityCameraViewLibDemoBinding>
 
         override fun onCameraClosed() {
             super.onCameraClosed()
-            AppLogger.e(TAG, "onCameraClosed")
             hideDialogInitCamera()
+            AppLogger.e(TAG, "onCameraClosed")
         }
 
         override fun onCameraError(exception: CameraException) {

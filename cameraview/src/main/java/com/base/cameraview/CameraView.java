@@ -32,10 +32,9 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.OnLifecycleEvent;
 
 import com.base.cameraview.controls.Audio;
 import com.base.cameraview.controls.AudioCodec;
@@ -108,7 +107,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Entry point for the whole library.
  * Please read documentation for usage and full set of features.
  */
-public class CameraView extends FrameLayout implements LifecycleObserver {
+public class CameraView extends FrameLayout implements DefaultLifecycleObserver {
 
     public final static int PERMISSION_REQUEST_CODE = 16;
     final static long DEFAULT_AUTOFOCUS_RESET_DELAY_MILLIS = 3000;
@@ -760,7 +759,7 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
      * Starts the camera preview, if not started already.
      * This should be called onResume(), or when you are ready with permissions.
      */
-    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+//    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     public void open() {
         if (mInEditor) return;
         if (mCameraPreview != null) mCameraPreview.onResume();
@@ -824,11 +823,30 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
         }
     }
 
+    @Override
+    public void onResume(@NonNull LifecycleOwner owner) {
+        DefaultLifecycleObserver.super.onResume(owner);
+        open();
+    }
+
+    @Override
+    public void onPause(@NonNull LifecycleOwner owner) {
+        DefaultLifecycleObserver.super.onPause(owner);
+        close();
+    }
+
+    @Override
+    public void onDestroy(@NonNull LifecycleOwner owner) {
+        DefaultLifecycleObserver.super.onDestroy(owner);
+        destroy();
+    }
+
     /**
      * Stops the current preview, if any was started.
      * This should be called onPause().
      */
-    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+
+//    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     public void close() {
         if (mInEditor) return;
         mOrientationHelper.disable();
@@ -840,7 +858,7 @@ public class CameraView extends FrameLayout implements LifecycleObserver {
      * Destroys this instance, releasing immediately
      * the camera resource.
      */
-    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+//    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     public void destroy() {
         if (mInEditor) return;
         clearCameraListeners();

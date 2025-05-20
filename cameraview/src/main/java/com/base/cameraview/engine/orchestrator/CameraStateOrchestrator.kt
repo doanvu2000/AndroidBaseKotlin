@@ -41,12 +41,14 @@ class CameraStateOrchestrator(callback: Callback) : CameraOrchestrator(callback)
             fromState.name + " >> " + toState.name
         return schedule<T?>(name, dispatchExceptions) {
             if (this.currentState != fromState) {
+                println("abcxyz, forCanceled: ${name.uppercase(Locale.getDefault())}")
                 LOG.w(
                     name.uppercase(Locale.getDefault()), "- State mismatch, aborting. current:",
                     this.currentState, "from:", fromState, "to:", toState
                 )
                 return@schedule Tasks.forCanceled<T?>()
             } else {
+                println("abcxyz, continueWithTask: ${name.uppercase(Locale.getDefault())}")
                 val executor = mCallback.getJobWorker(name).executor
                 return@schedule stateChange.call()!!.continueWithTask<T?>(
                     executor
@@ -58,6 +60,7 @@ class CameraStateOrchestrator(callback: Callback) : CameraOrchestrator(callback)
                 }
             }
         }.addOnCompleteListener { task: Task<T?>? ->
+            println("abcxyz, completeTask: ${name.uppercase(Locale.getDefault())} done")
             if (changeCount == mStateChangeCount) {
                 this.targetState = this.currentState
             }

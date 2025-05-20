@@ -72,7 +72,7 @@ abstract class FrameManager<T> protected constructor(
         val sizeInBits = (size.height * size.width * bitsPerPixel).toLong()
         this.frameBytes = ceil(sizeInBits / 8.0).toInt()
         for (i in 0..<this.poolSize) {
-            mFrameQueue.offer(Frame(this))
+            mFrameQueue.offer(Frame(this as FrameManager<Any?>))
         }
         mAngles = angles
     }
@@ -171,9 +171,8 @@ abstract class FrameManager<T> protected constructor(
     }
 
     companion object {
-        private val TAG: String = FrameManager::class.java.simpleName
+        val TAG: String = FrameManager::class.java.simpleName
 
-        @JvmField
-        protected val LOG: CameraLogger = CameraLogger.create(TAG)
+        val LOG: CameraLogger = CameraLogger.create(TAG)
     }
 }
