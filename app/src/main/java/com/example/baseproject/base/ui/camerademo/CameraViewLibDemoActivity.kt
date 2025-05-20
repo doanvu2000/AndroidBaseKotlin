@@ -65,7 +65,7 @@ class CameraViewLibDemoActivity : BaseActivity<ActivityCameraViewLibDemoBinding>
         showDialogInitCamera()
 //        binding.cameraView.toggleFacing()
         binding.cameraView.takePicture()
-        delayToAction(1000L) {
+        delayToAction(300L) {
             hideDialogInitCamera()
         }
     }
