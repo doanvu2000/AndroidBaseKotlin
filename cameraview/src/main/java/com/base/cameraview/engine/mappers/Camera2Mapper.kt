@@ -1,162 +1,158 @@
-package com.base.cameraview.engine.mappers;
+package com.base.cameraview.engine.mappers
 
-import android.hardware.camera2.CameraCharacteristics;
-import android.util.Pair;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import com.base.cameraview.controls.Control;
-import com.base.cameraview.controls.Facing;
-import com.base.cameraview.controls.Flash;
-import com.base.cameraview.controls.Hdr;
-import com.base.cameraview.controls.WhiteBalance;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import android.hardware.camera2.CameraCharacteristics
+import android.util.Pair
+import com.base.cameraview.controls.Control
+import com.base.cameraview.controls.Facing
+import com.base.cameraview.controls.Flash
+import com.base.cameraview.controls.Hdr
+import com.base.cameraview.controls.WhiteBalance
 
 /**
  * A Mapper maps camera engine constants to CameraView constants.
  */
-public class Camera2Mapper {
-
-    private static final Map<Facing, Integer> FACING = new HashMap<>();
-    private static final Map<WhiteBalance, Integer> WB = new HashMap<>();
-    private static final Map<Hdr, Integer> HDR = new HashMap<>();
-    private static Camera2Mapper sInstance;
-
-    static {
-        FACING.put(Facing.BACK, CameraCharacteristics.LENS_FACING_BACK);
-        FACING.put(Facing.FRONT, CameraCharacteristics.LENS_FACING_FRONT);
-        WB.put(WhiteBalance.AUTO, CameraCharacteristics.CONTROL_AWB_MODE_AUTO);
-        WB.put(WhiteBalance.CLOUDY, CameraCharacteristics.CONTROL_AWB_MODE_CLOUDY_DAYLIGHT);
-        WB.put(WhiteBalance.DAYLIGHT, CameraCharacteristics.CONTROL_AWB_MODE_DAYLIGHT);
-        WB.put(WhiteBalance.FLUORESCENT, CameraCharacteristics.CONTROL_AWB_MODE_FLUORESCENT);
-        WB.put(WhiteBalance.INCANDESCENT, CameraCharacteristics.CONTROL_AWB_MODE_INCANDESCENT);
-        HDR.put(Hdr.OFF, CameraCharacteristics.CONTROL_SCENE_MODE_DISABLED);
-        HDR.put(Hdr.ON, 18 /* CameraCharacteristics.CONTROL_SCENE_MODE_HDR */);
-    }
-
-    private Camera2Mapper() {
-    }
-
-    public static Camera2Mapper get() {
-        if (sInstance == null) {
-            sInstance = new Camera2Mapper();
-        }
-        return sInstance;
-    }
-
-    @NonNull
-    public List<Pair<Integer, Integer>> mapFlash(@NonNull Flash flash) {
-        List<Pair<Integer, Integer>> result = new ArrayList<>();
-        switch (flash) {
-            case ON: {
-                result.add(new Pair<>(
+class Camera2Mapper private constructor() {
+    fun mapFlash(flash: Flash): MutableList<Pair<Int?, Int?>?> {
+        val result: MutableList<Pair<Int?, Int?>?> = ArrayList<Pair<Int?, Int?>?>()
+        when (flash) {
+            Flash.ON -> {
+                result.add(
+                    Pair<Int?, Int?>(
                         CameraCharacteristics.CONTROL_AE_MODE_ON_ALWAYS_FLASH,
-                        CameraCharacteristics.FLASH_MODE_OFF));
-                break;
+                        CameraCharacteristics.FLASH_MODE_OFF
+                    )
+                )
             }
-            case AUTO: {
-                result.add(new Pair<>(
+
+            Flash.AUTO -> {
+                result.add(
+                    Pair<Int?, Int?>(
                         CameraCharacteristics.CONTROL_AE_MODE_ON_AUTO_FLASH,
-                        CameraCharacteristics.FLASH_MODE_OFF));
-                result.add(new Pair<>(
+                        CameraCharacteristics.FLASH_MODE_OFF
+                    )
+                )
+                result.add(
+                    Pair<Int?, Int?>(
                         CameraCharacteristics.CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE,
-                        CameraCharacteristics.FLASH_MODE_OFF));
-                break;
+                        CameraCharacteristics.FLASH_MODE_OFF
+                    )
+                )
             }
-            case OFF: {
-                result.add(new Pair<>(
+
+            Flash.OFF -> {
+                result.add(
+                    Pair<Int?, Int?>(
                         CameraCharacteristics.CONTROL_AE_MODE_ON,
-                        CameraCharacteristics.FLASH_MODE_OFF));
-                result.add(new Pair<>(
+                        CameraCharacteristics.FLASH_MODE_OFF
+                    )
+                )
+                result.add(
+                    Pair<Int?, Int?>(
                         CameraCharacteristics.CONTROL_AE_MODE_OFF,
-                        CameraCharacteristics.FLASH_MODE_OFF));
-                break;
+                        CameraCharacteristics.FLASH_MODE_OFF
+                    )
+                )
             }
-            case TORCH: {
+
+            Flash.TORCH -> {
                 // When AE_MODE is ON or OFF, we can finally use the flash mode
                 // low level control to either turn flash off or open the torch
-                result.add(new Pair<>(
+                result.add(
+                    Pair<Int?, Int?>(
                         CameraCharacteristics.CONTROL_AE_MODE_ON,
-                        CameraCharacteristics.FLASH_MODE_TORCH));
-                result.add(new Pair<>(
+                        CameraCharacteristics.FLASH_MODE_TORCH
+                    )
+                )
+                result.add(
+                    Pair<Int?, Int?>(
                         CameraCharacteristics.CONTROL_AE_MODE_OFF,
-                        CameraCharacteristics.FLASH_MODE_TORCH));
-                break;
+                        CameraCharacteristics.FLASH_MODE_TORCH
+                    )
+                )
             }
         }
-        return result;
+        return result
     }
 
-    public int mapFacing(@NonNull Facing facing) {
-        //noinspection ConstantConditions
-        return FACING.get(facing);
+    fun mapFacing(facing: Facing): Int {
+        return FACING[facing]!!
     }
 
-    public int mapWhiteBalance(@NonNull WhiteBalance whiteBalance) {
-        //noinspection ConstantConditions
-        return WB.get(whiteBalance);
+    fun mapWhiteBalance(whiteBalance: WhiteBalance): Int {
+        return WB[whiteBalance]!!
     }
 
-    public int mapHdr(@NonNull Hdr hdr) {
-        //noinspection ConstantConditions
-        return HDR.get(hdr);
+    fun mapHdr(hdr: Hdr): Int {
+        return HDR[hdr]!!
     }
 
-    @NonNull
-    public Set<Flash> unmapFlash(int cameraConstant) {
-        Set<Flash> result = new HashSet<>();
-        switch (cameraConstant) {
-            case CameraCharacteristics.CONTROL_AE_MODE_OFF:
-            case CameraCharacteristics.CONTROL_AE_MODE_ON: {
-                result.add(Flash.OFF);
-                result.add(Flash.TORCH);
-                break;
+    fun unmapFlash(cameraConstant: Int): MutableSet<Flash?> {
+        val result: MutableSet<Flash?> = HashSet()
+        when (cameraConstant) {
+            CameraCharacteristics.CONTROL_AE_MODE_OFF, CameraCharacteristics.CONTROL_AE_MODE_ON -> {
+                result.add(Flash.OFF)
+                result.add(Flash.TORCH)
             }
-            case CameraCharacteristics.CONTROL_AE_MODE_ON_ALWAYS_FLASH: {
-                result.add(Flash.ON);
-                break;
+
+            CameraCharacteristics.CONTROL_AE_MODE_ON_ALWAYS_FLASH -> {
+                result.add(Flash.ON)
             }
-            case CameraCharacteristics.CONTROL_AE_MODE_ON_AUTO_FLASH:
-            case CameraCharacteristics.CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE: {
-                result.add(Flash.AUTO);
-                break;
+
+            CameraCharacteristics.CONTROL_AE_MODE_ON_AUTO_FLASH, CameraCharacteristics.CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE -> {
+                result.add(Flash.AUTO)
             }
-            case CameraCharacteristics.CONTROL_AE_MODE_ON_EXTERNAL_FLASH:
-            default:
-                break; // we don't support external flash
+
+            CameraCharacteristics.CONTROL_AE_MODE_ON_EXTERNAL_FLASH -> {}
+            else -> {}
         }
-        return result;
+        return result
     }
 
-    @Nullable
-    public Facing unmapFacing(int cameraConstant) {
-        return reverseLookup(FACING, cameraConstant);
+    fun unmapFacing(cameraConstant: Int): Facing? {
+        return reverseLookup<Facing?, Int>(FACING, cameraConstant)
     }
 
-    @Nullable
-    public WhiteBalance unmapWhiteBalance(int cameraConstant) {
-        return reverseLookup(WB, cameraConstant);
+    fun unmapWhiteBalance(cameraConstant: Int): WhiteBalance? {
+        return reverseLookup<WhiteBalance?, Int>(WB, cameraConstant)
     }
 
-    @Nullable
-    public Hdr unmapHdr(int cameraConstant) {
-        return reverseLookup(HDR, cameraConstant);
+    fun unmapHdr(cameraConstant: Int): Hdr? {
+        return reverseLookup<Hdr?, Int>(HDR, cameraConstant)
     }
 
-    @Nullable
-    private <C extends Control, T> C reverseLookup(@NonNull Map<C, T> map, @NonNull T object) {
-        for (C value : map.keySet()) {
-            if (object.equals(map.get(value))) {
-                return value;
+    private fun <C : Control?, T> reverseLookup(map: MutableMap<C?, T>, `object`: T): C? {
+        for (value in map.keys) {
+            if (`object` == map[value]) {
+                return value
             }
         }
-        return null;
+        return null
+    }
+
+    companion object {
+        private val FACING: MutableMap<Facing?, Int> = HashMap<Facing?, Int>()
+        private val WB: MutableMap<WhiteBalance?, Int> = HashMap<WhiteBalance?, Int>()
+        private val HDR: MutableMap<Hdr?, Int> = HashMap<Hdr?, Int>()
+        private var sInstance: Camera2Mapper? = null
+
+        init {
+            FACING.put(Facing.BACK, CameraCharacteristics.LENS_FACING_BACK)
+            FACING.put(Facing.FRONT, CameraCharacteristics.LENS_FACING_FRONT)
+            WB.put(WhiteBalance.AUTO, CameraCharacteristics.CONTROL_AWB_MODE_AUTO)
+            WB.put(WhiteBalance.CLOUDY, CameraCharacteristics.CONTROL_AWB_MODE_CLOUDY_DAYLIGHT)
+            WB.put(WhiteBalance.DAYLIGHT, CameraCharacteristics.CONTROL_AWB_MODE_DAYLIGHT)
+            WB.put(WhiteBalance.FLUORESCENT, CameraCharacteristics.CONTROL_AWB_MODE_FLUORESCENT)
+            WB.put(WhiteBalance.INCANDESCENT, CameraCharacteristics.CONTROL_AWB_MODE_INCANDESCENT)
+            HDR.put(Hdr.OFF, CameraCharacteristics.CONTROL_SCENE_MODE_DISABLED)
+            HDR.put(Hdr.ON, 18 /* CameraCharacteristics.CONTROL_SCENE_MODE_HDR */)
+        }
+
+        @JvmStatic
+        fun get(): Camera2Mapper {
+            if (sInstance == null) {
+                sInstance = Camera2Mapper()
+            }
+            return sInstance!!
+        }
     }
 }

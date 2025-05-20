@@ -1,107 +1,99 @@
-package com.base.cameraview.engine.mappers;
+package com.base.cameraview.engine.mappers
 
-import android.hardware.Camera;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import com.base.cameraview.controls.Control;
-import com.base.cameraview.controls.Facing;
-import com.base.cameraview.controls.Flash;
-import com.base.cameraview.controls.Hdr;
-import com.base.cameraview.controls.WhiteBalance;
-
-import java.util.HashMap;
-import java.util.Map;
+import android.hardware.Camera
+import com.base.cameraview.controls.Control
+import com.base.cameraview.controls.Facing
+import com.base.cameraview.controls.Flash
+import com.base.cameraview.controls.Hdr
+import com.base.cameraview.controls.WhiteBalance
 
 /**
  * A Mapper maps camera engine constants to CameraView constants.
  */
-public class Camera1Mapper {
-
-    private static final Map<Flash, String> FLASH = new HashMap<>();
-    private static final Map<WhiteBalance, String> WB = new HashMap<>();
-    private static final Map<Facing, Integer> FACING = new HashMap<>();
-    private static final Map<Hdr, String> HDR = new HashMap<>();
-    private static Camera1Mapper sInstance;
-
-    static {
-        FLASH.put(Flash.OFF, Camera.Parameters.FLASH_MODE_OFF);
-        FLASH.put(Flash.ON, Camera.Parameters.FLASH_MODE_ON);
-        FLASH.put(Flash.AUTO, Camera.Parameters.FLASH_MODE_AUTO);
-        FLASH.put(Flash.TORCH, Camera.Parameters.FLASH_MODE_TORCH);
-        FACING.put(Facing.BACK, Camera.CameraInfo.CAMERA_FACING_BACK);
-        FACING.put(Facing.FRONT, Camera.CameraInfo.CAMERA_FACING_FRONT);
-        WB.put(WhiteBalance.AUTO, Camera.Parameters.WHITE_BALANCE_AUTO);
-        WB.put(WhiteBalance.INCANDESCENT, Camera.Parameters.WHITE_BALANCE_INCANDESCENT);
-        WB.put(WhiteBalance.FLUORESCENT, Camera.Parameters.WHITE_BALANCE_FLUORESCENT);
-        WB.put(WhiteBalance.DAYLIGHT, Camera.Parameters.WHITE_BALANCE_DAYLIGHT);
-        WB.put(WhiteBalance.CLOUDY, Camera.Parameters.WHITE_BALANCE_CLOUDY_DAYLIGHT);
-        HDR.put(Hdr.OFF, Camera.Parameters.SCENE_MODE_AUTO);
-        HDR.put(Hdr.ON, Camera.Parameters.SCENE_MODE_HDR);
+class Camera1Mapper private constructor() {
+    fun mapFlash(flash: Flash): String {
+        return FLASH[flash]!!
     }
 
-    private Camera1Mapper() {
+    fun mapFacing(facing: Facing): Int {
+        return FACING[facing]!!
     }
 
-    @NonNull
-    public static Camera1Mapper get() {
-        if (sInstance == null) {
-            sInstance = new Camera1Mapper();
-        }
-        return sInstance;
+    fun mapWhiteBalance(whiteBalance: WhiteBalance): String {
+        return WB[whiteBalance]!!
     }
 
-    @NonNull
-    public String mapFlash(@NonNull Flash flash) {
-        //noinspection ConstantConditions
-        return FLASH.get(flash);
+    fun mapHdr(hdr: Hdr): String {
+        return HDR[hdr]!!
     }
 
-    public int mapFacing(@NonNull Facing facing) {
-        //noinspection ConstantConditions
-        return FACING.get(facing);
+    fun unmapFlash(cameraConstant: String): Flash? {
+        return reverseLookup<Flash?, String>(FLASH, cameraConstant)
     }
 
-    @NonNull
-    public String mapWhiteBalance(@NonNull WhiteBalance whiteBalance) {
-        //noinspection ConstantConditions
-        return WB.get(whiteBalance);
+    fun unmapFacing(cameraConstant: Int): Facing? {
+        return reverseLookup<Facing?, Int>(FACING, cameraConstant)
     }
 
-    @NonNull
-    public String mapHdr(@NonNull Hdr hdr) {
-        //noinspection ConstantConditions
-        return HDR.get(hdr);
+    fun unmapWhiteBalance(cameraConstant: String): WhiteBalance? {
+        return reverseLookup<WhiteBalance?, String>(WB, cameraConstant)
     }
 
-    @Nullable
-    public Flash unmapFlash(@NonNull String cameraConstant) {
-        return reverseLookup(FLASH, cameraConstant);
+    fun unmapHdr(cameraConstant: String): Hdr? {
+        return reverseLookup<Hdr?, String>(HDR, cameraConstant)
     }
 
-    @Nullable
-    public Facing unmapFacing(int cameraConstant) {
-        return reverseLookup(FACING, cameraConstant);
-    }
-
-    @Nullable
-    public WhiteBalance unmapWhiteBalance(@NonNull String cameraConstant) {
-        return reverseLookup(WB, cameraConstant);
-    }
-
-    @Nullable
-    public Hdr unmapHdr(@NonNull String cameraConstant) {
-        return reverseLookup(HDR, cameraConstant);
-    }
-
-    @Nullable
-    private <C extends Control, T> C reverseLookup(@NonNull Map<C, T> map, @NonNull T object) {
-        for (C value : map.keySet()) {
-            if (object.equals(map.get(value))) {
-                return value;
+    private fun <C : Control?, T> reverseLookup(map: MutableMap<C?, T>, `object`: T): C? {
+        for (value in map.keys) {
+            if (`object` == map[value]) {
+                return value
             }
         }
-        return null;
+        return null
+    }
+
+    companion object {
+        private val FLASH: MutableMap<Flash?, String> = HashMap<Flash?, String>()
+        private val WB: MutableMap<WhiteBalance?, String> = HashMap<WhiteBalance?, String>()
+        private val FACING: MutableMap<Facing?, Int> = HashMap<Facing?, Int>()
+        private val HDR: MutableMap<Hdr?, String> = HashMap<Hdr?, String>()
+        private var sInstance: Camera1Mapper? = null
+
+
+        init {
+            @Suppress("DEPRECATION") FLASH.put(Flash.OFF, Camera.Parameters.FLASH_MODE_OFF)
+            @Suppress("DEPRECATION") FLASH.put(Flash.ON, Camera.Parameters.FLASH_MODE_ON)
+            @Suppress("DEPRECATION") FLASH.put(Flash.AUTO, Camera.Parameters.FLASH_MODE_AUTO)
+            @Suppress("DEPRECATION") FLASH.put(Flash.TORCH, Camera.Parameters.FLASH_MODE_TORCH)
+            @Suppress("DEPRECATION") FACING.put(Facing.BACK, Camera.CameraInfo.CAMERA_FACING_BACK)
+            @Suppress("DEPRECATION") FACING.put(Facing.FRONT, Camera.CameraInfo.CAMERA_FACING_FRONT)
+            @Suppress("DEPRECATION") WB.put(WhiteBalance.AUTO, Camera.Parameters.WHITE_BALANCE_AUTO)
+            @Suppress("DEPRECATION") WB.put(
+                WhiteBalance.INCANDESCENT,
+                Camera.Parameters.WHITE_BALANCE_INCANDESCENT
+            )
+            @Suppress("DEPRECATION") WB.put(
+                WhiteBalance.FLUORESCENT,
+                Camera.Parameters.WHITE_BALANCE_FLUORESCENT
+            )
+            @Suppress("DEPRECATION") WB.put(
+                WhiteBalance.DAYLIGHT,
+                Camera.Parameters.WHITE_BALANCE_DAYLIGHT
+            )
+            @Suppress("DEPRECATION") WB.put(
+                WhiteBalance.CLOUDY,
+                Camera.Parameters.WHITE_BALANCE_CLOUDY_DAYLIGHT
+            )
+            @Suppress("DEPRECATION") HDR.put(Hdr.OFF, Camera.Parameters.SCENE_MODE_AUTO)
+            @Suppress("DEPRECATION") HDR.put(Hdr.ON, Camera.Parameters.SCENE_MODE_HDR)
+        }
+
+        @JvmStatic
+        fun get(): Camera1Mapper {
+            if (sInstance == null) {
+                sInstance = Camera1Mapper()
+            }
+            return sInstance!!
+        }
     }
 }
