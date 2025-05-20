@@ -1,48 +1,43 @@
-package com.base.cameraview.engine.action;
+package com.base.cameraview.engine.action
 
-import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.CaptureResult;
-import android.hardware.camera2.TotalCaptureResult;
-import android.os.Build;
+import android.hardware.camera2.CaptureRequest
+import android.hardware.camera2.CaptureResult
+import android.hardware.camera2.TotalCaptureResult
+import com.base.cameraview.CameraLogger
+import com.base.cameraview.engine.CameraEngine
 
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
+class LogAction : BaseAction() {
+    private var lastLog: String? = null
 
-import com.base.cameraview.CameraLogger;
-import com.base.cameraview.engine.CameraEngine;
-
-@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-public class LogAction extends BaseAction {
-
-    private final static CameraLogger LOG
-            = CameraLogger.create(CameraEngine.class.getSimpleName());
-
-    private String lastLog;
-
-    @Override
-    public void onCaptureCompleted(@NonNull ActionHolder holder,
-                                   @NonNull CaptureRequest request,
-                                   @NonNull TotalCaptureResult result) {
-        super.onCaptureCompleted(holder, request, result);
-        Integer aeMode = result.get(CaptureResult.CONTROL_AE_MODE);
-        Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
-        Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
-        Boolean aeLock = result.get(CaptureResult.CONTROL_AE_LOCK);
-        Integer aeTriggerState = result.get(CaptureResult.CONTROL_AE_PRECAPTURE_TRIGGER);
-        Integer afTriggerState = result.get(CaptureResult.CONTROL_AF_TRIGGER);
-        String log = "aeMode: " + aeMode + " aeLock: " + aeLock +
+    override fun onCaptureCompleted(
+        holder: ActionHolder,
+        request: CaptureRequest,
+        result: TotalCaptureResult
+    ) {
+        super.onCaptureCompleted(holder, request, result)
+        val aeMode = result.get(CaptureResult.CONTROL_AE_MODE)
+        val aeState = result.get(CaptureResult.CONTROL_AE_STATE)
+        val afState = result.get(CaptureResult.CONTROL_AF_STATE)
+        val aeLock = result.get(CaptureResult.CONTROL_AE_LOCK)
+        val aeTriggerState = result.get(CaptureResult.CONTROL_AE_PRECAPTURE_TRIGGER)
+        val afTriggerState = result.get(CaptureResult.CONTROL_AF_TRIGGER)
+        val log = "aeMode: " + aeMode + " aeLock: " + aeLock +
                 " aeState: " + aeState + " aeTriggerState: " + aeTriggerState +
-                " afState: " + afState + " afTriggerState: " + afTriggerState;
-        if (!log.equals(lastLog)) {
-            lastLog = log;
-            LOG.i(log);
+                " afState: " + afState + " afTriggerState: " + afTriggerState
+        if (log != lastLog) {
+            lastLog = log
+            LOG.i(log)
         }
     }
 
-    @Override
-    protected void onCompleted(@NonNull ActionHolder holder) {
-        super.onCompleted(holder);
-        setState(0); // set another state.
-        start(holder); // restart.
+    override fun onCompleted(holder: ActionHolder) {
+        super.onCompleted(holder)
+        state = 0 // set another state.
+        start(holder) // restart.
+    }
+
+    companion object {
+        private val LOG
+                : CameraLogger = CameraLogger.create(CameraEngine::class.java.simpleName)
     }
 }

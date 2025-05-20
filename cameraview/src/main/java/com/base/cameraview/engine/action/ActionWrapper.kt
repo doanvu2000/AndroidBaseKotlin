@@ -1,68 +1,54 @@
-package com.base.cameraview.engine.action;
+package com.base.cameraview.engine.action
 
-import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.CaptureResult;
-import android.hardware.camera2.TotalCaptureResult;
-import android.os.Build;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-
+import android.hardware.camera2.CaptureRequest
+import android.hardware.camera2.CaptureResult
+import android.hardware.camera2.TotalCaptureResult
 
 /**
  * This can be used to add functionality around a base action.
  */
-@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-public abstract class ActionWrapper extends BaseAction {
-
+abstract class ActionWrapper : BaseAction() {
     /**
      * Should return the wrapped action.
      *
      * @return the wrapped action
      */
-    @NonNull
-    public abstract BaseAction getAction();
+    abstract val action: BaseAction
 
-    @Override
-    protected void onStart(@NonNull ActionHolder holder) {
-        super.onStart(holder);
-        getAction().addCallback(new ActionCallback() {
-            @Override
-            public void onActionStateChanged(@NonNull Action action, int state) {
-                setState(state);
-                if (state == STATE_COMPLETED) {
-                    action.removeCallback(this);
+    override fun onStart(holder: ActionHolder) {
+        super.onStart(holder)
+        this.action.addCallback(object : ActionCallback {
+            override fun onActionStateChanged(action: Action, state: Int) {
+                changeState(state)
+                if (state == Action.Companion.STATE_COMPLETED) {
+                    action.removeCallback(this)
                 }
             }
-        });
-        getAction().onStart(holder);
+        })
+        this.action.onStart(holder)
     }
 
-    @Override
-    protected void onAbort(@NonNull ActionHolder holder) {
-        super.onAbort(holder);
-        getAction().onAbort(holder);
+    override fun onAbort(holder: ActionHolder) {
+        super.onAbort(holder)
+        this.action.onAbort(holder)
     }
 
-    @Override
-    public void onCaptureStarted(@NonNull ActionHolder holder, @NonNull CaptureRequest request) {
-        super.onCaptureStarted(holder, request);
-        getAction().onCaptureStarted(holder, request);
+    override fun onCaptureStarted(holder: ActionHolder, request: CaptureRequest) {
+        super.onCaptureStarted(holder, request)
+        this.action.onCaptureStarted(holder, request)
     }
 
-    @Override
-    public void onCaptureProgressed(@NonNull ActionHolder holder,
-                                    @NonNull CaptureRequest request,
-                                    @NonNull CaptureResult result) {
-        super.onCaptureProgressed(holder, request, result);
-        getAction().onCaptureProgressed(holder, request, result);
+    override fun onCaptureProgressed(
+        holder: ActionHolder, request: CaptureRequest, result: CaptureResult
+    ) {
+        super.onCaptureProgressed(holder, request, result)
+        this.action.onCaptureProgressed(holder, request, result)
     }
 
-    @Override
-    public void onCaptureCompleted(@NonNull ActionHolder holder,
-                                   @NonNull CaptureRequest request,
-                                   @NonNull TotalCaptureResult result) {
-        super.onCaptureCompleted(holder, request, result);
-        getAction().onCaptureCompleted(holder, request, result);
+    override fun onCaptureCompleted(
+        holder: ActionHolder, request: CaptureRequest, result: TotalCaptureResult
+    ) {
+        super.onCaptureCompleted(holder, request, result)
+        this.action.onCaptureCompleted(holder, request, result)
     }
 }

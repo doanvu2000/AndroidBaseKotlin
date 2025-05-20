@@ -1,86 +1,73 @@
-package com.base.cameraview.engine.action;
+package com.base.cameraview.engine.action
 
-import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.CaptureResult;
-import android.hardware.camera2.TotalCaptureResult;
-import android.os.Build;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-
-import java.util.ArrayList;
-import java.util.List;
+import android.hardware.camera2.CaptureRequest
+import android.hardware.camera2.CaptureResult
+import android.hardware.camera2.TotalCaptureResult
 
 /**
  * Performs a list of actions together, completing
  * once all of them have completed.
  */
-@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-class TogetherAction extends BaseAction {
+internal class TogetherAction(actions: MutableList<BaseAction>) : BaseAction() {
     // Need to be BaseAction so we can call onStart() instead of start()
-    private final List<BaseAction> actions;
-    private final List<BaseAction> runningActions;
+    private val actions: MutableList<BaseAction> = actions.toMutableList()
+    private val runningActions = actions.toMutableList()
 
-    TogetherAction(@NonNull final List<BaseAction> actions) {
-        this.actions = new ArrayList<>(actions);
-        this.runningActions = new ArrayList<>(actions);
-        for (BaseAction action : actions) {
-            action.addCallback(new ActionCallback() {
-                @Override
-                public void onActionStateChanged(@NonNull Action action, int state) {
-                    if (state == STATE_COMPLETED) {
-                        //noinspection SuspiciousMethodCalls
-                        runningActions.remove(action);
+    init {
+        for (action in actions) {
+            action.addCallback(object : ActionCallback {
+                override fun onActionStateChanged(action: Action, state: Int) {
+                    if (state == Action.Companion.STATE_COMPLETED) {
+                        runningActions.remove(action)
                     }
                     if (runningActions.isEmpty()) {
-                        setState(STATE_COMPLETED);
+                        changeState(Action.Companion.STATE_COMPLETED)
                     }
                 }
-            });
+            })
         }
     }
 
-    @Override
-    protected void onStart(@NonNull ActionHolder holder) {
-        super.onStart(holder);
-        for (BaseAction action : actions) {
-            if (!action.isCompleted()) action.onStart(holder);
+    override fun onStart(holder: ActionHolder) {
+        super.onStart(holder)
+        for (action in actions) {
+            if (!action.isCompleted) action.onStart(holder)
         }
     }
 
-    @Override
-    protected void onAbort(@NonNull ActionHolder holder) {
-        super.onAbort(holder);
-        for (BaseAction action : actions) {
-            if (!action.isCompleted()) action.onAbort(holder);
+    override fun onAbort(holder: ActionHolder) {
+        super.onAbort(holder)
+        for (action in actions) {
+            if (!action.isCompleted) action.onAbort(holder)
         }
     }
 
-    @Override
-    public void onCaptureStarted(@NonNull ActionHolder holder, @NonNull CaptureRequest request) {
-        super.onCaptureStarted(holder, request);
-        for (BaseAction action : actions) {
-            if (!action.isCompleted()) action.onCaptureStarted(holder, request);
+    override fun onCaptureStarted(holder: ActionHolder, request: CaptureRequest) {
+        super.onCaptureStarted(holder, request)
+        for (action in actions) {
+            if (!action.isCompleted) action.onCaptureStarted(holder, request)
         }
     }
 
-    @Override
-    public void onCaptureProgressed(@NonNull ActionHolder holder,
-                                    @NonNull CaptureRequest request,
-                                    @NonNull CaptureResult result) {
-        super.onCaptureProgressed(holder, request, result);
-        for (BaseAction action : actions) {
-            if (!action.isCompleted()) action.onCaptureProgressed(holder, request, result);
+    override fun onCaptureProgressed(
+        holder: ActionHolder,
+        request: CaptureRequest,
+        result: CaptureResult
+    ) {
+        super.onCaptureProgressed(holder, request, result)
+        for (action in actions) {
+            if (!action.isCompleted) action.onCaptureProgressed(holder, request, result)
         }
     }
 
-    @Override
-    public void onCaptureCompleted(@NonNull ActionHolder holder,
-                                   @NonNull CaptureRequest request,
-                                   @NonNull TotalCaptureResult result) {
-        super.onCaptureCompleted(holder, request, result);
-        for (BaseAction action : actions) {
-            if (!action.isCompleted()) action.onCaptureCompleted(holder, request, result);
+    override fun onCaptureCompleted(
+        holder: ActionHolder,
+        request: CaptureRequest,
+        result: TotalCaptureResult
+    ) {
+        super.onCaptureCompleted(holder, request, result)
+        for (action in actions) {
+            if (!action.isCompleted) action.onCaptureCompleted(holder, request, result)
         }
     }
 }

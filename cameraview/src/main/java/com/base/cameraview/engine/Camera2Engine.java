@@ -1451,7 +1451,7 @@ public class Camera2Engine extends CameraBaseEngine implements ImageReader.OnIma
         // Needs the PREVIEW state!
         Actions.sequence(new BaseAction() {
             @Override
-            protected void onStart(@NonNull ActionHolder holder) {
+            public void onStart(@NonNull ActionHolder holder) {
                 super.onStart(holder);
                 applyDefaultFocus(holder.getBuilder(this));
                 holder.getBuilder(this).set(CaptureRequest.CONTROL_AE_LOCK, false);

@@ -101,7 +101,7 @@ public class Snapshot2PictureRecorder extends SnapshotGlPictureRecorder {
     private class FlashAction extends BaseAction {
 
         @Override
-        protected void onStart(@NonNull ActionHolder holder) {
+        public void onStart(@NonNull ActionHolder holder) {
             super.onStart(holder);
             LOG.i("FlashAction:", "Parameters locked, opening torch.");
             holder.getBuilder(this).set(CaptureRequest.FLASH_MODE,
@@ -135,7 +135,7 @@ public class Snapshot2PictureRecorder extends SnapshotGlPictureRecorder {
     private class ResetFlashAction extends BaseAction {
 
         @Override
-        protected void onStart(@NonNull ActionHolder holder) {
+        public void onStart(@NonNull ActionHolder holder) {
             super.onStart(holder);
             try {
                 // See Camera2Engine.setFlash() comments: turning TORCH off has bugs and we must do

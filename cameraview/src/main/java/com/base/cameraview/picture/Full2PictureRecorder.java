@@ -54,7 +54,7 @@ public class Full2PictureRecorder extends FullPictureRecorder
         mAction = new BaseAction() {
 
             @Override
-            protected void onStart(@NonNull ActionHolder holder) {
+            public void onStart(@NonNull ActionHolder holder) {
                 super.onStart(holder);
                 mPictureBuilder.addTarget(mPictureReader.getSurface());
                 if (mResult.format == PictureFormat.JPEG) {

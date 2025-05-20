@@ -1,11 +1,9 @@
 package com.base.cameraview.engine.meter;
 
 import android.hardware.camera2.params.MeteringRectangle;
-import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 
 import com.base.cameraview.CameraLogger;
 import com.base.cameraview.engine.CameraEngine;
@@ -22,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 public class MeterAction extends ActionWrapper {
 
     private final static String TAG = MeterAction.class.getSimpleName();
@@ -59,7 +56,7 @@ public class MeterAction extends ActionWrapper {
     }
 
     @Override
-    protected void onStart(@NonNull ActionHolder holder) {
+    public void onStart(@NonNull ActionHolder holder) {
         LOG.w("onStart:", "initializing.");
         initialize(holder);
         LOG.w("onStart:", "initialized.");

@@ -13,7 +13,7 @@ import com.base.cameraview.engine.action.BaseAction;
 public abstract class BaseLock extends BaseAction {
 
     @Override
-    protected final void onStart(@NonNull ActionHolder holder) {
+    public final void onStart(@NonNull ActionHolder holder) {
         super.onStart(holder);
         boolean isSkipped = checkShouldSkip(holder);
         boolean isSupported = checkIsSupported(holder);

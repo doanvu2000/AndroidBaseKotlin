@@ -29,7 +29,7 @@ public abstract class BaseMeter extends BaseAction {
     }
 
     @Override
-    protected final void onStart(@NonNull ActionHolder holder) {
+    public final void onStart(@NonNull ActionHolder holder) {
         super.onStart(holder);
         boolean isSkipped = skipIfPossible && checkShouldSkip(holder);
         boolean isSupported = checkIsSupported(holder);

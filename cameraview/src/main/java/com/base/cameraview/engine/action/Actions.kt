@@ -1,52 +1,46 @@
-package com.base.cameraview.engine.action;
-
-import androidx.annotation.NonNull;
-
-import java.util.Arrays;
+package com.base.cameraview.engine.action
 
 /**
- * Utilities for creating {@link Action} sequences.
+ * Utilities for creating [Action] sequences.
  */
-public class Actions {
-
+object Actions {
     /**
-     * Creates a {@link BaseAction} that executes all the child actions
+     * Creates a [BaseAction] that executes all the child actions
      * together, at the same time, and completes once all of them are
      * completed.
      *
      * @param actions input actions
      * @return a new action
      */
-    @NonNull
-    public static BaseAction together(@NonNull BaseAction... actions) {
-        return new TogetherAction(Arrays.asList(actions));
+    @JvmStatic
+    fun together(vararg actions: BaseAction): BaseAction {
+        return TogetherAction(mutableListOf(*actions))
     }
 
     /**
-     * Creates a {@link BaseAction} that executes all the child actions
+     * Creates a [BaseAction] that executes all the child actions
      * in sequence, waiting for the first to complete, then going on with
      * the second and so on, finally completing when all are completed.
      *
      * @param actions input actions
      * @return a new action
      */
-    @NonNull
-    public static BaseAction sequence(@NonNull BaseAction... actions) {
-        return new SequenceAction(Arrays.asList(actions));
+    @JvmStatic
+    fun sequence(vararg actions: BaseAction): BaseAction {
+        return SequenceAction(mutableListOf(*actions))
     }
 
     /**
-     * Creates a {@link BaseAction} that completes as normal, but is also
+     * Creates a [BaseAction] that completes as normal, but is also
      * forced to complete if the given timeout is reached, by calling
-     * {@link Action#abort(ActionHolder)}.
+     * [Action.abort].
      *
      * @param timeoutMillis timeout in milliseconds
      * @param action        action
      * @return a new action
      */
-    @NonNull
-    public static BaseAction timeout(long timeoutMillis, @NonNull BaseAction action) {
-        return new TimeoutAction(timeoutMillis, action);
+    @JvmStatic
+    fun timeout(timeoutMillis: Long, action: BaseAction): BaseAction {
+        return TimeoutAction(timeoutMillis, action)
     }
-
 }

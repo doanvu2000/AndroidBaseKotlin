@@ -24,7 +24,7 @@ public abstract class BaseReset extends BaseAction {
     }
 
     @Override
-    protected final void onStart(@NonNull ActionHolder holder) {
+    public final void onStart(@NonNull ActionHolder holder) {
         super.onStart(holder);
         MeteringRectangle area = null;
         if (resetArea) {
