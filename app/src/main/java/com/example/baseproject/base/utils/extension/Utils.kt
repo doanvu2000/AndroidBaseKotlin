@@ -24,6 +24,9 @@ import androidx.core.content.FileProvider
 import androidx.core.graphics.createBitmap
 import androidx.core.os.LocaleListCompat
 import com.example.baseproject.BuildConfig
+import com.example.baseproject.base.entity.deviceInfo
+import com.example.baseproject.base.utils.util.AppLogger
+import com.example.baseproject.base.utils.util.Constants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -249,11 +252,34 @@ fun isDebugMode() = BuildConfig.DEBUG
 fun isEmulator(): Boolean = Build.FINGERPRINT.startsWith("generic") ||
         Build.FINGERPRINT.startsWith("unknown") ||
         Build.MODEL.contains("google_sdk") ||
+        Build.MODEL.contains("sdk_gphone64") ||
         Build.MODEL.contains("Emulator") ||
         Build.MODEL.contains("Android SDK built for x86") ||
         Build.MANUFACTURER.contains("Genymotion") ||
         (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic")) ||
-        "google_sdk" == Build.PRODUCT
+        Build.PRODUCT == "google_sdk" ||
+        Build.PRODUCT.contains("sdk_gphone64_x86")
+
+fun deviceInfoPrint() {
+    val deviceInfo = deviceInfo {
+        model = Build.MODEL
+        manufacturer = Build.MANUFACTURER
+        brand = Build.BRAND
+        deviceString = Build.DEVICE
+        product = Build.PRODUCT
+        fingerPrint = Build.FINGERPRINT
+        display = Build.DISPLAY
+        hardware = Build.HARDWARE
+        host = Build.HOST
+        id = Build.ID
+        tag = Build.TAGS
+        time = Build.TIME.toTimeFormat()
+        type = Build.TYPE
+        user = Build.USER
+    }
+
+    AppLogger.d(Constants.TAG, deviceInfo.toPrettyDebugString())
+}
 
 /**
  * Preventing click multiple view

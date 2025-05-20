@@ -37,3 +37,20 @@ fun Int.isEven(): Boolean {
 }
 
 fun Int.isOdd() = !isEven()
+
+fun Long.toTimeFormat(): String {//1000 -> 01
+    val minutes = this / 1000 / 60
+    val second = (this - minutes * 60 * 1000) / 1000
+    var rs: String = if (minutes < 10) {
+        "0$minutes"
+    } else {
+        "$minutes"
+    }
+    rs += ":"
+    rs += if (second < 10) {
+        "0$second"
+    } else {
+        "$second"
+    }
+    return rs
+}

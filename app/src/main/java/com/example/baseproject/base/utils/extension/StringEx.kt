@@ -121,3 +121,159 @@ fun String.subStringSafety(startIndex: Int, endIndex: Int, default: String): Str
     }
     return substring(startIndex, endIndex)
 }
+
+fun Any.prettyPrint(): String {
+
+    var indentLevel = 0
+    val indentWidth = 4
+
+    fun padding() = "".padStart(indentLevel * indentWidth)
+
+    val toString = toString()
+
+    val stringBuilder = StringBuilder(toString.length)
+
+    var i = 0
+    while (i < toString.length) {
+        when (val char = toString[i]) {
+            '(', '[', '{' -> {
+                indentLevel++
+                stringBuilder.appendLine(char).append(padding())
+            }
+
+            ')', ']', '}' -> {
+                indentLevel--
+                stringBuilder.appendLine().append(padding()).append(char)
+            }
+
+            ',' -> {
+                stringBuilder.appendLine(char).append(padding())
+                // ignore space after comma as we have added a newline
+                val nextChar = toString.getOrElse(i + 1) { char }
+                if (nextChar == ' ') i++
+            }
+
+            else -> {
+                stringBuilder.append(char)
+            }
+        }
+        i++
+    }
+
+    return stringBuilder.toString()
+}
+
+fun Any?.toPrettyString2(): String {
+    if (this == null) return "(null)"
+
+    var indentLevel = 0
+    val indentWidth = 2
+
+    fun padding() = "".padStart(indentLevel * indentWidth)
+
+    val toString = toString()
+    val stringBuilder = StringBuilder(toString.length)
+
+    var nestingContext: Char? = null
+    var i = 0
+
+    // Replace standard '[' and '{' characters with Kotlin specific functions
+    while (i < toString.length) {
+        when (val char = toString[i]) {
+            '(', '[', '{' -> {
+                indentLevel++
+                nestingContext = char
+                stringBuilder.appendLine(
+                    when (char) {
+                        '[' -> "listOf("
+                        '{' -> "mapOf("
+                        else -> '('
+                    },
+                ).append(padding())
+            }
+
+            ')', ']', '}' -> {
+                indentLevel--
+                nestingContext = null
+                stringBuilder.appendLine().append(padding()).append(')')
+            }
+
+            ',' -> {
+                stringBuilder.appendLine(char).append(padding())
+                // ignore space after comma as we have added a newline
+                val nextChar = toString.getOrElse(i + 1) { char }
+                if (nextChar == ' ') i++
+            }
+
+            '=' -> {
+                when (nestingContext) {
+                    '{' -> stringBuilder.append(" to ")
+                    else -> stringBuilder.append(" = ")
+                }
+            }
+
+            else -> {
+                stringBuilder.append(char)
+            }
+        }
+
+        i++
+    }
+
+    return stringBuilder.toString()
+}
+
+//same prettyPrint
+fun Any.pretty() = toString().let { toString ->
+    var indentLevel = 0
+    val indentWidth = 4
+    fun padding() = "".padStart(indentLevel * indentWidth)
+    buildString {
+        var ignoreSpace = false
+        toString.onEach { char ->
+            when (char) {
+                '(', '[', '{' -> {
+                    indentLevel++
+                    appendLine(char)
+                    append(padding())
+                }
+
+                ')', ']', '}' -> {
+                    indentLevel--
+                    appendLine()
+                    append(padding())
+                    append(char)
+                }
+
+                ',' -> {
+                    appendLine(char)
+                    append(padding())
+                    ignoreSpace = true
+                }
+
+                ' ' -> {
+                    if (!ignoreSpace) append(char)
+                    ignoreSpace = false
+                }
+
+                else -> append(char)
+            }
+        }
+    }
+}
+
+fun Any.toPrettyDebugString(indentWidth: Int = 4) = buildString {
+    fun StringBuilder.indent(level: Int) = append("".padStart(level * indentWidth))
+    var ignoreSpace = false
+    var indentLevel = 0
+    this@toPrettyDebugString.toString().onEach {
+        when (it) {
+            '(', '[', '{' -> appendLine(it).indent(++indentLevel)
+            ')', ']', '}' -> appendLine().indent(--indentLevel).append(it)
+            ',' -> appendLine(it).indent(indentLevel).also { ignoreSpace = true }
+            ' ' -> if (ignoreSpace) ignoreSpace = false else append(it)
+            '=' -> append(" = ")
+            else -> append(it)
+        }
+    }
+}

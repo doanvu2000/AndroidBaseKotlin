@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.example.baseproject.base.ui.ads.AppOpenAdManager
+import com.example.baseproject.base.utils.extension.deviceInfoPrint
 import com.example.baseproject.base.utils.util.Constants
 import com.example.baseproject.base.utils.util.RemoteConfigUtil
 import com.example.baseproject.base.utils.util.SharePrefUtils
@@ -25,6 +26,7 @@ class MyApplication : Application(), Application.ActivityLifecycleCallbacks, Lif
 
     override fun onCreate() {
         super.onCreate()
+        deviceInfoPrint()
         registerActivityLifecycleCallbacks(this)
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
         SharePrefUtils.init(this)
