@@ -1,28 +1,24 @@
-package com.base.cameraview.engine.lock;
+package com.base.cameraview.engine.lock
 
-import androidx.annotation.NonNull;
+import com.base.cameraview.engine.action.Action
+import com.base.cameraview.engine.action.ActionHolder
+import com.base.cameraview.engine.action.BaseAction
 
-import com.base.cameraview.engine.action.ActionHolder;
-import com.base.cameraview.engine.action.BaseAction;
-
-
-public abstract class BaseLock extends BaseAction {
-
-    @Override
-    public final void onStart(@NonNull ActionHolder holder) {
-        super.onStart(holder);
-        boolean isSkipped = checkShouldSkip(holder);
-        boolean isSupported = checkIsSupported(holder);
+abstract class BaseLock : BaseAction() {
+    override fun onStart(holder: ActionHolder) {
+        super.onStart(holder)
+        val isSkipped = checkShouldSkip(holder)
+        val isSupported = checkIsSupported(holder)
         if (isSupported && !isSkipped) {
-            onStarted(holder);
+            onStarted(holder)
         } else {
-            setState(STATE_COMPLETED);
+            state = Action.Companion.STATE_COMPLETED
         }
     }
 
-    protected abstract void onStarted(@NonNull ActionHolder holder);
+    protected abstract fun onStarted(holder: ActionHolder)
 
-    protected abstract boolean checkShouldSkip(@NonNull ActionHolder holder);
+    protected abstract fun checkShouldSkip(holder: ActionHolder): Boolean
 
-    protected abstract boolean checkIsSupported(@NonNull ActionHolder holder);
+    protected abstract fun checkIsSupported(holder: ActionHolder): Boolean
 }

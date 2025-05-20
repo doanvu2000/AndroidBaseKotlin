@@ -1,22 +1,13 @@
-package com.base.cameraview.engine.lock;
+package com.base.cameraview.engine.lock
 
-import androidx.annotation.NonNull;
+import com.base.cameraview.engine.action.ActionWrapper
+import com.base.cameraview.engine.action.Actions.together
+import com.base.cameraview.engine.action.BaseAction
 
-import com.base.cameraview.engine.action.ActionWrapper;
-import com.base.cameraview.engine.action.Actions;
-import com.base.cameraview.engine.action.BaseAction;
-
-public class LockAction extends ActionWrapper {
-
-    private final BaseAction action = Actions.together(
-            new ExposureLock(),
-            new FocusLock(),
-            new WhiteBalanceLock()
-    );
-
-    @NonNull
-    @Override
-    public BaseAction getAction() {
-        return action;
-    }
+class LockAction : ActionWrapper() {
+    override val action: BaseAction = together(
+        ExposureLock(),
+        FocusLock(),
+        WhiteBalanceLock()
+    )
 }
