@@ -19,7 +19,7 @@
         app:cameraFrameProcessingMaxHeight="640"
         app:cameraFrameProcessingMaxWidth="480"
         app:cameraGrid="off"
-        app:cameraMode="video"
+        app:cameraMode="picture"
         app:cameraPlaySounds="true"
         app:cameraPreview="glSurface"
         app:cameraSnapshotMaxHeight="640"
@@ -72,5 +72,14 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/imgResult"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:background="@color/white"
+        android:padding="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -29,8 +29,10 @@ abstract class BaseAction : Action {
                     callback.onActionStateChanged(this, field)
                 }
                 if (field == Action.Companion.STATE_COMPLETED) {
-                    holder!!.removeAction(this)
-                    onCompleted(holder!!)
+                    holder?.let {
+                        holder?.removeAction(this)
+                        onCompleted(holder!!)
+                    }
                 }
             }
         }

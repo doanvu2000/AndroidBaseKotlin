@@ -1,87 +1,68 @@
-package com.base.cameraview.engine.meter;
+package com.base.cameraview.engine.meter
 
-import android.hardware.camera2.params.MeteringRectangle;
+import android.hardware.camera2.params.MeteringRectangle
+import com.base.cameraview.CameraLogger
+import com.base.cameraview.engine.CameraEngine
+import com.base.cameraview.engine.action.ActionHolder
+import com.base.cameraview.engine.action.ActionWrapper
+import com.base.cameraview.engine.action.Actions.together
+import com.base.cameraview.engine.action.BaseAction
+import com.base.cameraview.engine.metering.Camera2MeteringTransform
+import com.base.cameraview.engine.offset.Reference
+import com.base.cameraview.metering.MeteringRegions
+import com.base.cameraview.metering.MeteringTransform
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+class MeterAction(
+    private val engine: CameraEngine,
+    private val regions: MeteringRegions?,
+    private val skipIfPossible: Boolean,
+) : ActionWrapper() {
+    private var meters: MutableList<BaseMeter>? = null
 
-import com.base.cameraview.CameraLogger;
-import com.base.cameraview.engine.CameraEngine;
-import com.base.cameraview.engine.action.ActionHolder;
-import com.base.cameraview.engine.action.ActionWrapper;
-import com.base.cameraview.engine.action.Actions;
-import com.base.cameraview.engine.action.BaseAction;
-import com.base.cameraview.engine.metering.Camera2MeteringTransform;
-import com.base.cameraview.engine.offset.Reference;
-import com.base.cameraview.metering.MeteringRegions;
-import com.base.cameraview.metering.MeteringTransform;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-public class MeterAction extends ActionWrapper {
-
-    private final static String TAG = MeterAction.class.getSimpleName();
-    private final static CameraLogger LOG = CameraLogger.create(TAG);
-    private final MeteringRegions regions;
-    private final CameraEngine engine;
-    private final boolean skipIfPossible;
-    private List<BaseMeter> meters;
-    private BaseAction action;
-
-    public MeterAction(@NonNull CameraEngine engine,
-                       @Nullable MeteringRegions regions,
-                       boolean skipIfPossible) {
-        this.regions = regions;
-        this.engine = engine;
-        this.skipIfPossible = skipIfPossible;
-    }
-
-    @NonNull
-    @Override
-    public BaseAction getAction() {
-        return action;
-    }
-
-    public boolean isSuccessful() {
-        for (BaseMeter meter : meters) {
-            if (!meter.isSuccessful()) {
-                LOG.i("isSuccessful:", "returning false.");
-                return false;
+    val isSuccessful: Boolean
+        get() {
+            for (meter in meters!!) {
+                if (!meter.isSuccessful) {
+                    LOG.i("isSuccessful:", "returning false.")
+                    return false
+                }
             }
+            LOG.i("isSuccessful:", "returning true.")
+            return true
         }
-        LOG.i("isSuccessful:", "returning true.");
-        return true;
+    override lateinit var action: BaseAction
+
+    override fun onStart(holder: ActionHolder) {
+        LOG.w("onStart:", "initializing.")
+        initialize(holder)
+        LOG.w("onStart:", "initialized.")
+        super.onStart(holder)
     }
 
-    @Override
-    public void onStart(@NonNull ActionHolder holder) {
-        LOG.w("onStart:", "initializing.");
-        initialize(holder);
-        LOG.w("onStart:", "initialized.");
-        super.onStart(holder);
-    }
-
-    private void initialize(@NonNull ActionHolder holder) {
-        List<MeteringRectangle> areas = new ArrayList<>();
+    private fun initialize(holder: ActionHolder) {
+        var areas: MutableList<MeteringRectangle?> = ArrayList()
         if (regions != null) {
-            MeteringTransform<MeteringRectangle> transform = new Camera2MeteringTransform(
-                    engine.getAngles(),
-                    engine.getPreview().getSurfaceSize(),
-                    engine.getPreviewStreamSize(Reference.VIEW),
-                    engine.getPreview().isCropping(),
-                    holder.getCharacteristics(this),
-                    holder.getBuilder(this)
-            );
-            MeteringRegions transformed = regions.transform(transform);
-            areas = transformed.get(Integer.MAX_VALUE, transform);
+            val transform: MeteringTransform<MeteringRectangle?> = Camera2MeteringTransform(
+                engine.getAngles(),
+                engine.getPreview()!!.surfaceSize,
+                engine.getPreviewStreamSize(Reference.VIEW)!!,
+                engine.getPreview()!!.isCropping,
+                holder.getCharacteristics(this),
+                holder.getBuilder(this)
+            )
+            val transformed = regions.transform(transform)
+            areas = transformed.get<MeteringRectangle?>(Int.Companion.MAX_VALUE, transform)
         }
 
-        BaseMeter ae = new ExposureMeter(areas, skipIfPossible);
-        BaseMeter af = new FocusMeter(areas, skipIfPossible);
-        BaseMeter awb = new WhiteBalanceMeter(areas, skipIfPossible);
-        meters = Arrays.asList(ae, af, awb);
-        action = Actions.together(ae, af, awb);
+        val ae: BaseMeter = ExposureMeter(areas, skipIfPossible)
+        val af: BaseMeter = FocusMeter(areas, skipIfPossible)
+        val awb: BaseMeter = WhiteBalanceMeter(areas, skipIfPossible)
+        meters = mutableListOf(ae, af, awb)
+        action = together(ae, af, awb)
+    }
+
+    companion object {
+        private val TAG: String = MeterAction::class.java.simpleName
+        private val LOG: CameraLogger = CameraLogger.create(TAG)
     }
 }

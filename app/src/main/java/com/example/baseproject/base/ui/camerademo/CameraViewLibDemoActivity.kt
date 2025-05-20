@@ -10,11 +10,13 @@ import androidx.core.content.ContextCompat
 import com.base.cameraview.CameraException
 import com.base.cameraview.CameraListener
 import com.base.cameraview.CameraOptions
+import com.base.cameraview.PictureResult
 import com.base.cameraview.VideoResult
 import com.base.cameraview.controls.Mode
 import com.base.cameraview.frame.Frame
 import com.base.cameraview.frame.FrameProcessor
 import com.example.baseproject.base.base_view.screen.BaseActivity
+import com.example.baseproject.base.utils.extension.loadSrc
 import com.example.baseproject.base.utils.util.AppLogger
 import com.example.baseproject.databinding.ActivityCameraViewLibDemoBinding
 
@@ -61,7 +63,8 @@ class CameraViewLibDemoActivity : BaseActivity<ActivityCameraViewLibDemoBinding>
 
     private fun switchCamera() {
         showDialogInitCamera()
-        binding.cameraView.toggleFacing()
+//        binding.cameraView.toggleFacing()
+        binding.cameraView.takePicture()
         delayToAction(1000L) {
             hideDialogInitCamera()
         }
@@ -73,7 +76,7 @@ class CameraViewLibDemoActivity : BaseActivity<ActivityCameraViewLibDemoBinding>
             setLifecycleOwner(this@CameraViewLibDemoActivity)
             clearCameraListeners()
             addCameraListener(cameraListener)
-            mode = Mode.VIDEO
+            mode = Mode.PICTURE
             addFrameProcessor(frameProcessor)
         }
     }
@@ -110,29 +113,40 @@ class CameraViewLibDemoActivity : BaseActivity<ActivityCameraViewLibDemoBinding>
 
         override fun onCameraClosed() {
             super.onCameraClosed()
-            AppLogger.e(TAG, "onCameraOpened")
+            AppLogger.e(TAG, "onCameraClosed")
             hideDialogInitCamera()
         }
 
         override fun onCameraError(exception: CameraException) {
             super.onCameraError(exception)
-            AppLogger.e(TAG, "onCameraOpened")
+            AppLogger.e(TAG, "onCameraError")
             hideDialogInitCamera()
         }
 
         override fun onVideoRecordingStart() {
             super.onVideoRecordingStart()
-            AppLogger.d(TAG, "onCameraOpened")
+            AppLogger.d(TAG, "onVideoRecordingStart")
         }
 
         override fun onVideoRecordingEnd() {
             super.onVideoRecordingEnd()
-            AppLogger.w(TAG, "onCameraOpened")
+            AppLogger.w(TAG, "onVideoRecordingEnd")
         }
 
         override fun onVideoTaken(result: VideoResult) {
             super.onVideoTaken(result)
-            AppLogger.i(TAG, "onCameraOpened")
+            AppLogger.i(TAG, "onVideoTaken")
+        }
+
+        override fun onPictureTaken(result: PictureResult) {
+            super.onPictureTaken(result)
+            AppLogger.i(TAG, "onPictureTaken: $result")
+            binding.imgResult.loadSrc(result.data)
+        }
+
+        override fun onPictureShutter() {
+            super.onPictureShutter()
+            AppLogger.w(TAG, "onPictureShutter")
         }
     }
 

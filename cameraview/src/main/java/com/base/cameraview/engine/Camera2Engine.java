@@ -397,17 +397,10 @@ public class Camera2Engine extends CameraBaseEngine implements ImageReader.OnIma
                         LOG.i("onStartEngine:", "Opened camera device.");
                         mCameraCharacteristics = mManager.getCameraCharacteristics(mCameraId);
                         boolean flip = getAngles().flip(Reference.SENSOR, Reference.VIEW);
-                        int format;
-                        switch (mPictureFormat) {
-                            case JPEG:
-                                format = ImageFormat.JPEG;
-                                break;
-                            case DNG:
-                                format = ImageFormat.RAW_SENSOR;
-                                break;
-                            default:
-                                throw new IllegalArgumentException("Unknown format:" + mPictureFormat);
-                        }
+                        int format = switch (mPictureFormat) {
+                            case JPEG -> ImageFormat.JPEG;
+                            case DNG -> ImageFormat.RAW_SENSOR;
+                        };
                         mCameraOptions = new Camera2Options(mManager, mCameraId, flip, format);
                         createRepeatingRequestBuilder(getRepeatingRequestDefaultTemplate());
                     } catch (CameraAccessException e) {
@@ -524,17 +517,10 @@ public class Camera2Engine extends CameraBaseEngine implements ImageReader.OnIma
         // 3. PICTURE RECORDING
         // Format is supported, or it would have thrown in Camera2Options constructor.
         if (getMode() == Mode.PICTURE) {
-            int format;
-            switch (mPictureFormat) {
-                case JPEG:
-                    format = ImageFormat.JPEG;
-                    break;
-                case DNG:
-                    format = ImageFormat.RAW_SENSOR;
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unknown format:" + mPictureFormat);
-            }
+            int format = switch (mPictureFormat) {
+                case JPEG -> ImageFormat.JPEG;
+                case DNG -> ImageFormat.RAW_SENSOR;
+            };
             mPictureReader = ImageReader.newInstance(mCaptureSize.getWidth(), mCaptureSize.getHeight(), format, 2);
             outputSurfaces.add(mPictureReader.getSurface());
         }

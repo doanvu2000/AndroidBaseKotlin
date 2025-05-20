@@ -46,12 +46,7 @@ public class CameraOrchestrator {
                                        @NonNull WorkerHandler handler,
                                        @NonNull final OnCompleteListener<T> listener) {
         if (task.isComplete()) {
-            handler.run(new Runnable() {
-                @Override
-                public void run() {
-                    listener.onComplete(task);
-                }
-            });
+            handler.run(() -> listener.onComplete(task));
         } else {
             task.addOnCompleteListener(handler.getExecutor(), listener);
         }
@@ -69,12 +64,9 @@ public class CameraOrchestrator {
                                       boolean dispatchExceptions,
                                       long minDelay,
                                       @NonNull final Runnable job) {
-        return scheduleInternal(name, dispatchExceptions, minDelay, new Callable<Task<Void>>() {
-            @Override
-            public Task<Void> call() {
-                job.run();
-                return Tasks.forResult(null);
-            }
+        return scheduleInternal(name, dispatchExceptions, minDelay, () -> {
+            job.run();
+            return Tasks.forResult(null);
         });
     }
 
@@ -103,30 +95,24 @@ public class CameraOrchestrator {
     @GuardedBy("mJobsLock")
     private void sync(long after) {
         // Jumping on the message handler even if after = 0L should avoid StackOverflow errors.
-        mCallback.getJobWorker("_sync").post(after, new Runnable() {
-            @SuppressWarnings("StatementWithEmptyBody")
-            @Override
-            public void run() {
-                Job<?> job = null;
-                synchronized (mJobsLock) {
-                    if (mJobRunning) {
-                        // Do nothing, job will be picked in executed().
-                    } else {
-                        long now = System.currentTimeMillis();
-                        for (Job<?> candidate : mJobs) {
-                            if (candidate.startTime <= now) {
-                                job = candidate;
-                                break;
-                            }
-                        }
-                        if (job != null) {
-                            mJobRunning = true;
+        mCallback.getJobWorker("_sync").post(after, () -> {
+            Job<?> job = null;
+            synchronized (mJobsLock) {
+                if (!mJobRunning) {
+                    long now = System.currentTimeMillis();
+                    for (Job<?> candidate : mJobs) {
+                        if (candidate.startTime <= now) {
+                            job = candidate;
+                            break;
                         }
                     }
+                    if (job != null) {
+                        mJobRunning = true;
+                    }
                 }
-                // This must be out of mJobsLock! See comments in execute().
-                if (job != null) execute(job);
             }
+            // This must be out of mJobsLock! See comments in execute().
+            if (job != null) execute(job);
         });
     }
 
@@ -135,43 +121,37 @@ public class CameraOrchestrator {
     // all threads can be waiting on that, even the UI thread e.g. through scheduleInternal.
     private <T> void execute(@NonNull final Job<T> job) {
         final WorkerHandler worker = mCallback.getJobWorker(job.name);
-        worker.run(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    LOG.i(job.name.toUpperCase(), "- Executing.");
-                    Task<T> task = job.scheduler.call();
-                    onComplete(task, worker, new OnCompleteListener<T>() {
-                        @Override
-                        public void onComplete(@NonNull Task<T> task) {
-                            Exception e = task.getException();
-                            if (e != null) {
-                                LOG.w(job.name.toUpperCase(), "- Finished with ERROR.", e);
-                                if (job.dispatchExceptions) {
-                                    mCallback.handleJobException(job.name, e);
-                                }
-                                job.source.trySetException(e);
-                            } else if (task.isCanceled()) {
-                                LOG.i(job.name.toUpperCase(), "- Finished because ABORTED.");
-                                job.source.trySetException(new CancellationException());
-                            } else {
-                                LOG.i(job.name.toUpperCase(), "- Finished.");
-                                job.source.trySetResult(task.getResult());
-                            }
-                            synchronized (mJobsLock) {
-                                executed(job);
-                            }
+        worker.run(() -> {
+            try {
+                LOG.i(job.name.toUpperCase(), "- Executing.");
+                Task<T> task = job.scheduler.call();
+                onComplete(task, worker, task1 -> {
+                    Exception e = task1.getException();
+                    if (e != null) {
+                        LOG.w(job.name.toUpperCase(), "- Finished with ERROR.", e);
+                        if (job.dispatchExceptions) {
+                            mCallback.handleJobException(job.name, e);
                         }
-                    });
-                } catch (Exception e) {
-                    LOG.i(job.name.toUpperCase(), "- Finished with ERROR.", e);
-                    if (job.dispatchExceptions) {
-                        mCallback.handleJobException(job.name, e);
+                        job.source.trySetException(e);
+                    } else if (task1.isCanceled()) {
+                        LOG.i(job.name.toUpperCase(), "- Finished because ABORTED.");
+                        job.source.trySetException(new CancellationException());
+                    } else {
+                        LOG.i(job.name.toUpperCase(), "- Finished.");
+                        job.source.trySetResult(task1.getResult());
                     }
-                    job.source.trySetException(e);
                     synchronized (mJobsLock) {
                         executed(job);
                     }
+                });
+            } catch (Exception e) {
+                LOG.i(job.name.toUpperCase(), "- Finished with ERROR.", e);
+                if (job.dispatchExceptions) {
+                    mCallback.handleJobException(job.name, e);
+                }
+                job.source.trySetException(e);
+                synchronized (mJobsLock) {
+                    executed(job);
                 }
             }
         });

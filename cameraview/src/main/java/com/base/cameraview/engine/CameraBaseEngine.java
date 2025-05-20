@@ -389,14 +389,11 @@ public abstract class CameraBaseEngine extends CameraEngine {
         if (facing != old) {
             mFacing = facing;
             getOrchestrator().scheduleStateful("facing", CameraState.ENGINE,
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            if (collectCameraInfo(facing)) {
-                                restart();
-                            } else {
-                                mFacing = old;
-                            }
+                    () -> {
+                        if (collectCameraInfo(facing)) {
+                            restart();
+                        } else {
+                            mFacing = old;
                         }
                     });
         }
@@ -440,12 +437,7 @@ public abstract class CameraBaseEngine extends CameraEngine {
         if (mode != mMode) {
             mMode = mode;
             getOrchestrator().scheduleStateful("mode", CameraState.ENGINE,
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            restart();
-                        }
-                    });
+                    () -> restart());
         }
     }
 
@@ -541,20 +533,17 @@ public abstract class CameraBaseEngine extends CameraEngine {
         // Save boolean before scheduling! See how Camera2Engine calls this with a temp value.
         final boolean metering = mPictureMetering;
         getOrchestrator().scheduleStateful("take picture", CameraState.BIND,
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        LOG.i("takePicture:", "running. isTakingPicture:", isTakingPicture());
-                        if (isTakingPicture()) return;
-                        if (mMode == Mode.VIDEO) {
-                            throw new IllegalStateException("Can't take hq pictures while in VIDEO mode");
-                        }
-                        stub.isSnapshot = false;
-                        stub.location = mLocation;
-                        stub.facing = mFacing;
-                        stub.format = mPictureFormat;
-                        onTakePicture(stub, metering);
+                () -> {
+                    LOG.i("takePicture:", "running. isTakingPicture:", isTakingPicture());
+                    if (isTakingPicture()) return;
+                    if (mMode == Mode.VIDEO) {
+                        throw new IllegalStateException("Can't take hq pictures while in VIDEO mode");
                     }
+                    stub.isSnapshot = false;
+                    stub.location = mLocation;
+                    stub.facing = mFacing;
+                    stub.format = mPictureFormat;
+                    onTakePicture(stub, metering);
                 });
     }
 
@@ -569,20 +558,17 @@ public abstract class CameraBaseEngine extends CameraEngine {
         // Save boolean before scheduling! See how Camera2Engine calls this with a temp value.
         final boolean metering = mPictureSnapshotMetering;
         getOrchestrator().scheduleStateful("take picture snapshot", CameraState.BIND,
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        LOG.i("takePictureSnapshot:", "running. isTakingPicture:", isTakingPicture());
-                        if (isTakingPicture()) return;
-                        stub.location = mLocation;
-                        stub.isSnapshot = true;
-                        stub.facing = mFacing;
-                        stub.format = PictureFormat.JPEG;
-                        // Leave the other parameters to subclasses.
-                        //noinspection ConstantConditions
-                        AspectRatio ratio = AspectRatio.of(getPreviewSurfaceSize(Reference.OUTPUT));
-                        onTakePictureSnapshot(stub, ratio, metering);
-                    }
+                () -> {
+                    LOG.i("takePictureSnapshot:", "running. isTakingPicture:", isTakingPicture());
+                    if (isTakingPicture()) return;
+                    stub.location = mLocation;
+                    stub.isSnapshot = true;
+                    stub.facing = mFacing;
+                    stub.format = PictureFormat.JPEG;
+                    // Leave the other parameters to subclasses.
+                    //noinspection ConstantConditions
+                    AspectRatio ratio = AspectRatio.of(getPreviewSurfaceSize(Reference.OUTPUT));
+                    onTakePictureSnapshot(stub, ratio, metering);
                 });
     }
 
@@ -612,33 +598,30 @@ public abstract class CameraBaseEngine extends CameraEngine {
     public final void takeVideo(final @NonNull VideoResult.Stub stub,
                                 final @Nullable File file,
                                 final @Nullable FileDescriptor fileDescriptor) {
-        getOrchestrator().scheduleStateful("take video", CameraState.BIND, new Runnable() {
-            @Override
-            public void run() {
-                LOG.i("takeVideo:", "running. isTakingVideo:", isTakingVideo());
-                if (isTakingVideo()) return;
-                if (mMode == Mode.PICTURE) {
-                    throw new IllegalStateException("Can't record video while in PICTURE mode");
-                }
-                if (file != null) {
-                    stub.file = file;
-                } else if (fileDescriptor != null) {
-                    stub.fileDescriptor = fileDescriptor;
-                } else {
-                    throw new IllegalStateException("file and fileDescriptor are both null.");
-                }
-                stub.isSnapshot = false;
-                stub.videoCodec = mVideoCodec;
-                stub.audioCodec = mAudioCodec;
-                stub.location = mLocation;
-                stub.facing = mFacing;
-                stub.audio = mAudio;
-                stub.maxSize = mVideoMaxSize;
-                stub.maxDuration = mVideoMaxDuration;
-                stub.videoBitRate = mVideoBitRate;
-                stub.audioBitRate = mAudioBitRate;
-                onTakeVideo(stub);
+        getOrchestrator().scheduleStateful("take video", CameraState.BIND, () -> {
+            LOG.i("takeVideo:", "running. isTakingVideo:", isTakingVideo());
+            if (isTakingVideo()) return;
+            if (mMode == Mode.PICTURE) {
+                throw new IllegalStateException("Can't record video while in PICTURE mode");
             }
+            if (file != null) {
+                stub.file = file;
+            } else if (fileDescriptor != null) {
+                stub.fileDescriptor = fileDescriptor;
+            } else {
+                throw new IllegalStateException("file and fileDescriptor are both null.");
+            }
+            stub.isSnapshot = false;
+            stub.videoCodec = mVideoCodec;
+            stub.audioCodec = mAudioCodec;
+            stub.location = mLocation;
+            stub.facing = mFacing;
+            stub.audio = mAudio;
+            stub.maxSize = mVideoMaxSize;
+            stub.maxDuration = mVideoMaxDuration;
+            stub.videoBitRate = mVideoBitRate;
+            stub.audioBitRate = mAudioBitRate;
+            onTakeVideo(stub);
         });
     }
 
@@ -671,12 +654,9 @@ public abstract class CameraBaseEngine extends CameraEngine {
 
     @Override
     public final void stopVideo() {
-        getOrchestrator().schedule("stop video", true, new Runnable() {
-            @Override
-            public void run() {
-                LOG.i("stopVideo", "running. isTakingVideo?", isTakingVideo());
-                onStopVideo();
-            }
+        getOrchestrator().schedule("stop video", true, () -> {
+            LOG.i("stopVideo", "running. isTakingVideo?", isTakingVideo());
+            onStopVideo();
         });
     }
 
@@ -737,20 +717,17 @@ public abstract class CameraBaseEngine extends CameraEngine {
     public final void onSurfaceChanged() {
         LOG.i("onSurfaceChanged:", "Size is", getPreviewSurfaceSize(Reference.VIEW));
         getOrchestrator().scheduleStateful("surface changed", CameraState.BIND,
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        // Compute a new camera preview size and apply.
-                        Size newSize = computePreviewStreamSize();
-                        if (newSize.equals(mPreviewStreamSize)) {
-                            LOG.i("onSurfaceChanged:",
-                                    "The computed preview size is identical. No op.");
-                        } else {
-                            LOG.i("onSurfaceChanged:",
-                                    "Computed a new preview size. Calling onPreviewStreamSizeChanged().");
-                            mPreviewStreamSize = newSize;
-                            onPreviewStreamSizeChanged();
-                        }
+                () -> {
+                    // Compute a new camera preview size and apply.
+                    Size newSize = computePreviewStreamSize();
+                    if (newSize.equals(mPreviewStreamSize)) {
+                        LOG.i("onSurfaceChanged:",
+                                "The computed preview size is identical. No op.");
+                    } else {
+                        LOG.i("onSurfaceChanged:",
+                                "Computed a new preview size. Calling onPreviewStreamSizeChanged().");
+                        mPreviewStreamSize = newSize;
+                        onPreviewStreamSizeChanged();
                     }
                 });
     }

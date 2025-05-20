@@ -51,23 +51,13 @@ public class WorkerHandler {
         mThread.setDaemon(true);
         mThread.start();
         mHandler = new Handler(mThread.getLooper());
-        mExecutor = new Executor() {
-            @Override
-            public void execute(@NonNull Runnable command) {
-                WorkerHandler.this.run(command);
-            }
-        };
+        mExecutor = WorkerHandler.this::run;
 
         // HandlerThreads/Handlers sometimes have a significant warmup time.
         // We want to spend this time here so when this object is built, it
         // is fully operational.
         final CountDownLatch latch = new CountDownLatch(1);
-        post(new Runnable() {
-            @Override
-            public void run() {
-                latch.countDown();
-            }
-        });
+        post(latch::countDown);
         try {
             latch.await();
         } catch (InterruptedException ignore) {
@@ -191,14 +181,11 @@ public class WorkerHandler {
      */
     public <T> Task<T> post(@NonNull final Callable<T> callable) {
         final TaskCompletionSource<T> source = new TaskCompletionSource<>();
-        post(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    source.trySetResult(callable.call());
-                } catch (Exception e) {
-                    source.trySetException(e);
-                }
+        post(() -> {
+            try {
+                source.trySetResult(callable.call());
+            } catch (Exception e) {
+                source.trySetException(e);
             }
         });
         return source.getTask();

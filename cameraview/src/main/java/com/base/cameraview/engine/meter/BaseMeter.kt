@@ -1,59 +1,43 @@
-package com.base.cameraview.engine.meter;
+package com.base.cameraview.engine.meter
 
-import android.hardware.camera2.params.MeteringRectangle;
+import android.hardware.camera2.params.MeteringRectangle
+import com.base.cameraview.CameraLogger
+import com.base.cameraview.engine.action.Action
+import com.base.cameraview.engine.action.ActionHolder
+import com.base.cameraview.engine.action.BaseAction
 
-import androidx.annotation.NonNull;
+abstract class BaseMeter protected constructor(
+    private val areas: MutableList<MeteringRectangle?>,
+    private val skipIfPossible: Boolean
+) : BaseAction() {
+    var isSuccessful: Boolean = false
+        protected set
 
-import com.base.cameraview.CameraLogger;
-import com.base.cameraview.engine.action.ActionHolder;
-import com.base.cameraview.engine.action.BaseAction;
-
-import java.util.List;
-
-public abstract class BaseMeter extends BaseAction {
-
-    private final static String TAG = BaseMeter.class.getSimpleName();
-    private final static CameraLogger LOG = CameraLogger.create(TAG);
-
-    private final List<MeteringRectangle> areas;
-    private boolean isSuccessful;
-    private boolean skipIfPossible;
-
-    @SuppressWarnings("WeakerAccess")
-    protected BaseMeter(@NonNull List<MeteringRectangle> areas, boolean skipIfPossible) {
-        this.areas = areas;
-        this.skipIfPossible = skipIfPossible;
-    }
-
-    @Override
-    public final void onStart(@NonNull ActionHolder holder) {
-        super.onStart(holder);
-        boolean isSkipped = skipIfPossible && checkShouldSkip(holder);
-        boolean isSupported = checkIsSupported(holder);
+    override fun onStart(holder: ActionHolder) {
+        super.onStart(holder)
+        val isSkipped = skipIfPossible && checkShouldSkip(holder)
+        val isSupported = checkIsSupported(holder)
         if (isSupported && !isSkipped) {
-            LOG.i("onStart:", "supported and not skipped. Dispatching onStarted.");
-            onStarted(holder, areas);
+            LOG.i("onStart:", "supported and not skipped. Dispatching onStarted.")
+            onStarted(holder, areas)
         } else {
-            LOG.i("onStart:", "not supported or skipped. Dispatching COMPLETED state.");
-            setSuccessful(true);
-            setState(STATE_COMPLETED);
+            LOG.i("onStart:", "not supported or skipped. Dispatching COMPLETED state.")
+            this.isSuccessful = true
+            state = Action.Companion.STATE_COMPLETED
         }
     }
 
-    protected abstract void onStarted(@NonNull ActionHolder holder,
-                                      @NonNull List<MeteringRectangle> areas);
+    protected abstract fun onStarted(
+        holder: ActionHolder,
+        areas: MutableList<MeteringRectangle?>
+    )
 
-    protected abstract boolean checkShouldSkip(@NonNull ActionHolder holder);
+    protected abstract fun checkShouldSkip(holder: ActionHolder): Boolean
 
-    protected abstract boolean checkIsSupported(@NonNull ActionHolder holder);
+    protected abstract fun checkIsSupported(holder: ActionHolder): Boolean
 
-    @SuppressWarnings("WeakerAccess")
-    public boolean isSuccessful() {
-        return isSuccessful;
-    }
-
-    @SuppressWarnings("WeakerAccess")
-    protected void setSuccessful(boolean successful) {
-        isSuccessful = successful;
+    companion object {
+        private val TAG: String = BaseMeter::class.java.simpleName
+        private val LOG: CameraLogger = CameraLogger.create(TAG)
     }
 }

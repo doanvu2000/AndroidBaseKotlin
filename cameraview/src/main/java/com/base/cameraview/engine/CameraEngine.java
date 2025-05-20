@@ -46,7 +46,6 @@ import com.google.android.gms.tasks.Tasks;
 
 import java.io.File;
 import java.io.FileDescriptor;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -403,12 +402,7 @@ public abstract class CameraEngine implements CameraPreview.SurfaceCallback, Pic
     @NonNull
     @EngineThread
     private Task<Void> startPreview() {
-        return mOrchestrator.scheduleStateChange(CameraState.BIND, CameraState.PREVIEW, true, new Callable<Task<Void>>() {
-            @Override
-            public Task<Void> call() {
-                return onStartPreview();
-            }
-        });
+        return mOrchestrator.scheduleStateChange(CameraState.BIND, CameraState.PREVIEW, true, this::onStartPreview);
     }
 
     /**
@@ -435,7 +429,7 @@ public abstract class CameraEngine implements CameraPreview.SurfaceCallback, Pic
     @NonNull
     @EngineThread
     private Task<Void> stopPreview(boolean swallowExceptions) {
-        return mOrchestrator.scheduleStateChange(CameraState.PREVIEW, CameraState.BIND, !swallowExceptions, () -> onStopPreview());
+        return mOrchestrator.scheduleStateChange(CameraState.PREVIEW, CameraState.BIND, !swallowExceptions, this::onStopPreview);
     }
 
     //endregion
@@ -737,10 +731,5 @@ public abstract class CameraEngine implements CameraPreview.SurfaceCallback, Pic
             handleException(throwable, true);
         }
     }
-
-
-
-
-
     //endregion
 }

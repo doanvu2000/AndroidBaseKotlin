@@ -2,8 +2,6 @@ package com.base.cameraview.engine.orchestrator;
 
 import androidx.annotation.NonNull;
 
-import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 
@@ -53,33 +51,24 @@ public class CameraStateOrchestrator extends CameraOrchestrator {
         final boolean isTearDown = !toState.isAtLeast(fromState);
         final String name = isTearDown ? fromState.name() + " << " + toState.name()
                 : fromState.name() + " >> " + toState.name();
-        return schedule(name, dispatchExceptions, new Callable<Task<T>>() {
-            @Override
-            public Task<T> call() throws Exception {
-                if (getCurrentState() != fromState) {
-                    LOG.w(name.toUpperCase(), "- State mismatch, aborting. current:",
-                            getCurrentState(), "from:", fromState, "to:", toState);
-                    return Tasks.forCanceled();
-                } else {
-                    Executor executor = mCallback.getJobWorker(name).getExecutor();
-                    return stateChange.call().continueWithTask(executor,
-                            new Continuation<T, Task<T>>() {
-                                @Override
-                                public Task<T> then(@NonNull Task<T> task) {
-                                    if (task.isSuccessful() || isTearDown) {
-                                        mCurrentState = toState;
-                                    }
-                                    return task;
-                                }
-                            });
-                }
+        return schedule(name, dispatchExceptions, () -> {
+            if (getCurrentState() != fromState) {
+                LOG.w(name.toUpperCase(), "- State mismatch, aborting. current:",
+                        getCurrentState(), "from:", fromState, "to:", toState);
+                return Tasks.forCanceled();
+            } else {
+                Executor executor = mCallback.getJobWorker(name).getExecutor();
+                return stateChange.call().continueWithTask(executor,
+                        task -> {
+                            if (task.isSuccessful() || isTearDown) {
+                                mCurrentState = toState;
+                            }
+                            return task;
+                        });
             }
-        }).addOnCompleteListener(new OnCompleteListener<T>() {
-            @Override
-            public void onComplete(@NonNull Task<T> task) {
-                if (changeCount == mStateChangeCount) {
-                    mTargetState = mCurrentState;
-                }
+        }).addOnCompleteListener(task -> {
+            if (changeCount == mStateChangeCount) {
+                mTargetState = mCurrentState;
             }
         });
     }
