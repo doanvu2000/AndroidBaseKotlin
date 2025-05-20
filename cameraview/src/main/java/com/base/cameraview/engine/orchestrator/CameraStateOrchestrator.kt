@@ -1,104 +1,91 @@
-package com.base.cameraview.engine.orchestrator;
+package com.base.cameraview.engine.orchestrator
 
-import androidx.annotation.NonNull;
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
+import java.util.Locale
+import java.util.concurrent.Callable
 
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
+class CameraStateOrchestrator(callback: Callback) : CameraOrchestrator(callback) {
+    var currentState: CameraState = CameraState.OFF
+        private set
+    var targetState: CameraState = CameraState.OFF
+        private set
+    private var mStateChangeCount = 0
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executor;
-
-public class CameraStateOrchestrator extends CameraOrchestrator {
-
-    private CameraState mCurrentState = CameraState.OFF;
-    private CameraState mTargetState = CameraState.OFF;
-    private int mStateChangeCount = 0;
-
-    public CameraStateOrchestrator(@NonNull Callback callback) {
-        super(callback);
-    }
-
-    @NonNull
-    public CameraState getCurrentState() {
-        return mCurrentState;
-    }
-
-    @NonNull
-    public CameraState getTargetState() {
-        return mTargetState;
-    }
-
-    public boolean hasPendingStateChange() {
-        synchronized (mJobsLock) {
-            for (Job<?> job : mJobs) {
+    fun hasPendingStateChange(): Boolean {
+        synchronized(mJobsLock) {
+            for (job in mJobs) {
                 if ((job.name.contains(" >> ") || job.name.contains(" << "))
-                        && !job.source.getTask().isComplete()) {
-                    return true;
+                    && !job.source.getTask().isComplete
+                ) {
+                    return true
                 }
             }
-            return false;
+            return false
         }
     }
 
-    @NonNull
-    public <T> Task<T> scheduleStateChange(@NonNull final CameraState fromState,
-                                           @NonNull final CameraState toState,
-                                           boolean dispatchExceptions,
-                                           @NonNull final Callable<Task<T>> stateChange) {
-        final int changeCount = ++mStateChangeCount;
-        mTargetState = toState;
+    fun <T> scheduleStateChange(
+        fromState: CameraState,
+        toState: CameraState,
+        dispatchExceptions: Boolean,
+        stateChange: Callable<Task<T?>?>
+    ): Task<T?> {
+        val changeCount = ++mStateChangeCount
+        this.targetState = toState
 
-        final boolean isTearDown = !toState.isAtLeast(fromState);
-        final String name = isTearDown ? fromState.name() + " << " + toState.name()
-                : fromState.name() + " >> " + toState.name();
-        return schedule(name, dispatchExceptions, () -> {
-            if (getCurrentState() != fromState) {
-                LOG.w(name.toUpperCase(), "- State mismatch, aborting. current:",
-                        getCurrentState(), "from:", fromState, "to:", toState);
-                return Tasks.forCanceled();
+        val isTearDown = !toState.isAtLeast(fromState)
+        val name = if (isTearDown)
+            fromState.name + " << " + toState.name
+        else
+            fromState.name + " >> " + toState.name
+        return schedule<T?>(name, dispatchExceptions) {
+            if (this.currentState != fromState) {
+                LOG.w(
+                    name.uppercase(Locale.getDefault()), "- State mismatch, aborting. current:",
+                    this.currentState, "from:", fromState, "to:", toState
+                )
+                return@schedule Tasks.forCanceled<T?>()
             } else {
-                Executor executor = mCallback.getJobWorker(name).getExecutor();
-                return stateChange.call().continueWithTask(executor,
-                        task -> {
-                            if (task.isSuccessful() || isTearDown) {
-                                mCurrentState = toState;
-                            }
-                            return task;
-                        });
+                val executor = mCallback.getJobWorker(name).executor
+                return@schedule stateChange.call()!!.continueWithTask<T?>(
+                    executor
+                ) { task: Task<T?>? ->
+                    if (task!!.isSuccessful || isTearDown) {
+                        this.currentState = toState
+                    }
+                    task
+                }
             }
-        }).addOnCompleteListener(task -> {
+        }.addOnCompleteListener { task: Task<T?>? ->
             if (changeCount == mStateChangeCount) {
-                mTargetState = mCurrentState;
+                this.targetState = this.currentState
             }
-        });
+        }
     }
 
-    @SuppressWarnings("UnusedReturnValue")
-    @NonNull
-    public Task<Void> scheduleStateful(@NonNull String name,
-                                       @NonNull final CameraState atLeast,
-                                       @NonNull final Runnable job) {
-        return schedule(name, true, new Runnable() {
-            @Override
-            public void run() {
-                if (getCurrentState().isAtLeast(atLeast)) {
-                    job.run();
-                }
+    fun scheduleStateful(
+        name: String,
+        atLeast: CameraState,
+        job: Runnable
+    ): Task<Void?> {
+        return schedule(name, true) {
+            if (currentState.isAtLeast(atLeast)) {
+                job.run()
             }
-        });
+        }
     }
 
-    public void scheduleStatefulDelayed(@NonNull String name,
-                                        @NonNull final CameraState atLeast,
-                                        long delay,
-                                        @NonNull final Runnable job) {
-        scheduleDelayed(name, true, delay, new Runnable() {
-            @Override
-            public void run() {
-                if (getCurrentState().isAtLeast(atLeast)) {
-                    job.run();
-                }
+    fun scheduleStatefulDelayed(
+        name: String,
+        atLeast: CameraState,
+        delay: Long,
+        job: Runnable
+    ) {
+        scheduleDelayed(name, true, delay) {
+            if (currentState.isAtLeast(atLeast)) {
+                job.run()
             }
-        });
+        }
     }
 }

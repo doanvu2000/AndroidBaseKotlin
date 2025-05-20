@@ -1,230 +1,231 @@
-package com.base.cameraview.engine.orchestrator;
+package com.base.cameraview.engine.orchestrator
 
-import androidx.annotation.GuardedBy;
-import androidx.annotation.NonNull;
-
-import com.base.cameraview.CameraLogger;
-import com.base.cameraview.internal.WorkerHandler;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.TaskCompletionSource;
-import com.google.android.gms.tasks.Tasks;
-
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
+import androidx.annotation.GuardedBy
+import com.base.cameraview.CameraLogger
+import com.base.cameraview.internal.WorkerHandler
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.TaskCompletionSource
+import com.google.android.gms.tasks.Tasks
+import java.util.ArrayDeque
+import java.util.Locale
+import java.util.concurrent.Callable
+import java.util.concurrent.CancellationException
+import kotlin.math.max
 
 /**
  * so that they always run on the same thread.
- * <p>
+ *
+ *
  * We need to be extra careful (not as easy as posting on a Handler) because the engine
  * has different states, and some actions will modify the engine state - turn it on or
  * tear it down. Other actions might need a specific state to be executed.
  * And most importantly, some actions will finish asynchronously, so subsequent actions
  * should wait for the previous to finish, but without blocking the thread.
  */
-@SuppressWarnings("WeakerAccess")
-public class CameraOrchestrator {
+open class CameraOrchestrator(@JvmField protected val mCallback: Callback) {
+    @JvmField
+    protected val mJobs: ArrayDeque<Job<*>> = ArrayDeque<Job<*>>()
 
-    protected static final String TAG = CameraOrchestrator.class.getSimpleName();
-    protected static final CameraLogger LOG = CameraLogger.create(TAG);
-    protected final Callback mCallback;
-    protected final ArrayDeque<Job<?>> mJobs = new ArrayDeque<>();
-    protected final Object mJobsLock = new Object();
-    protected boolean mJobRunning = false;
+    @JvmField
+    protected val mJobsLock: Any = Any()
+    protected var mJobRunning: Boolean = false
 
-    public CameraOrchestrator(@NonNull Callback callback) {
-        mCallback = callback;
+    fun schedule(
+        name: String,
+        dispatchExceptions: Boolean,
+        job: Runnable
+    ): Task<Void?> {
+        return scheduleDelayed(name, dispatchExceptions, 0L, job)
     }
 
-    private static <T> void onComplete(@NonNull final Task<T> task,
-                                       @NonNull WorkerHandler handler,
-                                       @NonNull final OnCompleteListener<T> listener) {
-        if (task.isComplete()) {
-            handler.run(() -> listener.onComplete(task));
-        } else {
-            task.addOnCompleteListener(handler.getExecutor(), listener);
+    fun scheduleDelayed(
+        name: String,
+        dispatchExceptions: Boolean,
+        minDelay: Long,
+        job: Runnable
+    ): Task<Void?> {
+        return scheduleInternal<Void?>(name, dispatchExceptions, minDelay) {
+            job.run()
+            Tasks.forResult<Void?>(null)
         }
     }
 
-    @NonNull
-    public Task<Void> schedule(@NonNull String name,
-                               boolean dispatchExceptions,
-                               @NonNull Runnable job) {
-        return scheduleDelayed(name, dispatchExceptions, 0L, job);
+    fun <T> schedule(
+        name: String,
+        dispatchExceptions: Boolean,
+        scheduler: Callable<Task<T?>>
+    ): Task<T?> {
+        return scheduleInternal<T?>(name, dispatchExceptions, 0L, scheduler)
     }
 
-    @NonNull
-    public Task<Void> scheduleDelayed(@NonNull String name,
-                                      boolean dispatchExceptions,
-                                      long minDelay,
-                                      @NonNull final Runnable job) {
-        return scheduleInternal(name, dispatchExceptions, minDelay, () -> {
-            job.run();
-            return Tasks.forResult(null);
-        });
-    }
-
-    @NonNull
-    public <T> Task<T> schedule(@NonNull String name,
-                                boolean dispatchExceptions,
-                                @NonNull Callable<Task<T>> scheduler) {
-        return scheduleInternal(name, dispatchExceptions, 0L, scheduler);
-    }
-
-    @NonNull
-    private <T> Task<T> scheduleInternal(@NonNull String name,
-                                         boolean dispatchExceptions,
-                                         long minDelay,
-                                         @NonNull Callable<Task<T>> scheduler) {
-        LOG.i(name.toUpperCase(), "- Scheduling.");
-        Job<T> job = new Job<>(name, scheduler, dispatchExceptions,
-                System.currentTimeMillis() + minDelay);
-        synchronized (mJobsLock) {
-            mJobs.addLast(job);
-            sync(minDelay);
+    private fun <T> scheduleInternal(
+        name: String,
+        dispatchExceptions: Boolean,
+        minDelay: Long,
+        scheduler: Callable<Task<T?>>
+    ): Task<T?> {
+        LOG.i(name.uppercase(Locale.getDefault()), "- Scheduling.")
+        val job = Job(
+            name, scheduler, dispatchExceptions,
+            System.currentTimeMillis() + minDelay
+        )
+        synchronized(mJobsLock) {
+            mJobs.addLast(job)
+            sync<T>(minDelay)
         }
-        return job.source.getTask();
+        return job.source.getTask()
     }
 
     @GuardedBy("mJobsLock")
-    private void sync(long after) {
+    private fun <T> sync(after: Long) {
         // Jumping on the message handler even if after = 0L should avoid StackOverflow errors.
-        mCallback.getJobWorker("_sync").post(after, () -> {
-            Job<?> job = null;
-            synchronized (mJobsLock) {
+        mCallback.getJobWorker("_sync").post(after) {
+            var job: Job<T?>? = null
+            synchronized(mJobsLock) {
                 if (!mJobRunning) {
-                    long now = System.currentTimeMillis();
-                    for (Job<?> candidate : mJobs) {
+                    val now = System.currentTimeMillis()
+                    for (candidate in mJobs) {
                         if (candidate.startTime <= now) {
-                            job = candidate;
-                            break;
+                            job = candidate as Job<T?>?
+                            break
                         }
                     }
                     if (job != null) {
-                        mJobRunning = true;
+                        mJobRunning = true
                     }
                 }
             }
             // This must be out of mJobsLock! See comments in execute().
-            if (job != null) execute(job);
-        });
+            val currentJob = job
+            currentJob?.let {
+                execute(it)
+            }
+        }
     }
 
     // Since we use WorkerHandler.run(), the job can end up being executed on the current thread.
     // For this reason, it's important that this method is never guarded by mJobsLock! Because
     // all threads can be waiting on that, even the UI thread e.g. through scheduleInternal.
-    private <T> void execute(@NonNull final Job<T> job) {
-        final WorkerHandler worker = mCallback.getJobWorker(job.name);
-        worker.run(() -> {
+    private fun <T> execute(job: Job<T?>) {
+        val worker = mCallback.getJobWorker(job.name)
+        worker.run {
             try {
-                LOG.i(job.name.toUpperCase(), "- Executing.");
-                Task<T> task = job.scheduler.call();
-                onComplete(task, worker, task1 -> {
-                    Exception e = task1.getException();
+                LOG.i(job.name.uppercase(Locale.getDefault()), "- Executing.")
+                val task = job.scheduler.call()
+                onComplete<T?>(task, worker) { task1: Task<T?>? ->
+                    val e = task1!!.exception
                     if (e != null) {
-                        LOG.w(job.name.toUpperCase(), "- Finished with ERROR.", e);
+                        LOG.w(job.name.uppercase(Locale.getDefault()), "- Finished with ERROR.", e)
                         if (job.dispatchExceptions) {
-                            mCallback.handleJobException(job.name, e);
+                            mCallback.handleJobException(job.name, e)
                         }
-                        job.source.trySetException(e);
-                    } else if (task1.isCanceled()) {
-                        LOG.i(job.name.toUpperCase(), "- Finished because ABORTED.");
-                        job.source.trySetException(new CancellationException());
+                        job.source.trySetException(e)
+                    } else if (task1.isCanceled) {
+                        LOG.i(
+                            job.name.uppercase(Locale.getDefault()),
+                            "- Finished because ABORTED."
+                        )
+                        job.source.trySetException(CancellationException())
                     } else {
-                        LOG.i(job.name.toUpperCase(), "- Finished.");
-                        job.source.trySetResult(task1.getResult());
+                        LOG.i(job.name.uppercase(Locale.getDefault()), "- Finished.")
+                        job.source.trySetResult(task1.getResult())
                     }
-                    synchronized (mJobsLock) {
-                        executed(job);
+                    synchronized(mJobsLock) {
+                        executed<T?>(job)
                     }
-                });
-            } catch (Exception e) {
-                LOG.i(job.name.toUpperCase(), "- Finished with ERROR.", e);
-                if (job.dispatchExceptions) {
-                    mCallback.handleJobException(job.name, e);
                 }
-                job.source.trySetException(e);
-                synchronized (mJobsLock) {
-                    executed(job);
+            } catch (e: Exception) {
+                LOG.i(job.name.uppercase(Locale.getDefault()), "- Finished with ERROR.", e)
+                if (job.dispatchExceptions) {
+                    mCallback.handleJobException(job.name, e)
+                }
+                job.source.trySetException(e)
+                synchronized(mJobsLock) {
+                    executed<T?>(job)
                 }
             }
-        });
+        }
     }
 
     @GuardedBy("mJobsLock")
-    private <T> void executed(Job<T> job) {
-        if (!mJobRunning) {
-            throw new IllegalStateException("mJobRunning was not true after completing job=" + job.name);
-        }
-        mJobRunning = false;
-        mJobs.remove(job);
-        sync(0L);
+    private fun <T> executed(job: Job<T?>) {
+        check(mJobRunning) { "mJobRunning was not true after completing job=" + job.name }
+        mJobRunning = false
+        mJobs.remove(job)
+        sync<T>(0L)
     }
 
-    public void remove(@NonNull String name) {
-        trim(name, 0);
+    fun remove(name: String) {
+        trim(name, 0)
     }
 
-    public void trim(@NonNull String name, int allowed) {
-        synchronized (mJobsLock) {
-            List<Job<?>> scheduled = new ArrayList<>();
-            for (Job<?> job : mJobs) {
-                if (job.name.equals(name)) {
-                    scheduled.add(job);
+    fun trim(name: String, allowed: Int) {
+        synchronized(mJobsLock) {
+            var scheduled: MutableList<Job<*>?> = mutableListOf()
+            for (job in mJobs) {
+                if (job.name == name) {
+                    scheduled.add(job)
                 }
             }
-            LOG.v("trim: name=", name, "scheduled=", scheduled.size(), "allowed=", allowed);
-            int existing = Math.max(scheduled.size() - allowed, 0);
+            LOG.v("trim: name=", name, "scheduled=", scheduled.size, "allowed=", allowed)
+            val existing = max(scheduled.size - allowed, 0)
             if (existing > 0) {
                 // To remove the oldest ones first, we must reverse the list.
                 // Note that we will potentially remove a job that is being executed: we don't
                 // have a mechanism to cancel the ongoing execution, but it shouldn't be a problem.
-                Collections.reverse(scheduled);
-                scheduled = scheduled.subList(0, existing);
-                for (Job<?> job : scheduled) {
-                    mJobs.remove(job);
+                scheduled.reverse()
+                scheduled = scheduled.subList(0, existing)
+                for (job in scheduled) {
+                    mJobs.remove(job)
                 }
             }
         }
     }
 
-    public void reset() {
-        synchronized (mJobsLock) {
-            Set<String> all = new HashSet<>();
-            for (Job<?> job : mJobs) {
-                all.add(job.name);
+    fun reset() {
+        synchronized(mJobsLock) {
+            val all: MutableSet<String> = HashSet()
+            for (job in mJobs) {
+                all.add(job.name)
             }
-            for (String job : all) {
-                remove(job);
+            for (job in all) {
+                remove(job)
             }
         }
     }
 
-    public interface Callback {
-        @NonNull
-        WorkerHandler getJobWorker(@NonNull String job);
+    interface Callback {
+        fun getJobWorker(job: String): WorkerHandler
 
-        void handleJobException(@NonNull String job, @NonNull Exception exception);
+        fun handleJobException(job: String, exception: Exception)
     }
 
-    protected static class Job<T> {
-        public final String name;
-        public final TaskCompletionSource<T> source = new TaskCompletionSource<>();
-        public final Callable<Task<T>> scheduler;
-        public final boolean dispatchExceptions;
-        public final long startTime;
+    protected class Job<T>(
+        @JvmField val name: String,
+        val scheduler: Callable<Task<T?>>,
+        val dispatchExceptions: Boolean,
+        val startTime: Long
+    ) {
+        @JvmField
+        val source: TaskCompletionSource<T?> = TaskCompletionSource<T?>()
+    }
 
-        private Job(@NonNull String name, @NonNull Callable<Task<T>> scheduler, boolean dispatchExceptions, long startTime) {
-            this.name = name;
-            this.scheduler = scheduler;
-            this.dispatchExceptions = dispatchExceptions;
-            this.startTime = startTime;
+    companion object {
+        val TAG: String = CameraOrchestrator::class.java.simpleName
+
+        @JvmField
+        val LOG: CameraLogger = CameraLogger.create(TAG)
+        private fun <T> onComplete(
+            task: Task<T?>,
+            handler: WorkerHandler,
+            listener: OnCompleteListener<T?>
+        ) {
+            if (task.isComplete) {
+                handler.run { listener.onComplete(task) }
+            } else {
+                task.addOnCompleteListener(handler.executor, listener)
+            }
         }
     }
 }
