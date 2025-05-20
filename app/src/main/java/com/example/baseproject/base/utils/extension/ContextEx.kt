@@ -451,10 +451,11 @@ fun Context.downloadBitmapByUrl(
 }
 
 fun Context.isGpsEnable(): Boolean {
+    //todo: flag to open setting location source
+//    Settings.ACTION_LOCATION_SOURCE_SETTINGS
     val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-    return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && locationManager.isProviderEnabled(
-        LocationManager.NETWORK_PROVIDER
-    )
+    return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+//            && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 }
 
 @SuppressLint("MissingPermission")

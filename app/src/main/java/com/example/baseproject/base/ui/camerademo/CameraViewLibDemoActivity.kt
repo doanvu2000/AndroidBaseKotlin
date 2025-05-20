@@ -17,6 +17,7 @@ import com.base.cameraview.frame.Frame
 import com.base.cameraview.frame.FrameProcessor
 import com.example.baseproject.base.base_view.screen.BaseActivity
 import com.example.baseproject.base.utils.extension.loadSrc
+import com.example.baseproject.base.utils.extension.pretty
 import com.example.baseproject.base.utils.util.AppLogger
 import com.example.baseproject.databinding.ActivityCameraViewLibDemoBinding
 
@@ -101,6 +102,7 @@ class CameraViewLibDemoActivity : BaseActivity<ActivityCameraViewLibDemoBinding>
 
     private val frameProcessor = object : FrameProcessor {
         override fun process(frame: Frame) {
+            AppLogger.d(TAG, frame.pretty())
         }
     }
 
