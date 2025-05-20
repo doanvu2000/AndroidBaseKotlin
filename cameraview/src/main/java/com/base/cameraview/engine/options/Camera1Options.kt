@@ -1,136 +1,137 @@
-package com.base.cameraview.engine.options;
+package com.base.cameraview.engine.options
 
-import android.graphics.ImageFormat;
-import android.hardware.Camera;
-import android.media.CamcorderProfile;
+import android.graphics.ImageFormat
+import android.hardware.Camera
+import android.hardware.Camera.CameraInfo
+import com.base.cameraview.CameraOptions
+import com.base.cameraview.controls.Flash
+import com.base.cameraview.controls.Hdr
+import com.base.cameraview.controls.PictureFormat
+import com.base.cameraview.engine.mappers.Camera1Mapper.Companion.get
+import com.base.cameraview.internal.CamcorderProfiles
+import com.base.cameraview.size.AspectRatio
+import com.base.cameraview.size.Size
+import kotlin.math.max
+import kotlin.math.min
 
-import androidx.annotation.NonNull;
-
-import com.base.cameraview.CameraOptions;
-import com.base.cameraview.controls.Facing;
-import com.base.cameraview.controls.Flash;
-import com.base.cameraview.controls.Hdr;
-import com.base.cameraview.controls.PictureFormat;
-import com.base.cameraview.controls.WhiteBalance;
-import com.base.cameraview.engine.mappers.Camera1Mapper;
-import com.base.cameraview.internal.CamcorderProfiles;
-import com.base.cameraview.size.AspectRatio;
-import com.base.cameraview.size.Size;
-
-import java.util.List;
-
-public class Camera1Options extends CameraOptions {
-
-    public Camera1Options(@NonNull Camera.Parameters params, int cameraId, boolean flipSizes) {
-        List<String> strings;
-        Camera1Mapper mapper = Camera1Mapper.get();
+class Camera1Options(params: Camera.Parameters, cameraId: Int, flipSizes: Boolean) :
+    CameraOptions() {
+    init {
+        val mapper = get()
 
         // Facing
-        Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
-        for (int i = 0, count = Camera.getNumberOfCameras(); i < count; i++) {
-            Camera.getCameraInfo(i, cameraInfo);
-            Facing value = mapper.unmapFacing(cameraInfo.facing);
-            if (value != null) supportedFacing.add(value);
+        val cameraInfo = CameraInfo()
+        var i = 0
+        val count = Camera.getNumberOfCameras()
+        while (i < count) {
+            Camera.getCameraInfo(i, cameraInfo)
+            val value = mapper.unmapFacing(cameraInfo.facing)
+            if (value != null) supportedFacing.add(value)
+            i++
         }
 
         // WB
-        strings = params.getSupportedWhiteBalance();
+        var strings = params.supportedWhiteBalance
         if (strings != null) {
-            for (String string : strings) {
-                WhiteBalance value = mapper.unmapWhiteBalance(string);
-                if (value != null) supportedWhiteBalance.add(value);
+            for (string in strings) {
+                val value = mapper.unmapWhiteBalance(string)
+                if (value != null) supportedWhiteBalance.add(value)
             }
         }
 
         // Flash
-        supportedFlash.add(Flash.OFF);
-        strings = params.getSupportedFlashModes();
+        supportedFlash.add(Flash.OFF)
+        strings = params.supportedFlashModes
         if (strings != null) {
-            for (String string : strings) {
-                Flash value = mapper.unmapFlash(string);
-                if (value != null) supportedFlash.add(value);
+            for (string in strings) {
+                val value = mapper.unmapFlash(string)
+                if (value != null) supportedFlash.add(value)
             }
         }
 
         // Hdr
-        supportedHdr.add(Hdr.OFF);
-        strings = params.getSupportedSceneModes();
+        supportedHdr.add(Hdr.OFF)
+        strings = params.supportedSceneModes
         if (strings != null) {
-            for (String string : strings) {
-                Hdr value = mapper.unmapHdr(string);
-                if (value != null) supportedHdr.add(value);
+            for (string in strings) {
+                val value = mapper.unmapHdr(string)
+                if (value != null) supportedHdr.add(value)
             }
         }
 
         // zoom
-        zoomSupported = params.isZoomSupported();
+        zoomSupported = params.isZoomSupported
 
         // autofocus
-        autoFocusSupported = params.getSupportedFocusModes()
-                .contains(Camera.Parameters.FOCUS_MODE_AUTO);
+        autoFocusSupported = params.supportedFocusModes
+            .contains(Camera.Parameters.FOCUS_MODE_AUTO)
 
         // Exposure correction
-        float step = params.getExposureCompensationStep();
-        exposureCorrectionMinValue = (float) params.getMinExposureCompensation() * step;
-        exposureCorrectionMaxValue = (float) params.getMaxExposureCompensation() * step;
-        exposureCorrectionSupported = params.getMinExposureCompensation() != 0
-                || params.getMaxExposureCompensation() != 0;
+        val step = params.exposureCompensationStep
+        exposureCorrectionMinValue = params.minExposureCompensation.toFloat() * step
+        exposureCorrectionMaxValue = params.maxExposureCompensation.toFloat() * step
+        exposureCorrectionSupported = params.minExposureCompensation != 0
+                || params.maxExposureCompensation != 0
 
         // Picture Sizes
-        List<Camera.Size> sizes = params.getSupportedPictureSizes();
-        for (Camera.Size size : sizes) {
-            int width = flipSizes ? size.height : size.width;
-            int height = flipSizes ? size.width : size.height;
-            supportedPictureSizes.add(new Size(width, height));
-            supportedPictureAspectRatio.add(AspectRatio.of(width, height));
+        val sizes = params.supportedPictureSizes
+        for (size in sizes) {
+            val width = if (flipSizes) size.height else size.width
+            val height = if (flipSizes) size.width else size.height
+            supportedPictureSizes.add(Size(width, height))
+            supportedPictureAspectRatio.add(AspectRatio.of(width, height))
         }
 
         // Video Sizes
         // As a safety measure, remove Sizes bigger than CamcorderProfile.highest
-        CamcorderProfile profile = CamcorderProfiles.get(cameraId,
-                new Size(Integer.MAX_VALUE, Integer.MAX_VALUE));
-        Size videoMaxSize = new Size(profile.videoFrameWidth, profile.videoFrameHeight);
-        List<Camera.Size> vsizes = params.getSupportedVideoSizes();
+        val profile = CamcorderProfiles.get(
+            cameraId,
+            Size(Int.Companion.MAX_VALUE, Int.Companion.MAX_VALUE)
+        )
+        val videoMaxSize = Size(profile.videoFrameWidth, profile.videoFrameHeight)
+        val vsizes = params.supportedVideoSizes
         if (vsizes != null) {
-            for (Camera.Size size : vsizes) {
-                if (size.width <= videoMaxSize.getWidth()
-                        && size.height <= videoMaxSize.getHeight()) {
-                    int width = flipSizes ? size.height : size.width;
-                    int height = flipSizes ? size.width : size.height;
-                    supportedVideoSizes.add(new Size(width, height));
-                    supportedVideoAspectRatio.add(AspectRatio.of(width, height));
+            for (size in vsizes) {
+                if (size.width <= videoMaxSize.width
+                    && size.height <= videoMaxSize.height
+                ) {
+                    val width = if (flipSizes) size.height else size.width
+                    val height = if (flipSizes) size.width else size.height
+                    supportedVideoSizes.add(Size(width, height))
+                    supportedVideoAspectRatio.add(AspectRatio.of(width, height))
                 }
             }
         } else {
             // StackOverflow threads seems to agree that if getSupportedVideoSizes is null,
             // previews can be used.
-            List<Camera.Size> fallback = params.getSupportedPreviewSizes();
-            for (Camera.Size size : fallback) {
-                if (size.width <= videoMaxSize.getWidth()
-                        && size.height <= videoMaxSize.getHeight()) {
-                    int width = flipSizes ? size.height : size.width;
-                    int height = flipSizes ? size.width : size.height;
-                    supportedVideoSizes.add(new Size(width, height));
-                    supportedVideoAspectRatio.add(AspectRatio.of(width, height));
+            val fallback = params.supportedPreviewSizes
+            for (size in fallback) {
+                if (size.width <= videoMaxSize.width
+                    && size.height <= videoMaxSize.height
+                ) {
+                    val width = if (flipSizes) size.height else size.width
+                    val height = if (flipSizes) size.width else size.height
+                    supportedVideoSizes.add(Size(width, height))
+                    supportedVideoAspectRatio.add(AspectRatio.of(width, height))
                 }
             }
         }
 
         // Preview FPS
-        previewFrameRateMinValue = Float.MAX_VALUE;
-        previewFrameRateMaxValue = -Float.MAX_VALUE;
-        List<int[]> fpsRanges = params.getSupportedPreviewFpsRange();
-        for (int[] fpsRange : fpsRanges) {
-            float lower = (float) fpsRange[0] / 1000F;
-            float upper = (float) fpsRange[1] / 1000F;
-            previewFrameRateMinValue = Math.min(previewFrameRateMinValue, lower);
-            previewFrameRateMaxValue = Math.max(previewFrameRateMaxValue, upper);
+        previewFrameRateMinValue = Float.Companion.MAX_VALUE
+        previewFrameRateMaxValue = -Float.Companion.MAX_VALUE
+        val fpsRanges = params.supportedPreviewFpsRange
+        for (fpsRange in fpsRanges) {
+            val lower = fpsRange[0].toFloat() / 1000f
+            val upper = fpsRange[1].toFloat() / 1000f
+            previewFrameRateMinValue = min(previewFrameRateMinValue, lower)
+            previewFrameRateMaxValue = max(previewFrameRateMaxValue, upper)
         }
 
         // Picture formats
-        supportedPictureFormats.add(PictureFormat.JPEG);
+        supportedPictureFormats.add(PictureFormat.JPEG)
 
         // Frame processing formats
-        supportedFrameProcessingFormats.add(ImageFormat.NV21);
+        supportedFrameProcessingFormats.add(ImageFormat.NV21)
     }
 }
