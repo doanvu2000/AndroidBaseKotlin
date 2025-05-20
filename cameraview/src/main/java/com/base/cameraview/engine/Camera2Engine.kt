@@ -280,8 +280,11 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
 
     //endregion
     //region Protected APIs
+    override val previewStreamAvailableSizes: MutableList<Size>
+        get() = getPreviewStreamAvailableSizesEngine2()
+
     @EngineThread
-    override fun getPreviewStreamAvailableSizes(): MutableList<Size?> {
+    private fun getPreviewStreamAvailableSizesEngine2(): MutableList<Size> {
         try {
             val characteristics = mManager.getCameraCharacteristics(mCameraId!!)
             val streamMap =
@@ -291,8 +294,8 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
             }
             // This works because our previews return either a SurfaceTexture or a SurfaceHolder,
             // which are accepted class types by the getOutputSizes method.
-            val sizes = streamMap.getOutputSizes(mPreview.getOutputClass())
-            val candidates: MutableList<Size?> = ArrayList(sizes.size)
+            val sizes = streamMap.getOutputSizes(mPreview?.getOutputClass())
+            val candidates: MutableList<Size> = ArrayList(sizes.size)
             for (size in sizes) {
                 val add = Size(size.width, size.height)
                 if (!candidates.contains(add)) candidates.add(add)
@@ -306,8 +309,11 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
         return ArrayList()
     }
 
+    override val frameProcessingAvailableSizes: MutableList<Size>
+        get() = getFrameProcessingAvailableSizesEngine2()
+
     @EngineThread
-    override fun getFrameProcessingAvailableSizes(): MutableList<Size?> {
+    private fun getFrameProcessingAvailableSizesEngine2(): MutableList<Size> {
         try {
             val characteristics = mManager.getCameraCharacteristics(mCameraId!!)
             val streamMap =
@@ -316,7 +322,7 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
                 throw RuntimeException("StreamConfigurationMap is null. Should not happen.")
             }
             val sizes = streamMap.getOutputSizes(mFrameProcessingFormat)
-            val candidates: MutableList<Size?> = ArrayList(sizes.size)
+            val candidates: MutableList<Size> = ArrayList(sizes.size)
             for (size in sizes) {
                 val add = Size(size.width, size.height)
                 if (!candidates.contains(add)) candidates.add(add)
@@ -401,6 +407,7 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
                         val format = when (mPictureFormat) {
                             PictureFormat.JPEG -> ImageFormat.JPEG
                             PictureFormat.DNG -> ImageFormat.RAW_SENSOR
+                            null -> ImageFormat.JPEG
                         }
                         mCameraOptions = Camera2Options(mManager, mCameraId!!, flip, format)
                         createRepeatingRequestBuilder(this@Camera2Engine.repeatingRequestDefaultTemplate)
@@ -468,8 +475,8 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
 
         // 1. PREVIEW
         // Create a preview surface with the correct size.
-        val outputClass = mPreview.getOutputClass()
-        val output = mPreview.getOutput()
+        val outputClass = mPreview?.getOutputClass()
+        val output = mPreview?.getOutput()
         when (outputClass) {
             SurfaceHolder::class.java -> {
                 try {
@@ -478,9 +485,11 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
                     @Suppress("DEPRECATION", "UNCHECKED_CAST") Tasks.await(
                         Tasks.call<Void?>(
                             Callable {
-                                (output as SurfaceHolder).setFixedSize(
-                                    mPreviewStreamSize.width, mPreviewStreamSize.height
-                                )
+                                mPreviewStreamSize?.let {
+                                    (output as SurfaceHolder).setFixedSize(
+                                        mPreviewStreamSize!!.width, mPreviewStreamSize!!.height
+                                    )
+                                }
                                 null
                             } as Callable<Void?>))
                 } catch (e: ExecutionException) {
@@ -495,9 +504,11 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
 
             SurfaceTexture::class.java -> {
                 try {
-                    (output as SurfaceTexture).setDefaultBufferSize(
-                        mPreviewStreamSize.width, mPreviewStreamSize.height
-                    )
+                    mPreviewStreamSize?.let {
+                        (output as SurfaceTexture).setDefaultBufferSize(
+                            it.width, it.height
+                        )
+                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -531,10 +542,13 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
             val format = when (mPictureFormat) {
                 PictureFormat.JPEG -> ImageFormat.JPEG
                 PictureFormat.DNG -> ImageFormat.RAW_SENSOR
+                else -> ImageFormat.JPEG
             }
-            mPictureReader = ImageReader.newInstance(
-                mCaptureSize.width, mCaptureSize.height, format, 2
-            )
+            mCaptureSize?.let {
+                mPictureReader = ImageReader.newInstance(
+                    it.width, it.height, format, 2
+                )
+            }
             outputSurfaces.add(mPictureReader!!.surface)
         }
 
@@ -549,12 +563,11 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
             // This is a design flaw in the ImageReader / sensor implementation, as they should
             // simply DROP frames written to the surface if there are no Images available.
             // Since this is not how things work, we ensure that one Image is always available here.
-            mFrameProcessingReader = ImageReader.newInstance(
-                mFrameProcessingSize.width,
-                mFrameProcessingSize.height,
-                mFrameProcessingFormat,
-                frameProcessingPoolSize + 1
-            )
+            mFrameProcessingSize?.let {
+                mFrameProcessingReader = ImageReader.newInstance(
+                    it.width, it.height, mFrameProcessingFormat, frameProcessingPoolSize + 1
+                )
+            }
             mFrameProcessingReader!!.setOnImageAvailableListener(this, null)
             mFrameProcessingSurface = mFrameProcessingReader!!.surface
             outputSurfaces.add(mFrameProcessingSurface)
@@ -610,10 +623,10 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
 
         val previewSizeForView = getPreviewStreamSize(Reference.VIEW)
         checkNotNull(previewSizeForView) { "previewStreamSize should not be null at this point." }
-        mPreview.setStreamSize(previewSizeForView.width, previewSizeForView.height)
-        mPreview.setDrawRotation(angles.offset(Reference.BASE, Reference.VIEW, Axis.ABSOLUTE))
-        if (hasFrameProcessors()) {
-            getFrameManager().setUp(mFrameProcessingFormat, mFrameProcessingSize, angles)
+        mPreview?.setStreamSize(previewSizeForView.width, previewSizeForView.height)
+        mPreview?.setDrawRotation(angles.offset(Reference.BASE, Reference.VIEW, Axis.ABSOLUTE))
+        if (hasFrameProcessors() && mFrameProcessingSize != null) {
+            getFrameManager().setUp(mFrameProcessingFormat, mFrameProcessingSize!!, angles)
         }
 
         LOG.i("onStartPreview:", "Starting preview.")
@@ -654,7 +667,7 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
         if (mVideoRecorder != null) {
             // This should synchronously call onVideoResult that will reset the repeating builder
             // to the PREVIEW template. This is very important.
-            mVideoRecorder.stop(true)
+            mVideoRecorder?.stop(true)
             mVideoRecorder = null
         }
         mPictureRecorder = null
@@ -762,7 +775,7 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
             mPictureRecorder = Snapshot2PictureRecorder(
                 stub, this, (mPreview as RendererCameraPreview?)!!, outputRatio
             )
-            mPictureRecorder.take()
+            mPictureRecorder?.take()
         }
     }
 
@@ -798,7 +811,7 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
                 val builder = mCamera!!.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)
                 applyAllParameters(builder, mRepeatingRequestBuilder)
                 mPictureRecorder = Full2PictureRecorder(stub, this, builder, mPictureReader!!)
-                mPictureRecorder.take()
+                mPictureRecorder?.take()
             } catch (e: CameraAccessException) {
                 throw createCameraException(e)
             } catch (e: Exception) {
@@ -831,12 +844,11 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
     @EngineThread
     override fun onTakeVideo(stub: VideoResult.Stub) {
         LOG.i("onTakeVideo", "called.")
-        stub.rotation =
-            angles.offset(Reference.SENSOR, Reference.OUTPUT, Axis.RELATIVE_TO_SENSOR)
+        stub.rotation = angles.offset(Reference.SENSOR, Reference.OUTPUT, Axis.RELATIVE_TO_SENSOR)
         stub.size = if (angles.flip(
                 Reference.SENSOR, Reference.OUTPUT
             )
-        ) mCaptureSize.flip() else mCaptureSize
+        ) mCaptureSize?.flip() else mCaptureSize
         // We must restart the session at each time.
         // Save the pending data and restart the session.
         LOG.w("onTakeVideo", "calling restartBind.")
@@ -853,7 +865,7 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
             createRepeatingRequestBuilder(CameraDevice.TEMPLATE_RECORD)
             addRepeatingRequestBuilderSurfaces((mVideoRecorder as Full2VideoRecorder).inputSurface!!)
             applyRepeatingRequestBuilder(true, CameraException.REASON_DISCONNECTED)
-            mVideoRecorder.start(stub)
+            mVideoRecorder?.start(stub)
         } catch (e: CameraAccessException) {
             onVideoResult(null, e)
             throw createCameraException(e)
@@ -879,7 +891,7 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
         LOG.i("onTakeVideoSnapshot", "rotation:", stub.rotation, "size:", stub.size)
         mVideoRecorder = SnapshotVideoRecorder(this, mPreview as RendererCameraPreview, overlay)
         try {
-            mVideoRecorder.start(stub)
+            mVideoRecorder?.start(stub)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -974,12 +986,10 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
             // metering parameters. Copy these special keys over to the new builder.
             // These are the keys changed by metering.Parameters, or by us in applyFocusForMetering.
             builder.set(
-                CaptureRequest.CONTROL_AF_REGIONS,
-                oldBuilder.get(CaptureRequest.CONTROL_AF_REGIONS)
+                CaptureRequest.CONTROL_AF_REGIONS, oldBuilder.get(CaptureRequest.CONTROL_AF_REGIONS)
             )
             builder.set(
-                CaptureRequest.CONTROL_AE_REGIONS,
-                oldBuilder.get(CaptureRequest.CONTROL_AE_REGIONS)
+                CaptureRequest.CONTROL_AE_REGIONS, oldBuilder.get(CaptureRequest.CONTROL_AE_REGIONS)
             )
             builder.set(
                 CaptureRequest.CONTROL_AWB_REGIONS,
@@ -1067,26 +1077,28 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
         mFlashTask = orchestrator.scheduleStateful(
             "flash ($flash)", CameraState.ENGINE
         ) {
-            val shouldApply = applyFlash(mRepeatingRequestBuilder!!, old)
-            val needsWorkaround = state == CameraState.PREVIEW
-            if (needsWorkaround) {
-                // Runtime changes to the flash value are not correctly handled by the
-                // driver. See https://stackoverflow.com/q/53003383/4288782 for example.
-                // For this reason, we go back to OFF, capture once, then go to the new one.
-                mFlash = Flash.OFF
-                applyFlash(mRepeatingRequestBuilder!!, old)
-                try {
-                    mSession!!.capture(mRepeatingRequestBuilder!!.build(), null, null)
-                } catch (e: CameraAccessException) {
-                    throw createCameraException(e)
-                } catch (e: Exception) {
-                    throw CameraException(e, CameraException.REASON_UNKNOWN)
+            old?.let {
+                val shouldApply = applyFlash(mRepeatingRequestBuilder!!, old)
+                val needsWorkaround = state == CameraState.PREVIEW
+                if (needsWorkaround) {
+                    // Runtime changes to the flash value are not correctly handled by the
+                    // driver. See https://stackoverflow.com/q/53003383/4288782 for example.
+                    // For this reason, we go back to OFF, capture once, then go to the new one.
+                    mFlash = Flash.OFF
+                    applyFlash(mRepeatingRequestBuilder!!, old)
+                    try {
+                        mSession!!.capture(mRepeatingRequestBuilder!!.build(), null, null)
+                    } catch (e: CameraAccessException) {
+                        throw createCameraException(e)
+                    } catch (e: Exception) {
+                        throw CameraException(e, CameraException.REASON_UNKNOWN)
+                    }
+                    mFlash = flash
+                    applyFlash(mRepeatingRequestBuilder!!, old)
+                    applyRepeatingRequestBuilder()
+                } else if (shouldApply) {
+                    applyRepeatingRequestBuilder()
                 }
-                mFlash = flash
-                applyFlash(mRepeatingRequestBuilder!!, old)
-                applyRepeatingRequestBuilder()
-            } else if (shouldApply) {
-                applyRepeatingRequestBuilder()
             }
         }
     }
@@ -1112,7 +1124,10 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
      * distinguish between a turned off flash and a torch flash.
      */
     private fun applyFlash(builder: CaptureRequest.Builder, oldFlash: Flash): Boolean {
-        if (mCameraOptions.supports(mFlash)) {
+        if (mCameraOptions == null || mFlash == null) {
+            return false
+        }
+        if (mCameraOptions!!.supports(mFlash!!)) {
             val availableAeModesArray = readCharacteristic<IntArray?>(
                 CameraCharacteristics.CONTROL_AE_AVAILABLE_MODES, intArrayOf()
             )!!
@@ -1120,7 +1135,7 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
             for (mode in availableAeModesArray) {
                 availableAeModes.add(mode)
             }
-            val pairs: MutableList<Pair<Int?, Int?>> = mMapper.mapFlash(mFlash)
+            val pairs: MutableList<Pair<Int?, Int?>> = mMapper.mapFlash(mFlash!!)
             for (pair in pairs) {
                 if (availableAeModes.contains(pair.first)) {
                     LOG.i("applyFlash: setting CONTROL_AE_MODE to", pair.first)
@@ -1138,15 +1153,14 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
     override fun setLocation(location: Location?) {
         val old = mLocation
         mLocation = location
-        mLocationTask =
-            orchestrator.scheduleStateful("location", CameraState.ENGINE) {
-                if (applyLocation(
-                        mRepeatingRequestBuilder!!, old
-                    )
-                ) {
-                    applyRepeatingRequestBuilder()
-                }
+        mLocationTask = orchestrator.scheduleStateful("location", CameraState.ENGINE) {
+            if (applyLocation(
+                    mRepeatingRequestBuilder!!, old
+                )
+            ) {
+                applyRepeatingRequestBuilder()
             }
+        }
     }
 
     private fun applyLocation(
@@ -1164,11 +1178,13 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
         mWhiteBalanceTask = orchestrator.scheduleStateful(
             "white balance ($whiteBalance)", CameraState.ENGINE
         ) {
-            if (applyWhiteBalance(
-                    mRepeatingRequestBuilder!!, old
-                )
-            ) {
-                applyRepeatingRequestBuilder()
+            old?.let {
+                if (applyWhiteBalance(
+                        mRepeatingRequestBuilder!!, old
+                    )
+                ) {
+                    applyRepeatingRequestBuilder()
+                }
             }
         }
     }
@@ -1176,8 +1192,11 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
     private fun applyWhiteBalance(
         builder: CaptureRequest.Builder, oldWhiteBalance: WhiteBalance
     ): Boolean {
-        if (mCameraOptions.supports(mWhiteBalance)) {
-            val whiteBalance = mMapper.mapWhiteBalance(mWhiteBalance)
+        if (mCameraOptions == null || mWhiteBalance == null) {
+            return false
+        }
+        if (mCameraOptions!!.supports(mWhiteBalance!!)) {
+            val whiteBalance = mMapper.mapWhiteBalance(mWhiteBalance!!)
             builder.set(CaptureRequest.CONTROL_AWB_MODE, whiteBalance)
             return true
         }
@@ -1186,22 +1205,27 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
     }
 
     override fun setHdr(hdr: Hdr) {
+        if (mHdr == null) {
+            return
+        }
         val old = mHdr
         mHdr = hdr
-        mHdrTask =
-            orchestrator.scheduleStateful("hdr ($hdr)", CameraState.ENGINE) {
-                if (applyHdr(
-                        mRepeatingRequestBuilder!!, old
-                    )
-                ) {
-                    applyRepeatingRequestBuilder()
-                }
+        mHdrTask = orchestrator.scheduleStateful("hdr ($hdr)", CameraState.ENGINE) {
+            if (applyHdr(
+                    mRepeatingRequestBuilder!!, old!!
+                )
+            ) {
+                applyRepeatingRequestBuilder()
             }
+        }
     }
 
     private fun applyHdr(builder: CaptureRequest.Builder, oldHdr: Hdr): Boolean {
-        if (mCameraOptions.supports(mHdr)) {
-            val hdr = mMapper.mapHdr(mHdr)
+        if (mCameraOptions == null || mHdr == null) {
+            return false
+        }
+        if (mCameraOptions!!.supports(mHdr!!)) {
+            val hdr = mMapper.mapHdr(mHdr!!)
             builder.set(CaptureRequest.CONTROL_SCENE_MODE, hdr)
             return true
         }
@@ -1228,7 +1252,7 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
     }
 
     private fun applyZoom(builder: CaptureRequest.Builder, oldZoom: Float): Boolean {
-        if (mCameraOptions.isZoomSupported) {
+        if (mCameraOptions?.isZoomSupported == true) {
             val maxZoom = readCharacteristic<Float?>(
                 CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM, 1f
             )!!
@@ -1282,7 +1306,7 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
     private fun applyExposureCorrection(
         builder: CaptureRequest.Builder, oldEValue: Float
     ): Boolean {
-        if (mCameraOptions.isExposureCorrectionSupported) {
+        if (mCameraOptions?.isExposureCorrectionSupported == true) {
             val exposureCorrectionStep = readCharacteristic(
                 CameraCharacteristics.CONTROL_AE_COMPENSATION_STEP, Rational(1, 1)
             )
@@ -1334,12 +1358,16 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
             }
         } else {
             // If out of boundaries, adjust it.
-            mPreviewFrameRate = min(mPreviewFrameRate, mCameraOptions.getPreviewFrameRateMaxValue())
-            mPreviewFrameRate = max(mPreviewFrameRate, mCameraOptions.getPreviewFrameRateMinValue())
-            for (fpsRange in filterFrameRateRanges(fpsRanges)) {
-                if (fpsRange.contains(mPreviewFrameRate.roundToInt())) {
-                    builder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fpsRange)
-                    return true
+            mCameraOptions?.let {
+                mPreviewFrameRate =
+                    min(mPreviewFrameRate, mCameraOptions!!.getPreviewFrameRateMaxValue())
+                mPreviewFrameRate =
+                    max(mPreviewFrameRate, mCameraOptions!!.getPreviewFrameRateMinValue())
+                for (fpsRange in filterFrameRateRanges(fpsRanges)) {
+                    if (fpsRange.contains(mPreviewFrameRate.roundToInt())) {
+                        builder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fpsRange)
+                        return true
+                    }
                 }
             }
         }
@@ -1361,8 +1389,13 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
 
     private fun filterFrameRateRanges(fpsRanges: Array<Range<Int>>): MutableList<Range<Int>> {
         val results: MutableList<Range<Int>> = ArrayList()
-        val min = mCameraOptions.getPreviewFrameRateMinValue().roundToInt()
-        val max = mCameraOptions.getPreviewFrameRateMaxValue().roundToInt()
+
+        if (mCameraOptions == null) {
+            return mutableListOf()
+        }
+
+        val min = mCameraOptions!!.getPreviewFrameRateMinValue().roundToInt()
+        val max = mCameraOptions!!.getPreviewFrameRateMaxValue().roundToInt()
         for (fpsRange in fpsRanges) {
             if (!fpsRange.contains(min) && !fpsRange.contains(max)) continue
             if (!FpsRangeValidator.validate(fpsRange)) continue
@@ -1401,7 +1434,10 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
             LOG.w("onImageAvailable:", "failed to acquire Image!")
         } else if (state == CameraState.PREVIEW && !isChangingState) {
             // After preview, the frame manager is correctly set up
-            val frame = getFrameManager().getFrame(image, System.currentTimeMillis())
+            val frame = (getFrameManager() as FrameManager<Image>).getFrame(
+                image,
+                System.currentTimeMillis()
+            )
             if (frame != null) {
                 LOG.v("onImageAvailable:", "Image acquired, dispatching.")
                 callback.dispatchFrame(frame)
@@ -1464,7 +1500,8 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
         ) {
             // The camera options API still has the auto focus API but it really
             // refers to "3A metering to a specific point". Since we have a point, check.
-            if (!mCameraOptions.isAutoFocusSupported) return@scheduleStateful
+            if (mCameraOptions == null) return@scheduleStateful
+            if (!mCameraOptions!!.isAutoFocusSupported) return@scheduleStateful
 
             // Create the meter and start.
             callback.dispatchOnFocusStart(gesture, legacyPoint)

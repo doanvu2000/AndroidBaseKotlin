@@ -1,364 +1,276 @@
-package com.base.cameraview.engine;
+package com.base.cameraview.engine
 
-import android.location.Location;
-
-import androidx.annotation.CallSuper;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
-
-import com.base.cameraview.CameraException;
-import com.base.cameraview.CameraOptions;
-import com.base.cameraview.PictureResult;
-import com.base.cameraview.VideoResult;
-import com.base.cameraview.controls.Audio;
-import com.base.cameraview.controls.AudioCodec;
-import com.base.cameraview.controls.Facing;
-import com.base.cameraview.controls.Flash;
-import com.base.cameraview.controls.Hdr;
-import com.base.cameraview.controls.Mode;
-import com.base.cameraview.controls.PictureFormat;
-import com.base.cameraview.controls.VideoCodec;
-import com.base.cameraview.controls.WhiteBalance;
-import com.base.cameraview.engine.offset.Angles;
-import com.base.cameraview.engine.offset.Reference;
-import com.base.cameraview.engine.orchestrator.CameraState;
-import com.base.cameraview.frame.FrameManager;
-import com.base.cameraview.overlay.Overlay;
-import com.base.cameraview.picture.PictureRecorder;
-import com.base.cameraview.preview.CameraPreview;
-import com.base.cameraview.size.AspectRatio;
-import com.base.cameraview.size.Size;
-import com.base.cameraview.size.SizeSelector;
-import com.base.cameraview.size.SizeSelectors;
-import com.base.cameraview.video.VideoRecorder;
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
-
-import java.io.File;
-import java.io.FileDescriptor;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
+import android.location.Location
+import androidx.annotation.CallSuper
+import androidx.annotation.VisibleForTesting
+import com.base.cameraview.CameraException
+import com.base.cameraview.CameraOptions
+import com.base.cameraview.PictureResult
+import com.base.cameraview.VideoResult
+import com.base.cameraview.controls.Audio
+import com.base.cameraview.controls.AudioCodec
+import com.base.cameraview.controls.Facing
+import com.base.cameraview.controls.Flash
+import com.base.cameraview.controls.Hdr
+import com.base.cameraview.controls.Mode
+import com.base.cameraview.controls.PictureFormat
+import com.base.cameraview.controls.VideoCodec
+import com.base.cameraview.controls.WhiteBalance
+import com.base.cameraview.engine.offset.Angles
+import com.base.cameraview.engine.offset.Reference
+import com.base.cameraview.engine.orchestrator.CameraState
+import com.base.cameraview.frame.FrameManager
+import com.base.cameraview.overlay.Overlay
+import com.base.cameraview.picture.PictureRecorder
+import com.base.cameraview.preview.CameraPreview
+import com.base.cameraview.size.AspectRatio
+import com.base.cameraview.size.Size
+import com.base.cameraview.size.SizeSelector
+import com.base.cameraview.size.SizeSelectors
+import com.base.cameraview.video.VideoRecorder
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
+import java.io.File
+import java.io.FileDescriptor
+import kotlin.math.floor
+import kotlin.math.min
 
 /**
- * Abstract implementation of {@link CameraEngine} that helps in common tasks.
+ * Abstract implementation of [CameraEngine] that helps in common tasks.
  */
-public abstract class CameraBaseEngine extends CameraEngine {
+abstract class CameraBaseEngine protected constructor(callback: Callback) : CameraEngine(callback) {
+    private val mAngles = Angles()
+    protected var mPreview: CameraPreview<*, *>? = null
+    protected var mCameraOptions: CameraOptions? = null
+    protected var mPictureRecorder: PictureRecorder? = null
+    protected var mVideoRecorder: VideoRecorder? = null
+    protected var mCaptureSize: Size? = null
+    protected var mPreviewStreamSize: Size? = null
+    protected var mFrameProcessingSize: Size? = null
+    protected var mFrameProcessingFormat: Int = 0
+    protected var mHasFrameProcessors: Boolean = false
+    protected var mFlash: Flash? = null
+    protected var mWhiteBalance: WhiteBalance? = null
+    protected var mVideoCodec: VideoCodec? = null
+    protected var mAudioCodec: AudioCodec? = null
+    protected var mHdr: Hdr? = null
+    protected var mPictureFormat: PictureFormat? = null
+    protected var mLocation: Location? = null
+    protected var mZoomValue: Float = 0f
+    protected var mExposureCorrectionValue: Float = 0f
+    protected var mPlaySounds: Boolean = false
+    protected var mPictureMetering: Boolean = false
+    protected var mPictureSnapshotMetering: Boolean = false
+    protected var mPreviewFrameRate: Float = 0f
 
-    protected final static int ALLOWED_ZOOM_OPS = 20;
-    protected final static int ALLOWED_EV_OPS = 20;
-    private final Angles mAngles = new Angles();
-    @SuppressWarnings("WeakerAccess")
-    protected CameraPreview mPreview;
-    @SuppressWarnings("WeakerAccess")
-    protected CameraOptions mCameraOptions;
-    @SuppressWarnings("WeakerAccess")
-    protected PictureRecorder mPictureRecorder;
-    @SuppressWarnings("WeakerAccess")
-    protected VideoRecorder mVideoRecorder;
-    @SuppressWarnings("WeakerAccess")
-    protected Size mCaptureSize;
-    @SuppressWarnings("WeakerAccess")
-    protected Size mPreviewStreamSize;
-    @SuppressWarnings("WeakerAccess")
-    protected Size mFrameProcessingSize;
-    @SuppressWarnings("WeakerAccess")
-    protected int mFrameProcessingFormat;
-    @SuppressWarnings("WeakerAccess")
-    protected boolean mHasFrameProcessors;
-    @SuppressWarnings("WeakerAccess")
-    protected Flash mFlash;
-    @SuppressWarnings("WeakerAccess")
-    protected WhiteBalance mWhiteBalance;
-    @SuppressWarnings("WeakerAccess")
-    protected VideoCodec mVideoCodec;
-    @SuppressWarnings("WeakerAccess")
-    protected AudioCodec mAudioCodec;
-    @SuppressWarnings("WeakerAccess")
-    protected Hdr mHdr;
-    @SuppressWarnings("WeakerAccess")
-    protected PictureFormat mPictureFormat;
-    @SuppressWarnings("WeakerAccess")
-    protected Location mLocation;
-    @SuppressWarnings("WeakerAccess")
-    protected float mZoomValue;
-    @SuppressWarnings("WeakerAccess")
-    protected float mExposureCorrectionValue;
-    @SuppressWarnings("WeakerAccess")
-    protected boolean mPlaySounds;
-    @SuppressWarnings("WeakerAccess")
-    protected boolean mPictureMetering;
-    @SuppressWarnings("WeakerAccess")
-    protected boolean mPictureSnapshotMetering;
-    @SuppressWarnings("WeakerAccess")
-    protected float mPreviewFrameRate;
     // Ops used for testing.
-    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-    Task<Void> mZoomTask
-            = Tasks.forResult(null);
-    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-    Task<Void> mExposureCorrectionTask
-            = Tasks.forResult(null);
-    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-    Task<Void> mFlashTask
-            = Tasks.forResult(null);
-    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-    Task<Void> mWhiteBalanceTask
-            = Tasks.forResult(null);
-    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-    Task<Void> mHdrTask
-            = Tasks.forResult(null);
-    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-    Task<Void> mLocationTask
-            = Tasks.forResult(null);
-    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-    Task<Void> mPlaySoundsTask
-            = Tasks.forResult(null);
-    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-    Task<Void> mPreviewFrameRateTask
-            = Tasks.forResult(null);
-    @SuppressWarnings("WeakerAccess")
-    private boolean mPreviewFrameRateExact;
-    private FrameManager mFrameManager;
-    @Nullable
-    private SizeSelector mPreviewStreamSizeSelector;
-    private SizeSelector mPictureSizeSelector;
-    private SizeSelector mVideoSizeSelector;
-    private Facing mFacing;
-    private Mode mMode;
-    private Audio mAudio;
-    private long mVideoMaxSize;
-    private int mVideoMaxDuration;
-    private int mVideoBitRate;
-    private int mAudioBitRate;
-    private long mAutoFocusResetDelayMillis;
-    private int mSnapshotMaxWidth; // in REF_VIEW like SizeSelectors
-    private int mSnapshotMaxHeight; // in REF_VIEW like SizeSelectors
-    private int mFrameProcessingMaxWidth; // in REF_VIEW like SizeSelectors
-    private int mFrameProcessingMaxHeight; // in REF_VIEW like SizeSelectors
-    private int mFrameProcessingPoolSize;
-    private Overlay mOverlay;
+    @VisibleForTesting(otherwise = VisibleForTesting.Companion.PROTECTED)
+    var mZoomTask: Task<Void?> = Tasks.forResult<Void?>(null)
 
-    @SuppressWarnings("WeakerAccess")
-    protected CameraBaseEngine(@NonNull Callback callback) {
-        super(callback);
-    }
+    @VisibleForTesting(otherwise = VisibleForTesting.Companion.PROTECTED)
+    var mExposureCorrectionTask: Task<Void?> = Tasks.forResult<Void?>(null)
+
+    @VisibleForTesting(otherwise = VisibleForTesting.Companion.PROTECTED)
+    var mFlashTask: Task<Void?> = Tasks.forResult<Void?>(null)
+
+    @VisibleForTesting(otherwise = VisibleForTesting.Companion.PROTECTED)
+    var mWhiteBalanceTask: Task<Void?> = Tasks.forResult<Void?>(null)
+
+    @VisibleForTesting(otherwise = VisibleForTesting.Companion.PROTECTED)
+    var mHdrTask: Task<Void?> = Tasks.forResult<Void?>(null)
+
+    @VisibleForTesting(otherwise = VisibleForTesting.Companion.PROTECTED)
+    var mLocationTask: Task<Void?> = Tasks.forResult<Void?>(null)
+
+    @VisibleForTesting(otherwise = VisibleForTesting.Companion.PROTECTED)
+    var mPlaySoundsTask: Task<Void?> = Tasks.forResult<Void?>(null)
+
+    @VisibleForTesting(otherwise = VisibleForTesting.Companion.PROTECTED)
+    var mPreviewFrameRateTask: Task<Void?> = Tasks.forResult<Void?>(null)
+    private var mPreviewFrameRateExact = false
+    private var mFrameManager: FrameManager<*>? = null
+    private var mPreviewStreamSizeSelector: SizeSelector? = null
+    private var mPictureSizeSelector: SizeSelector? = null
+    private var mVideoSizeSelector: SizeSelector? = null
+    private var mFacing: Facing? = null
+    private var mMode: Mode? = null
+    private var mAudio: Audio? = null
+    private var mVideoMaxSize: Long = 0
+    private var mVideoMaxDuration = 0
+    private var mVideoBitRate = 0
+    private var mAudioBitRate = 0
+    private var mAutoFocusResetDelayMillis: Long = 0
+    private var mSnapshotMaxWidth = 0 // in REF_VIEW like SizeSelectors
+    private var mSnapshotMaxHeight = 0 // in REF_VIEW like SizeSelectors
+    private var mFrameProcessingMaxWidth = 0 // in REF_VIEW like SizeSelectors
+    private var mFrameProcessingMaxHeight = 0 // in REF_VIEW like SizeSelectors
+    private var mFrameProcessingPoolSize = 0
+    private var mOverlay: Overlay? = null
 
     /**
      * Called at construction time to get a frame manager that can later be
-     * accessed through {@link #getFrameManager()}.
+     * accessed through [.getFrameManager].
      *
      * @param poolSize pool size
      * @return a frame manager
      */
-    @NonNull
-    protected abstract FrameManager instantiateFrameManager(int poolSize);
+    protected abstract fun instantiateFrameManager(poolSize: Int): FrameManager<*>
 
-    @NonNull
-    @Override
-    public final Angles getAngles() {
-        return mAngles;
+    override fun getAngles(): Angles {
+        return mAngles
     }
 
-    @NonNull
-    @Override
-    public FrameManager getFrameManager() {
+    override fun getFrameManager(): FrameManager<*> {
         if (mFrameManager == null) {
-            mFrameManager = instantiateFrameManager(mFrameProcessingPoolSize);
+            mFrameManager = instantiateFrameManager(mFrameProcessingPoolSize)
         }
-        return mFrameManager;
+        return mFrameManager!!
     }
 
-    @Nullable
-    @Override
-    public final CameraOptions getCameraOptions() {
-        return mCameraOptions;
+    override fun getCameraOptions(): CameraOptions? {
+        return mCameraOptions
     }
 
-    @NonNull
-    @Override
-    public final CameraPreview getPreview() {
-        return mPreview;
+    override fun getPreview(): CameraPreview<*, *> {
+        return mPreview!!
     }
 
-    @Override
-    public final void setPreview(@NonNull CameraPreview cameraPreview) {
-        if (mPreview != null) mPreview.setSurfaceCallback(null);
-        mPreview = cameraPreview;
-        mPreview.setSurfaceCallback(this);
+    override fun setPreview(cameraPreview: CameraPreview<*, *>) {
+        if (mPreview != null) mPreview!!.setSurfaceCallback(null)
+        mPreview = cameraPreview
+        mPreview!!.setSurfaceCallback(this)
     }
 
-    @Nullable
-    @Override
-    public final Overlay getOverlay() {
-        return mOverlay;
+    override fun getOverlay(): Overlay? {
+        return mOverlay
     }
 
-    @Override
-    public final void setOverlay(@Nullable Overlay overlay) {
-        mOverlay = overlay;
+    override fun setOverlay(overlay: Overlay?) {
+        mOverlay = overlay
     }
 
-    @Nullable
-    @Override
-    public final SizeSelector getPreviewStreamSizeSelector() {
-        return mPreviewStreamSizeSelector;
+    override fun getPreviewStreamSizeSelector(): SizeSelector? {
+        return mPreviewStreamSizeSelector
     }
 
-    @Override
-    public final void setPreviewStreamSizeSelector(@Nullable SizeSelector selector) {
-        mPreviewStreamSizeSelector = selector;
+    override fun setPreviewStreamSizeSelector(selector: SizeSelector?) {
+        mPreviewStreamSizeSelector = selector
     }
 
-    @NonNull
-    @Override
-    public final SizeSelector getPictureSizeSelector() {
-        return mPictureSizeSelector;
+    override fun getPictureSizeSelector(): SizeSelector {
+        return mPictureSizeSelector!!
     }
 
-    @Override
-    public final void setPictureSizeSelector(@NonNull SizeSelector selector) {
-        mPictureSizeSelector = selector;
+    override fun setPictureSizeSelector(selector: SizeSelector) {
+        mPictureSizeSelector = selector
     }
 
-    @NonNull
-    @Override
-    public final SizeSelector getVideoSizeSelector() {
-        return mVideoSizeSelector;
+    override fun getVideoSizeSelector(): SizeSelector {
+        return mVideoSizeSelector!!
     }
 
-    @Override
-    public final void setVideoSizeSelector(@NonNull SizeSelector selector) {
-        mVideoSizeSelector = selector;
+    override fun setVideoSizeSelector(selector: SizeSelector) {
+        mVideoSizeSelector = selector
     }
 
-    @Override
-    public final long getVideoMaxSize() {
-        return mVideoMaxSize;
+    override fun getVideoMaxSize(): Long {
+        return mVideoMaxSize
     }
 
-    @Override
-    public final void setVideoMaxSize(long videoMaxSizeBytes) {
-        mVideoMaxSize = videoMaxSizeBytes;
+    override fun setVideoMaxSize(videoMaxSizeBytes: Long) {
+        mVideoMaxSize = videoMaxSizeBytes
     }
 
-    @Override
-    public final int getVideoMaxDuration() {
-        return mVideoMaxDuration;
+    override fun getVideoMaxDuration(): Int {
+        return mVideoMaxDuration
     }
 
-    @Override
-    public final void setVideoMaxDuration(int videoMaxDurationMillis) {
-        mVideoMaxDuration = videoMaxDurationMillis;
+    override fun setVideoMaxDuration(videoMaxDurationMillis: Int) {
+        mVideoMaxDuration = videoMaxDurationMillis
     }
 
-    @NonNull
-    @Override
-    public final VideoCodec getVideoCodec() {
-        return mVideoCodec;
+    override fun getVideoCodec(): VideoCodec {
+        return mVideoCodec!!
     }
 
-    @Override
-    public final void setVideoCodec(@NonNull VideoCodec codec) {
-        mVideoCodec = codec;
+    override fun setVideoCodec(codec: VideoCodec) {
+        mVideoCodec = codec
     }
 
-    @Override
-    public final int getVideoBitRate() {
-        return mVideoBitRate;
+    override fun getVideoBitRate(): Int {
+        return mVideoBitRate
     }
 
-    @Override
-    public final void setVideoBitRate(int videoBitRate) {
-        mVideoBitRate = videoBitRate;
+    override fun setVideoBitRate(videoBitRate: Int) {
+        mVideoBitRate = videoBitRate
     }
 
-    @NonNull
-    @Override
-    public final AudioCodec getAudioCodec() {
-        return mAudioCodec;
+    override fun getAudioCodec(): AudioCodec {
+        return mAudioCodec!!
     }
 
-    @Override
-    public final void setAudioCodec(@NonNull AudioCodec codec) {
-        mAudioCodec = codec;
+    override fun setAudioCodec(codec: AudioCodec) {
+        mAudioCodec = codec
     }
 
-    @Override
-    public final int getAudioBitRate() {
-        return mAudioBitRate;
+    override fun getAudioBitRate(): Int {
+        return mAudioBitRate
     }
 
-    @Override
-    public final void setAudioBitRate(int audioBitRate) {
-        mAudioBitRate = audioBitRate;
+    override fun setAudioBitRate(audioBitRate: Int) {
+        mAudioBitRate = audioBitRate
     }
 
-    @Override
-    public final int getSnapshotMaxWidth() {
-        return mSnapshotMaxWidth;
+    override fun getSnapshotMaxWidth(): Int {
+        return mSnapshotMaxWidth
     }
 
-    @Override
-    public final void setSnapshotMaxWidth(int maxWidth) {
-        mSnapshotMaxWidth = maxWidth;
+    override fun setSnapshotMaxWidth(maxWidth: Int) {
+        mSnapshotMaxWidth = maxWidth
     }
 
-    @Override
-    public final int getSnapshotMaxHeight() {
-        return mSnapshotMaxHeight;
+    override fun getSnapshotMaxHeight(): Int {
+        return mSnapshotMaxHeight
     }
 
-    @Override
-    public final void setSnapshotMaxHeight(int maxHeight) {
-        mSnapshotMaxHeight = maxHeight;
+    override fun setSnapshotMaxHeight(maxHeight: Int) {
+        mSnapshotMaxHeight = maxHeight
     }
 
-    @Override
-    public final int getFrameProcessingMaxWidth() {
-        return mFrameProcessingMaxWidth;
+    override fun getFrameProcessingMaxWidth(): Int {
+        return mFrameProcessingMaxWidth
     }
 
-    @Override
-    public final void setFrameProcessingMaxWidth(int maxWidth) {
-        mFrameProcessingMaxWidth = maxWidth;
+    override fun setFrameProcessingMaxWidth(maxWidth: Int) {
+        mFrameProcessingMaxWidth = maxWidth
     }
 
-    @Override
-    public final int getFrameProcessingMaxHeight() {
-        return mFrameProcessingMaxHeight;
+    override fun getFrameProcessingMaxHeight(): Int {
+        return mFrameProcessingMaxHeight
     }
 
-    @Override
-    public final void setFrameProcessingMaxHeight(int maxHeight) {
-        mFrameProcessingMaxHeight = maxHeight;
+    override fun setFrameProcessingMaxHeight(maxHeight: Int) {
+        mFrameProcessingMaxHeight = maxHeight
     }
 
-    @Override
-    public final int getFrameProcessingFormat() {
-        return mFrameProcessingFormat;
+    override fun getFrameProcessingFormat(): Int {
+        return mFrameProcessingFormat
     }
 
-    @Override
-    public final int getFrameProcessingPoolSize() {
-        return mFrameProcessingPoolSize;
+    override fun getFrameProcessingPoolSize(): Int {
+        return mFrameProcessingPoolSize
     }
 
-    @Override
-    public final void setFrameProcessingPoolSize(int poolSize) {
-        mFrameProcessingPoolSize = poolSize;
+    override fun setFrameProcessingPoolSize(poolSize: Int) {
+        mFrameProcessingPoolSize = poolSize
     }
 
-    @Override
-    public final long getAutoFocusResetDelay() {
-        return mAutoFocusResetDelayMillis;
+    override fun getAutoFocusResetDelay(): Long {
+        return mAutoFocusResetDelayMillis
     }
 
-    @Override
-    public final void setAutoFocusResetDelay(long delayMillis) {
-        mAutoFocusResetDelayMillis = delayMillis;
+    override fun setAutoFocusResetDelay(delayMillis: Long) {
+        mAutoFocusResetDelayMillis = delayMillis
     }
 
     /**
@@ -366,15 +278,12 @@ public abstract class CameraBaseEngine extends CameraEngine {
      *
      * @return true if AF should be reset
      */
-    @SuppressWarnings("WeakerAccess")
-    protected final boolean shouldResetAutoFocus() {
-        return mAutoFocusResetDelayMillis > 0 && mAutoFocusResetDelayMillis != Long.MAX_VALUE;
+    protected fun shouldResetAutoFocus(): Boolean {
+        return mAutoFocusResetDelayMillis > 0 && mAutoFocusResetDelayMillis != Long.Companion.MAX_VALUE
     }
 
-    @NonNull
-    @Override
-    public final Facing getFacing() {
-        return mFacing;
+    override fun getFacing(): Facing {
+        return mFacing ?: Facing.defaultFacing()
     }
 
     /**
@@ -383,26 +292,25 @@ public abstract class CameraBaseEngine extends CameraEngine {
      *
      * @param facing facing
      */
-    @Override
-    public final void setFacing(final @NonNull Facing facing) {
-        final Facing old = mFacing;
+    override fun setFacing(facing: Facing) {
+
+        val old = (mFacing ?: Facing.defaultFacing())
         if (facing != old) {
-            mFacing = facing;
-            getOrchestrator().scheduleStateful("facing", CameraState.ENGINE,
-                    () -> {
-                        if (collectCameraInfo(facing)) {
-                            restart();
-                        } else {
-                            mFacing = old;
-                        }
-                    });
+            mFacing = facing
+            orchestrator.scheduleStateful(
+                "facing", CameraState.ENGINE
+            ) {
+                if (collectCameraInfo(facing)) {
+                    restart()
+                } else {
+                    mFacing = old
+                }
+            }
         }
     }
 
-    @NonNull
-    @Override
-    public final Audio getAudio() {
-        return mAudio;
+    override fun getAudio(): Audio {
+        return mAudio ?: Audio.DEFAULT
     }
 
     /**
@@ -410,21 +318,19 @@ public abstract class CameraBaseEngine extends CameraEngine {
      *
      * @param audio desired audio
      */
-    @Override
-    public final void setAudio(@NonNull Audio audio) {
+    override fun setAudio(audio: Audio) {
         if (mAudio != audio) {
-            if (isTakingVideo()) {
-                LOG.w("Audio setting was changed while recording. " +
-                        "Changes will take place starting from next video");
+            if (isTakingVideo) {
+                LOG.w(
+                    "Audio setting was changed while recording. " + "Changes will take place starting from next video"
+                )
             }
-            mAudio = audio;
+            mAudio = audio
         }
     }
 
-    @NonNull
-    @Override
-    public final Mode getMode() {
-        return mMode;
+    override fun getMode(): Mode {
+        return mMode!!
     }
 
     /**
@@ -432,393 +338,361 @@ public abstract class CameraBaseEngine extends CameraEngine {
      *
      * @param mode desired mode.
      */
-    @Override
-    public final void setMode(@NonNull Mode mode) {
+    override fun setMode(mode: Mode) {
         if (mode != mMode) {
-            mMode = mode;
-            getOrchestrator().scheduleStateful("mode", CameraState.ENGINE,
-                    () -> restart());
+            mMode = mode
+            orchestrator.scheduleStateful(
+                "mode", CameraState.ENGINE
+            ) {
+                restart()
+            }
         }
     }
 
-    @Override
-    public final float getZoomValue() {
-        return mZoomValue;
+    override fun getZoomValue(): Float {
+        return mZoomValue
     }
 
-    @Override
-    public final float getExposureCorrectionValue() {
-        return mExposureCorrectionValue;
+    override fun getExposureCorrectionValue(): Float {
+        return mExposureCorrectionValue
     }
 
-    @NonNull
-    @Override
-    public final Flash getFlash() {
-        return mFlash;
+    override fun getFlash(): Flash {
+        return mFlash!!
     }
 
-    @NonNull
-    @Override
-    public final WhiteBalance getWhiteBalance() {
-        return mWhiteBalance;
+    override fun getWhiteBalance(): WhiteBalance {
+        return mWhiteBalance!!
     }
 
-    @NonNull
-    @Override
-    public final Hdr getHdr() {
-        return mHdr;
+    override fun getHdr(): Hdr {
+        return mHdr!!
     }
 
-    @Nullable
-    @Override
-    public final Location getLocation() {
-        return mLocation;
+    override fun getLocation(): Location? {
+        return mLocation
     }
 
-    @NonNull
-    @Override
-    public final PictureFormat getPictureFormat() {
-        return mPictureFormat;
+    override fun getPictureFormat(): PictureFormat {
+        return mPictureFormat!!
     }
 
-    @Override
-    public final boolean getPreviewFrameRateExact() {
-        return mPreviewFrameRateExact;
+    override fun getPreviewFrameRateExact(): Boolean {
+        return mPreviewFrameRateExact
     }
 
-    @Override
-    public final void setPreviewFrameRateExact(boolean previewFrameRateExact) {
-        mPreviewFrameRateExact = previewFrameRateExact;
+    override fun setPreviewFrameRateExact(previewFrameRateExact: Boolean) {
+        mPreviewFrameRateExact = previewFrameRateExact
     }
 
-    @Override
-    public final float getPreviewFrameRate() {
-        return mPreviewFrameRate;
+    override fun getPreviewFrameRate(): Float {
+        return mPreviewFrameRate
     }
 
-    @Override
-    public final boolean hasFrameProcessors() {
-        return mHasFrameProcessors;
+    override fun hasFrameProcessors(): Boolean {
+        return mHasFrameProcessors
     }
 
-    @Override
-    public final boolean getPictureMetering() {
-        return mPictureMetering;
+    override fun getPictureMetering(): Boolean {
+        return mPictureMetering
     }
 
-    @Override
-    public final void setPictureMetering(boolean enable) {
-        mPictureMetering = enable;
+    override fun setPictureMetering(enable: Boolean) {
+        mPictureMetering = enable
     }
 
-    @Override
-    public final boolean getPictureSnapshotMetering() {
-        return mPictureSnapshotMetering;
+    override fun getPictureSnapshotMetering(): Boolean {
+        return mPictureSnapshotMetering
     }
 
-    @Override
-    public final void setPictureSnapshotMetering(boolean enable) {
-        mPictureSnapshotMetering = enable;
+    override fun setPictureSnapshotMetering(enable: Boolean) {
+        mPictureSnapshotMetering = enable
     }
 
     //region Picture and video control
-
-    @Override
-    public final boolean isTakingPicture() {
-        return mPictureRecorder != null;
+    override fun isTakingPicture(): Boolean {
+        return mPictureRecorder != null
     }
 
-    @Override
-    public /* final */ void takePicture(final @NonNull PictureResult.Stub stub) {
+    /* final */ override fun takePicture(stub: PictureResult.Stub) {
         // Save boolean before scheduling! See how Camera2Engine calls this with a temp value.
-        final boolean metering = mPictureMetering;
-        getOrchestrator().scheduleStateful("take picture", CameraState.BIND,
-                () -> {
-                    LOG.i("takePicture:", "running. isTakingPicture:", isTakingPicture());
-                    if (isTakingPicture()) return;
-                    if (mMode == Mode.VIDEO) {
-                        throw new IllegalStateException("Can't take hq pictures while in VIDEO mode");
-                    }
-                    stub.isSnapshot = false;
-                    stub.location = mLocation;
-                    stub.facing = mFacing;
-                    stub.format = mPictureFormat;
-                    onTakePicture(stub, metering);
-                });
-    }
-
-    /**
-     * The snapshot size is the {@link #getPreviewStreamSize(Reference)}, but cropped based on the
-     * view/surface aspect ratio.
-     *
-     * @param stub a picture stub
-     */
-    @Override
-    public /* final */ void takePictureSnapshot(final @NonNull PictureResult.Stub stub) {
-        // Save boolean before scheduling! See how Camera2Engine calls this with a temp value.
-        final boolean metering = mPictureSnapshotMetering;
-        getOrchestrator().scheduleStateful("take picture snapshot", CameraState.BIND,
-                () -> {
-                    LOG.i("takePictureSnapshot:", "running. isTakingPicture:", isTakingPicture());
-                    if (isTakingPicture()) return;
-                    stub.location = mLocation;
-                    stub.isSnapshot = true;
-                    stub.facing = mFacing;
-                    stub.format = PictureFormat.JPEG;
-                    // Leave the other parameters to subclasses.
-                    //noinspection ConstantConditions
-                    AspectRatio ratio = AspectRatio.of(getPreviewSurfaceSize(Reference.OUTPUT));
-                    onTakePictureSnapshot(stub, ratio, metering);
-                });
-    }
-
-    @Override
-    public void onPictureShutter(boolean didPlaySound) {
-        getCallback().dispatchOnPictureShutter(!didPlaySound);
-    }
-
-    @Override
-    public void onPictureResult(@Nullable PictureResult.Stub result, @Nullable Exception error) {
-        mPictureRecorder = null;
-        if (result != null && result.data != null) {
-            getCallback().dispatchOnPictureTaken(result);
-        } else {
-            LOG.e("onPictureResult", "result or data is null: something went wrong.", error);
-            getCallback().dispatchError(new CameraException(error,
-                    CameraException.REASON_PICTURE_FAILED));
+        val metering = mPictureMetering
+        orchestrator.scheduleStateful(
+            "take picture", CameraState.BIND
+        ) {
+            LOG.i("takePicture:", "running. isTakingPicture:", isTakingPicture)
+            if (isTakingPicture) return@scheduleStateful
+            check(mMode != Mode.VIDEO) { "Can't take hq pictures while in VIDEO mode" }
+            stub.isSnapshot = false
+            stub.location = mLocation
+            stub.facing = mFacing
+            stub.format = mPictureFormat
+            onTakePicture(stub, metering)
         }
     }
 
-    @Override
-    public final boolean isTakingVideo() {
-        return mVideoRecorder != null && mVideoRecorder.isRecording();
+    /**
+     * The snapshot size is the [.getPreviewStreamSize], but cropped based on the
+     * view/surface aspect ratio.
+     *
+     * @param stub a picture stub
+     *//* final */ override fun takePictureSnapshot(stub: PictureResult.Stub) {
+        // Save boolean before scheduling! See how Camera2Engine calls this with a temp value.
+        val metering = mPictureSnapshotMetering
+        orchestrator.scheduleStateful(
+            "take picture snapshot", CameraState.BIND
+        ) {
+            LOG.i("takePictureSnapshot:", "running. isTakingPicture:", isTakingPicture)
+            if (isTakingPicture) return@scheduleStateful
+            stub.location = mLocation
+            stub.isSnapshot = true
+            stub.facing = mFacing
+            stub.format = PictureFormat.JPEG
+            // Leave the other parameters to subclasses.
+            val ratio = AspectRatio.of(getPreviewSurfaceSize(Reference.OUTPUT)!!)
+            onTakePictureSnapshot(stub, ratio, metering)
+        }
     }
 
-    @Override
-    public final void takeVideo(final @NonNull VideoResult.Stub stub,
-                                final @Nullable File file,
-                                final @Nullable FileDescriptor fileDescriptor) {
-        getOrchestrator().scheduleStateful("take video", CameraState.BIND, () -> {
-            LOG.i("takeVideo:", "running. isTakingVideo:", isTakingVideo());
-            if (isTakingVideo()) return;
-            if (mMode == Mode.PICTURE) {
-                throw new IllegalStateException("Can't record video while in PICTURE mode");
-            }
+    override fun onPictureShutter(didPlaySound: Boolean) {
+        callback.dispatchOnPictureShutter(!didPlaySound)
+    }
+
+    override fun onPictureResult(result: PictureResult.Stub?, error: Exception?) {
+        mPictureRecorder = null
+        if (result != null && result.data != null) {
+            callback.dispatchOnPictureTaken(result)
+        } else {
+            LOG.e("onPictureResult", "result or data is null: something went wrong.", error)
+            callback.dispatchError(
+                CameraException(
+                    error, CameraException.REASON_PICTURE_FAILED
+                )
+            )
+        }
+    }
+
+    override fun isTakingVideo(): Boolean {
+        return mVideoRecorder != null && mVideoRecorder!!.isRecording
+    }
+
+    override fun takeVideo(
+        stub: VideoResult.Stub, file: File?, fileDescriptor: FileDescriptor?
+    ) {
+        orchestrator.scheduleStateful("take video", CameraState.BIND) {
+            LOG.i("takeVideo:", "running. isTakingVideo:", isTakingVideo)
+            if (isTakingVideo) return@scheduleStateful
+            check(mMode != Mode.PICTURE) { "Can't record video while in PICTURE mode" }
             if (file != null) {
-                stub.file = file;
+                stub.file = file
             } else if (fileDescriptor != null) {
-                stub.fileDescriptor = fileDescriptor;
+                stub.fileDescriptor = fileDescriptor
             } else {
-                throw new IllegalStateException("file and fileDescriptor are both null.");
+                throw IllegalStateException("file and fileDescriptor are both null.")
             }
-            stub.isSnapshot = false;
-            stub.videoCodec = mVideoCodec;
-            stub.audioCodec = mAudioCodec;
-            stub.location = mLocation;
-            stub.facing = mFacing;
-            stub.audio = mAudio;
-            stub.maxSize = mVideoMaxSize;
-            stub.maxDuration = mVideoMaxDuration;
-            stub.videoBitRate = mVideoBitRate;
-            stub.audioBitRate = mAudioBitRate;
-            onTakeVideo(stub);
-        });
+            stub.isSnapshot = false
+            stub.videoCodec = mVideoCodec
+            stub.audioCodec = mAudioCodec
+            stub.location = mLocation
+            stub.facing = mFacing
+            stub.audio = mAudio
+            stub.maxSize = mVideoMaxSize
+            stub.maxDuration = mVideoMaxDuration
+            stub.videoBitRate = mVideoBitRate
+            stub.audioBitRate = mAudioBitRate
+            onTakeVideo(stub)
+        }
     }
 
     /**
      * @param stub a video stub
      * @param file the output file
      */
-    @Override
-    public final void takeVideoSnapshot(@NonNull final VideoResult.Stub stub,
-                                        @NonNull final File file) {
-        getOrchestrator().scheduleStateful("take video snapshot", CameraState.BIND,
-                () -> {
-                    LOG.i("takeVideoSnapshot:", "running. isTakingVideo:", isTakingVideo());
-                    stub.file = file;
-                    stub.isSnapshot = true;
-                    stub.videoCodec = mVideoCodec;
-                    stub.audioCodec = mAudioCodec;
-                    stub.location = mLocation;
-                    stub.facing = mFacing;
-                    stub.videoBitRate = mVideoBitRate;
-                    stub.audioBitRate = mAudioBitRate;
-                    stub.audio = mAudio;
-                    stub.maxSize = mVideoMaxSize;
-                    stub.maxDuration = mVideoMaxDuration;
-                    //noinspection ConstantConditions
-                    AspectRatio ratio = AspectRatio.of(getPreviewSurfaceSize(Reference.OUTPUT));
-                    onTakeVideoSnapshot(stub, ratio);
-                });
+    override fun takeVideoSnapshot(
+        stub: VideoResult.Stub, file: File
+    ) {
+        orchestrator.scheduleStateful(
+            "take video snapshot", CameraState.BIND
+        ) {
+            LOG.i("takeVideoSnapshot:", "running. isTakingVideo:", isTakingVideo)
+            stub.file = file
+            stub.isSnapshot = true
+            stub.videoCodec = mVideoCodec
+            stub.audioCodec = mAudioCodec
+            stub.location = mLocation
+            stub.facing = mFacing
+            stub.videoBitRate = mVideoBitRate
+            stub.audioBitRate = mAudioBitRate
+            stub.audio = mAudio
+            stub.maxSize = mVideoMaxSize
+            stub.maxDuration = mVideoMaxDuration
+            val ratio = AspectRatio.of(getPreviewSurfaceSize(Reference.OUTPUT)!!)
+            onTakeVideoSnapshot(stub, ratio)
+        }
     }
 
-    @Override
-    public final void stopVideo() {
-        getOrchestrator().schedule("stop video", true, () -> {
-            LOG.i("stopVideo", "running. isTakingVideo?", isTakingVideo());
-            onStopVideo();
-        });
+    override fun stopVideo() {
+        orchestrator.schedule("stop video", true) {
+            LOG.i("stopVideo", "running. isTakingVideo?", isTakingVideo)
+            onStopVideo()
+        }
     }
 
     @EngineThread
-    @SuppressWarnings("WeakerAccess")
-    protected void onStopVideo() {
+    protected fun onStopVideo() {
         if (mVideoRecorder != null) {
-            mVideoRecorder.stop(false);
+            mVideoRecorder!!.stop(false)
             // Do not null this, so we respond correctly to isTakingVideo(),
             // which checks for recorder presence and recorder.isRecording().
-            // It will be nulled in onVideoResult.
+            // It will be pulled in onVideoResult.
         }
     }
 
     @CallSuper
-    @Override
-    public void onVideoResult(@Nullable VideoResult.Stub result, @Nullable Exception exception) {
-        mVideoRecorder = null;
+    override fun onVideoResult(result: VideoResult.Stub?, exception: Exception?) {
+        mVideoRecorder = null
         if (result != null) {
-            getCallback().dispatchOnVideoTaken(result);
+            callback.dispatchOnVideoTaken(result)
         } else {
-            LOG.e("onVideoResult", "result is null: something went wrong.", exception);
-            getCallback().dispatchError(new CameraException(exception,
-                    CameraException.REASON_VIDEO_FAILED));
+            LOG.e("onVideoResult", "result is null: something went wrong.", exception)
+            callback.dispatchError(
+                CameraException(
+                    exception, CameraException.REASON_VIDEO_FAILED
+                )
+            )
         }
     }
 
-    @Override
-    public void onVideoRecordingStart() {
-        getCallback().dispatchOnVideoRecordingStart();
+    override fun onVideoRecordingStart() {
+        callback.dispatchOnVideoRecordingStart()
     }
 
-    @Override
-    public void onVideoRecordingEnd() {
-        getCallback().dispatchOnVideoRecordingEnd();
+    override fun onVideoRecordingEnd() {
+        callback.dispatchOnVideoRecordingEnd()
     }
 
     @EngineThread
-    protected abstract void onTakePicture(@NonNull PictureResult.Stub stub, boolean doMetering);
+    protected abstract fun onTakePicture(stub: PictureResult.Stub, doMetering: Boolean)
 
     @EngineThread
-    protected abstract void onTakePictureSnapshot(@NonNull PictureResult.Stub stub,
-                                                  @NonNull AspectRatio outputRatio,
-                                                  boolean doMetering);
+    protected abstract fun onTakePictureSnapshot(
+        stub: PictureResult.Stub, outputRatio: AspectRatio, doMetering: Boolean
+    )
 
     @EngineThread
-    protected abstract void onTakeVideoSnapshot(@NonNull VideoResult.Stub stub,
-                                                @NonNull AspectRatio outputRatio);
+    protected abstract fun onTakeVideoSnapshot(
+        stub: VideoResult.Stub, outputRatio: AspectRatio
+    )
 
     @EngineThread
-    protected abstract void onTakeVideo(@NonNull VideoResult.Stub stub);
+    protected abstract fun onTakeVideo(stub: VideoResult.Stub)
 
     //endregion
-
     //region Size / Surface
-
-    @Override
-    public final void onSurfaceChanged() {
-        LOG.i("onSurfaceChanged:", "Size is", getPreviewSurfaceSize(Reference.VIEW));
-        getOrchestrator().scheduleStateful("surface changed", CameraState.BIND,
-                () -> {
-                    // Compute a new camera preview size and apply.
-                    Size newSize = computePreviewStreamSize();
-                    if (newSize.equals(mPreviewStreamSize)) {
-                        LOG.i("onSurfaceChanged:",
-                                "The computed preview size is identical. No op.");
-                    } else {
-                        LOG.i("onSurfaceChanged:",
-                                "Computed a new preview size. Calling onPreviewStreamSizeChanged().");
-                        mPreviewStreamSize = newSize;
-                        onPreviewStreamSizeChanged();
-                    }
-                });
+    override fun onSurfaceChanged() {
+        LOG.i("onSurfaceChanged:", "Size is", getPreviewSurfaceSize(Reference.VIEW))
+        orchestrator.scheduleStateful(
+            "surface changed", CameraState.BIND
+        ) {
+            // Compute a new camera preview size and apply.
+            val newSize = computePreviewStreamSize()
+            if (newSize == mPreviewStreamSize) {
+                LOG.i(
+                    "onSurfaceChanged:", "The computed preview size is identical. No op."
+                )
+            } else {
+                LOG.i(
+                    "onSurfaceChanged:",
+                    "Computed a new preview size. Calling onPreviewStreamSizeChanged()."
+                )
+                mPreviewStreamSize = newSize
+                onPreviewStreamSizeChanged()
+            }
+        }
     }
 
     /**
      * The preview stream size has changed. At this point, some engine might want to
-     * simply call {@link #restartPreview()}, others to {@link #restartBind()}.
-     * <p>
+     * simply call [.restartPreview], others to [.restartBind].
+     *
+     *
      * It basically depends on the step at which the preview stream size is actually used.
      */
     @EngineThread
-    protected abstract void onPreviewStreamSizeChanged();
+    protected abstract fun onPreviewStreamSizeChanged()
 
-    @Nullable
-    @Override
-    public final Size getPictureSize(@SuppressWarnings("SameParameterValue") @NonNull Reference reference) {
-        Size size = mCaptureSize;
-        if (size == null || mMode == Mode.VIDEO) return null;
-        return getAngles().flip(Reference.SENSOR, reference) ? size.flip() : size;
+    override fun getPictureSize(reference: Reference): Size? {
+        val size = mCaptureSize
+        if (size == null || mMode == Mode.VIDEO) return null
+        return if (angles.flip(Reference.SENSOR, reference)) size.flip() else size
     }
 
-    @Nullable
-    @Override
-    public final Size getVideoSize(@SuppressWarnings("SameParameterValue") @NonNull Reference reference) {
-        Size size = mCaptureSize;
-        if (size == null || mMode == Mode.PICTURE) return null;
-        return getAngles().flip(Reference.SENSOR, reference) ? size.flip() : size;
+    override fun getVideoSize(reference: Reference): Size? {
+        val size = mCaptureSize
+        if (size == null || mMode == Mode.PICTURE) return null
+        return if (angles.flip(Reference.SENSOR, reference)) size.flip() else size
     }
 
-    @Nullable
-    @Override
-    public final Size getPreviewStreamSize(@NonNull Reference reference) {
-        Size size = mPreviewStreamSize;
-        if (size == null) return null;
-        return getAngles().flip(Reference.SENSOR, reference) ? size.flip() : size;
+    override fun getPreviewStreamSize(reference: Reference): Size? {
+        val size = mPreviewStreamSize
+        if (size == null) return null
+        return if (angles.flip(Reference.SENSOR, reference)) size.flip() else size
     }
 
-    @SuppressWarnings("SameParameterValue")
-    @Nullable
-    private Size getPreviewSurfaceSize(@NonNull Reference reference) {
-        CameraPreview preview = mPreview;
-        if (preview == null) return null;
-        return getAngles().flip(Reference.VIEW, reference) ? preview.getSurfaceSize().flip()
-                : preview.getSurfaceSize();
+    private fun getPreviewSurfaceSize(reference: Reference): Size? {
+        val preview = mPreview
+        if (preview == null) return null
+        return if (angles.flip(Reference.VIEW, reference)) preview.surfaceSize.flip()
+        else preview.surfaceSize
     }
 
     /**
      * Returns the snapshot size, but not cropped with the view dimensions, which
      * is what we will do before creating the snapshot. However, cropping is done at various
      * levels so we don't want to perform the op here.
-     * <p>
+     *
+     *
      * The base snapshot size is based on PreviewStreamSize (later cropped with view ratio). Why?
      * One might be tempted to say that it's the SurfaceSize (which already matches the view ratio).
-     * <p>
+     *
+     *
      * The camera sensor will capture preview frames with PreviewStreamSize and that's it. Then they
      * are hardware-scaled by the preview surface, but this does not affect the snapshot, as the
      * snapshot recorder simply creates another surface.
-     * <p>
+     *
+     *
      * Done tests to ensure that this is true, by using
      * 1. small SurfaceSize and biggest() PreviewStreamSize: output is not low quality
      * 2. big SurfaceSize and smallest() PreviewStreamSize: output is low quality
      * In both cases the result.size here was set to the biggest of the two.
-     * <p>
+     *
+     *
      * I could not find the same evidence for videos, but I would say that the same things should
      * apply, despite the capturing mechanism being different.
      *
      * @param reference the reference system
      * @return the uncropped snapshot size
      */
-    @Nullable
-    @Override
-    public final Size getUncroppedSnapshotSize(@NonNull Reference reference) {
-        Size baseSize = getPreviewStreamSize(reference);
-        if (baseSize == null) return null;
-        boolean flip = getAngles().flip(reference, Reference.VIEW);
-        int maxWidth = flip ? mSnapshotMaxHeight : mSnapshotMaxWidth;
-        int maxHeight = flip ? mSnapshotMaxWidth : mSnapshotMaxHeight;
-        if (maxWidth <= 0) maxWidth = Integer.MAX_VALUE;
-        if (maxHeight <= 0) maxHeight = Integer.MAX_VALUE;
-        float baseRatio = AspectRatio.of(baseSize).toFloat();
-        float maxValuesRatio = AspectRatio.of(maxWidth, maxHeight).toFloat();
+    override fun getUncroppedSnapshotSize(reference: Reference): Size? {
+        val baseSize = getPreviewStreamSize(reference)
+        if (baseSize == null) return null
+        val flip = angles.flip(reference, Reference.VIEW)
+        var maxWidth = if (flip) mSnapshotMaxHeight else mSnapshotMaxWidth
+        var maxHeight = if (flip) mSnapshotMaxWidth else mSnapshotMaxHeight
+        if (maxWidth <= 0) maxWidth = Int.Companion.MAX_VALUE
+        if (maxHeight <= 0) maxHeight = Int.Companion.MAX_VALUE
+        val baseRatio = AspectRatio.of(baseSize).toFloat()
+        val maxValuesRatio = AspectRatio.of(maxWidth, maxHeight).toFloat()
         if (maxValuesRatio >= baseRatio) {
             // Height is the real constraint.
-            int outHeight = Math.min(baseSize.getHeight(), maxHeight);
-            int outWidth = (int) Math.floor((float) outHeight * baseRatio);
-            return new Size(outWidth, outHeight);
+            val outHeight = min(baseSize.height, maxHeight)
+            val outWidth = floor((outHeight.toFloat() * baseRatio).toDouble()).toInt()
+            return Size(outWidth, outHeight)
         } else {
             // Width is the real constraint.
-            int outWidth = Math.min(baseSize.getWidth(), maxWidth);
-            int outHeight = (int) Math.floor((float) outWidth / baseRatio);
-            return new Size(outWidth, outHeight);
+            val outWidth = min(baseSize.width, maxWidth)
+            val outHeight = floor((outWidth.toFloat() / baseRatio).toDouble()).toInt()
+            return Size(outWidth, outHeight)
         }
     }
 
@@ -826,164 +700,151 @@ public abstract class CameraBaseEngine extends CameraEngine {
      * This is called either on cameraView.start(), or when the underlying surface changes.
      * It is possible that in the first call the preview surface has not already computed its
      * dimensions.
-     * But when it does, the {@link CameraPreview.SurfaceCallback} should be called,
+     * But when it does, the [CameraPreview.SurfaceCallback] should be called,
      * and this should be refreshed.
      *
      * @return the capture size
      */
-    @NonNull
-    @SuppressWarnings("WeakerAccess")
-    protected final Size computeCaptureSize() {
-        return computeCaptureSize(mMode);
-    }
-
-    @NonNull
-    @SuppressWarnings("WeakerAccess")
-    protected final Size computeCaptureSize(@NonNull Mode mode) {
+    protected fun computeCaptureSize(mode: Mode = (mMode ?: Mode.PICTURE)): Size {
         // We want to pass stuff into the REF_VIEW reference, not the sensor one.
         // This is already managed by CameraOptions, so we just flip again at the end.
-        boolean flip = getAngles().flip(Reference.SENSOR, Reference.VIEW);
-        SizeSelector selector;
-        Collection<Size> sizes;
+        val flip = angles.flip(Reference.SENSOR, Reference.VIEW)
+        var selector: SizeSelector?
+        val sizes: MutableCollection<Size?>?
         if (mode == Mode.PICTURE) {
-            selector = mPictureSizeSelector;
-            sizes = mCameraOptions.getSupportedPictureSizes();
+            selector = mPictureSizeSelector
+            sizes = mCameraOptions!!.getSupportedPictureSizes()
         } else {
-            selector = mVideoSizeSelector;
-            sizes = mCameraOptions.getSupportedVideoSizes();
+            selector = mVideoSizeSelector
+            sizes = mCameraOptions!!.getSupportedVideoSizes()
         }
-        selector = SizeSelectors.or(selector, SizeSelectors.biggest());
-        List<Size> list = new ArrayList<>(sizes);
-        Size result = selector.select(list).get(0);
+        selector = SizeSelectors.or(selector, SizeSelectors.biggest())
+        val list: MutableList<Size?> = ArrayList(sizes)
+        var result: Size = selector.select(list)[0]!!
         if (!list.contains(result)) {
-            throw new RuntimeException("SizeSelectors must not return Sizes other than " +
-                    "those in the input list.");
+            throw RuntimeException(
+                "SizeSelectors must not return Sizes other than " + "those in the input list."
+            )
         }
-        LOG.i("computeCaptureSize:", "result:", result, "flip:", flip, "mode:", mode);
-        if (flip) result = result.flip(); // Go back to REF_SENSOR
-        return result;
+        LOG.i("computeCaptureSize:", "result:", result, "flip:", flip, "mode:", mode)
+        if (flip) result = result.flip() // Go back to REF_SENSOR
+
+        return result
     }
 
-    /**
-     * This is called anytime {@link #computePreviewStreamSize()} is called.
-     * This means that it should be called during the binding process, when
-     * we can be sure that the camera is available (engineState == STARTED).
-     *
-     * @return a list of available sizes for preview
-     */
-    @EngineThread
-    @NonNull
-    protected abstract List<Size> getPreviewStreamAvailableSizes();
+    @get:EngineThread
+    protected abstract val previewStreamAvailableSizes: MutableList<Size>
 
     @EngineThread
-    @NonNull
-    @SuppressWarnings("WeakerAccess")
-    protected final Size computePreviewStreamSize() {
-        @NonNull List<Size> previewSizes = getPreviewStreamAvailableSizes();
+    protected fun computePreviewStreamSize(): Size {
+        val previewSizes = this.previewStreamAvailableSizes
         // These sizes come in REF_SENSOR. Since there is an external selector involved,
         // we must convert all of them to REF_VIEW, then flip back when returning.
-        boolean flip = getAngles().flip(Reference.SENSOR, Reference.VIEW);
-        List<Size> sizes = new ArrayList<>(previewSizes.size());
-        for (Size size : previewSizes) {
-            sizes.add(flip ? size.flip() : size);
+        val flip = angles.flip(Reference.SENSOR, Reference.VIEW)
+        val sizes: MutableList<Size?> = ArrayList(previewSizes.size)
+        for (size in previewSizes) {
+            sizes.add(if (flip) size.flip() else size)
         }
 
         // Create our own default selector, which will be used if the external
         // mPreviewStreamSizeSelector is null, or if it fails in finding a size.
-        Size targetMinSize = getPreviewSurfaceSize(Reference.VIEW);
-        if (targetMinSize == null) {
-            throw new IllegalStateException("targetMinSize should not be null here.");
-        }
-        AspectRatio targetRatio = AspectRatio.of(mCaptureSize.getWidth(), mCaptureSize.getHeight());
-        if (flip) targetRatio = targetRatio.flip();
-        LOG.i("computePreviewStreamSize:",
-                "targetRatio:", targetRatio,
-                "targetMinSize:", targetMinSize);
-        SizeSelector matchRatio = SizeSelectors.and( // Match this aspect ratio and sort by biggest
-                SizeSelectors.aspectRatio(targetRatio, 0),
-                SizeSelectors.biggest());
-        SizeSelector matchSize = SizeSelectors.and( // Bigger than this size, and sort by smallest
-                SizeSelectors.minHeight(targetMinSize.getHeight()),
-                SizeSelectors.minWidth(targetMinSize.getWidth()),
-                SizeSelectors.smallest());
-        SizeSelector matchAll = SizeSelectors.or(
-                SizeSelectors.and(matchRatio, matchSize), // Try to respect both constraints.
-                matchSize, // If couldn't match aspect ratio, at least respect the size
-                matchRatio, // If couldn't respect size, at least match aspect ratio
-                SizeSelectors.biggest() // If couldn't match any, take the biggest.
-        );
+        val targetMinSize = getPreviewSurfaceSize(Reference.VIEW)
+        checkNotNull(targetMinSize) { "targetMinSize should not be null here." }
+        var targetRatio = AspectRatio.of(mCaptureSize!!.width, mCaptureSize!!.height)
+        if (flip) targetRatio = targetRatio.flip()
+        LOG.i(
+            "computePreviewStreamSize:",
+            "targetRatio:",
+            targetRatio,
+            "targetMinSize:",
+            targetMinSize
+        )
+        val matchRatio = SizeSelectors.and( // Match this aspect ratio and sort by biggest
+            SizeSelectors.aspectRatio(targetRatio, 0f), SizeSelectors.biggest()
+        )
+        val matchSize = SizeSelectors.and( // Bigger than this size, and sort by smallest
+            SizeSelectors.minHeight(targetMinSize.height),
+            SizeSelectors.minWidth(targetMinSize.width),
+            SizeSelectors.smallest()
+        )
+        val matchAll = SizeSelectors.or(
+            SizeSelectors.and(matchRatio, matchSize),  // Try to respect both constraints.
+            matchSize,  // If couldn't match aspect ratio, at least respect the size
+            matchRatio,  // If couldn't respect size, at least match aspect ratio
+            SizeSelectors.biggest() // If couldn't match any, take the biggest.
+        )
 
         // Apply the external selector with this as a fallback,
         // and return a size in REF_SENSOR reference.
-        SizeSelector selector;
-        if (mPreviewStreamSizeSelector != null) {
-            selector = SizeSelectors.or(mPreviewStreamSizeSelector, matchAll);
+        val selector = if (mPreviewStreamSizeSelector != null) {
+            SizeSelectors.or(mPreviewStreamSizeSelector, matchAll)
         } else {
-            selector = matchAll;
+            matchAll
         }
-        Size result = selector.select(sizes).get(0);
+        var result: Size = selector.select(sizes)[0]!!
         if (!sizes.contains(result)) {
-            throw new RuntimeException("SizeSelectors must not return Sizes other than " +
-                    "those in the input list.");
+            throw RuntimeException(
+                "SizeSelectors must not return Sizes other than " + "those in the input list."
+            )
         }
-        if (flip) result = result.flip();
-        LOG.i("computePreviewStreamSize:", "result:", result, "flip:", flip);
-        return result;
+        if (flip) result = result.flip()
+        LOG.i("computePreviewStreamSize:", "result:", result, "flip:", flip)
+        return result
     }
 
-    /**
-     * This is called anytime {@link #computeFrameProcessingSize()} is called.
-     * Implementors can return null if frame processor size is not selectable
-     *
-     * @return a list of available sizes for frame processing
-     */
-    @EngineThread
-    @NonNull
-    protected abstract List<Size> getFrameProcessingAvailableSizes();
+    @get:EngineThread
+    protected abstract val frameProcessingAvailableSizes: MutableList<Size>
 
     @EngineThread
-    @NonNull
-    @SuppressWarnings("WeakerAccess")
-    protected final Size computeFrameProcessingSize() {
-        @NonNull List<Size> frameSizes = getFrameProcessingAvailableSizes();
+    protected fun computeFrameProcessingSize(): Size {
+        val frameSizes = this.frameProcessingAvailableSizes
         // These sizes come in REF_SENSOR. Since there is an external selector involved,
         // we must convert all of them to REF_VIEW, then flip back when returning.
-        boolean flip = getAngles().flip(Reference.SENSOR, Reference.VIEW);
-        List<Size> sizes = new ArrayList<>(frameSizes.size());
-        for (Size size : frameSizes) {
-            sizes.add(flip ? size.flip() : size);
+        val flip = angles.flip(Reference.SENSOR, Reference.VIEW)
+        val sizes: MutableList<Size?> = ArrayList(frameSizes.size)
+        for (size in frameSizes) {
+            sizes.add(if (flip) size.flip() else size)
         }
-        AspectRatio targetRatio = AspectRatio.of(
-                mPreviewStreamSize.getWidth(),
-                mPreviewStreamSize.getHeight());
-        if (flip) targetRatio = targetRatio.flip();
-        int maxWidth = mFrameProcessingMaxWidth;
-        int maxHeight = mFrameProcessingMaxHeight;
-        if (maxWidth <= 0 || maxWidth == Integer.MAX_VALUE) maxWidth = 640;
-        if (maxHeight <= 0 || maxHeight == Integer.MAX_VALUE) maxHeight = 640;
-        Size targetMaxSize = new Size(maxWidth, maxHeight);
-        LOG.i("computeFrameProcessingSize:",
-                "targetRatio:", targetRatio,
-                "targetMaxSize:", targetMaxSize);
-        SizeSelector matchRatio = SizeSelectors.aspectRatio(targetRatio, 0);
-        SizeSelector matchSize = SizeSelectors.and(
-                SizeSelectors.maxHeight(targetMaxSize.getHeight()),
-                SizeSelectors.maxWidth(targetMaxSize.getWidth()),
-                SizeSelectors.biggest());
-        SizeSelector matchAll = SizeSelectors.or(
-                SizeSelectors.and(matchRatio, matchSize), // Try to respect both constraints.
-                matchSize, // If couldn't match aspect ratio, at least respect the size
-                SizeSelectors.smallest() // If couldn't match any, take the smallest.
-        );
-        Size result = matchAll.select(sizes).get(0);
+        var targetRatio = AspectRatio.of(
+            mPreviewStreamSize!!.width, mPreviewStreamSize!!.height
+        )
+        if (flip) targetRatio = targetRatio.flip()
+        var maxWidth = mFrameProcessingMaxWidth
+        var maxHeight = mFrameProcessingMaxHeight
+        if (maxWidth <= 0 || maxWidth == Int.Companion.MAX_VALUE) maxWidth = 640
+        if (maxHeight <= 0 || maxHeight == Int.Companion.MAX_VALUE) maxHeight = 640
+        val targetMaxSize = Size(maxWidth, maxHeight)
+        LOG.i(
+            "computeFrameProcessingSize:",
+            "targetRatio:",
+            targetRatio,
+            "targetMaxSize:",
+            targetMaxSize
+        )
+        val matchRatio = SizeSelectors.aspectRatio(targetRatio, 0f)
+        val matchSize = SizeSelectors.and(
+            SizeSelectors.maxHeight(targetMaxSize.height),
+            SizeSelectors.maxWidth(targetMaxSize.width),
+            SizeSelectors.biggest()
+        )
+        val matchAll = SizeSelectors.or(
+            SizeSelectors.and(matchRatio, matchSize),  // Try to respect both constraints.
+            matchSize,  // If couldn't match aspect ratio, at least respect the size
+            SizeSelectors.smallest() // If couldn't match any, take the smallest.
+        )
+        var result: Size = matchAll.select(sizes)[0]!!
         if (!sizes.contains(result)) {
-            throw new RuntimeException("SizeSelectors must not return Sizes other than " +
-                    "those in the input list.");
+            throw RuntimeException(
+                "SizeSelectors must not return Sizes other than " + "those in the input list."
+            )
         }
-        if (flip) result = result.flip();
-        LOG.i("computeFrameProcessingSize:", "result:", result, "flip:", flip);
-        return result;
-    }
+        if (flip) result = result.flip()
+        LOG.i("computeFrameProcessingSize:", "result:", result, "flip:", flip)
+        return result
+    } //endregion
 
-    //endregion
+    companion object {
+        const val ALLOWED_ZOOM_OPS: Int = 20
+        const val ALLOWED_EV_OPS: Int = 20
+    }
 }

@@ -1,151 +1,124 @@
-package com.base.cameraview.frame;
+package com.base.cameraview.frame
 
+import android.graphics.ImageFormat
+import com.base.cameraview.CameraLogger
+import com.base.cameraview.engine.offset.Angles
+import com.base.cameraview.engine.offset.Axis
+import com.base.cameraview.engine.offset.Reference
+import com.base.cameraview.size.Size
+import java.util.concurrent.LinkedBlockingQueue
+import kotlin.math.ceil
 
-import android.graphics.ImageFormat;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import com.base.cameraview.CameraLogger;
-import com.base.cameraview.engine.offset.Angles;
-import com.base.cameraview.engine.offset.Axis;
-import com.base.cameraview.engine.offset.Reference;
-import com.base.cameraview.size.Size;
-
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * This class manages the allocation of {@link Frame} objects.
- * The FrameManager keeps a {@link #mPoolSize} integer that defines the number of instances to keep.
- * <p>
+ * This class manages the allocation of [Frame] objects.
+ * The FrameManager keeps a [.mPoolSize] integer that defines the number of instances to keep.
+ *
+ *
  * Main methods are:
- * - {@link #release()}: to release. After release, a manager can be setUp again.
- * - {@link #getFrame(Object, long)}: gets a new {@link Frame}.
- * <p>
+ * - [.release]: to release. After release, a manager can be setUp again.
+ * - [.getFrame]: gets a new [Frame].
+ *
+ *
  * For frames to get back to the FrameManager pool, all you have to do
- * is call {@link Frame#release()} when done.
+ * is call [Frame.release] when done.
  */
-public abstract class FrameManager<T> {
-
-    private static final String TAG = FrameManager.class.getSimpleName();
-    protected static final CameraLogger LOG = CameraLogger.create(TAG);
-
-    private final int mPoolSize;
-    private final Class<T> mFrameDataClass;
-    private int mFrameBytes = -1;
-    private Size mFrameSize = null;
-    private int mFrameFormat = -1;
-    private LinkedBlockingQueue<Frame> mFrameQueue;
-    private Angles mAngles;
-
-
-    /**
-     * Construct a new frame manager.
-     * The construction must be followed by an {@link #setUp(int, Size, Angles)} call
-     * as soon as the parameters are known.
-     *
-     * @param poolSize the size of the backing pool.
-     */
-    protected FrameManager(int poolSize, @NonNull Class<T> dataClass) {
-        mPoolSize = poolSize;
-        mFrameDataClass = dataClass;
-        mFrameQueue = new LinkedBlockingQueue<>(mPoolSize);
-    }
-
+abstract class FrameManager<T> protected constructor(
     /**
      * Returns the pool size.
      *
      * @return pool size
      */
-    @SuppressWarnings("WeakerAccess")
-    public final int getPoolSize() {
-        return mPoolSize;
-    }
-
-    /**
-     * Returns the frame size in bytes.
-     *
-     * @return frame size in bytes
-     */
-    @SuppressWarnings("WeakerAccess")
-    public final int getFrameBytes() {
-        return mFrameBytes;
-    }
-
+    val poolSize: Int,
     /**
      * Returns the frame data class.
      *
      * @return frame data class
      */
-    public final Class<T> getFrameDataClass() {
-        return mFrameDataClass;
-    }
+    val frameDataClass: Class<T?>
+) {
+    /**
+     * Returns the frame size in bytes.
+     *
+     * @return frame size in bytes
+     */
+    var frameBytes: Int = -1
+        private set
+    private var mFrameSize: Size? = null
+    private var mFrameFormat = -1
+    private val mFrameQueue: LinkedBlockingQueue<Frame?> = LinkedBlockingQueue<Frame?>(
+        this.poolSize
+    )
+    private var mAngles: Angles? = null
 
     /**
-     * Allocates a {@link #mPoolSize} number of buffers. Should be called once
+     * Allocates a [.mPoolSize] number of buffers. Should be called once
      * the preview size and the image format value are known.
-     * <p>
-     * This method can be called again after {@link #release()} has been called.
+     *
+     *
+     * This method can be called again after [.release] has been called.
      *
      * @param format the image format
      * @param size   the frame size
      * @param angles angle object
      */
-    public void setUp(int format, @NonNull Size size, @NonNull Angles angles) {
-        if (isSetUp()) {
-            // TODO throw or just reconfigure?
+    open fun setUp(format: Int, size: Size, angles: Angles) {
+//        if (this.isSetUp) {
+//            // TODO throw or just reconfigure?
+//        }
+        mFrameSize = size
+        mFrameFormat = format
+        val bitsPerPixel = ImageFormat.getBitsPerPixel(format)
+        val sizeInBits = (size.height * size.width * bitsPerPixel).toLong()
+        this.frameBytes = ceil(sizeInBits / 8.0).toInt()
+        for (i in 0..<this.poolSize) {
+            mFrameQueue.offer(Frame(this))
         }
-        mFrameSize = size;
-        mFrameFormat = format;
-        int bitsPerPixel = ImageFormat.getBitsPerPixel(format);
-        long sizeInBits = size.getHeight() * size.getWidth() * bitsPerPixel;
-        mFrameBytes = (int) Math.ceil(sizeInBits / 8.0d);
-        for (int i = 0; i < getPoolSize(); i++) {
-            mFrameQueue.offer(new Frame(this));
-        }
-        mAngles = angles;
+        mAngles = angles
     }
 
-    /**
-     * Returns true after {@link #setUp(int, Size, Angles)}
-     * but before {@link #release()}.
-     * Returns false otherwise.
-     *
-     * @return true if set up
-     */
-    protected boolean isSetUp() {
-        return mFrameSize != null;
-    }
+    protected val isSetUp: Boolean
+        /**
+         * Returns true after [.setUp]
+         * but before [.release].
+         * Returns false otherwise.
+         *
+         * @return true if set up
+         */
+        get() = mFrameSize != null
 
     /**
      * Returns a new Frame for the given data. This must be called
-     * - after {@link #setUp(int, Size, Angles)}, which sets the buffer size
+     * - after [.setUp], which sets the buffer size
      * - after the T data has been filled
      *
      * @param data data
      * @param time timestamp
      * @return a new frame
      */
-    @Nullable
-    public Frame getFrame(@NonNull T data, long time) {
-        if (!isSetUp()) {
-            throw new IllegalStateException("Can't call getFrame() after releasing " +
-                    "or before setUp.");
+    fun getFrame(data: T, time: Long): Frame? {
+        check(this.isSetUp) {
+            "Can't call getFrame() after releasing " +
+                    "or before setUp."
         }
 
-        Frame frame = mFrameQueue.poll();
+        val frame = mFrameQueue.poll()
         if (frame != null) {
-            LOG.v("getFrame for time:", time, "RECYCLING.");
-            int userRotation = mAngles.offset(Reference.SENSOR, Reference.OUTPUT,
-                    Axis.RELATIVE_TO_SENSOR);
-            int viewRotation = mAngles.offset(Reference.SENSOR, Reference.VIEW,
-                    Axis.RELATIVE_TO_SENSOR);
-            frame.setContent(data, time, userRotation, viewRotation, mFrameSize, mFrameFormat);
-            return frame;
+            LOG.v("getFrame for time:", time, "RECYCLING.")
+            val userRotation = mAngles!!.offset(
+                Reference.SENSOR, Reference.OUTPUT,
+                Axis.RELATIVE_TO_SENSOR
+            )
+            val viewRotation = mAngles!!.offset(
+                Reference.SENSOR, Reference.VIEW,
+                Axis.RELATIVE_TO_SENSOR
+            )
+            frame.setContent(data!!, time, userRotation, viewRotation, mFrameSize!!, mFrameFormat)
+            return frame
         } else {
-            LOG.i("getFrame for time:", time, "NOT AVAILABLE.");
-            onFrameDataReleased(data, false);
-            return null;
+            LOG.i("getFrame for time:", time, "NOT AVAILABLE.")
+            onFrameDataReleased(data, false)
+            return null
         }
     }
 
@@ -154,12 +127,12 @@ public abstract class FrameManager<T> {
      *
      * @param frame the released frame
      */
-    void onFrameReleased(@NonNull Frame frame, @NonNull T data) {
-        if (!isSetUp()) return;
+    fun onFrameReleased(frame: Frame, data: T) {
+        if (!this.isSetUp) return
         // If frame queue is full, let's drop everything.
         // If frame queue accepts this frame, let's recycle the buffer as well.
-        boolean recycled = mFrameQueue.offer(frame);
-        onFrameDataReleased(data, recycled);
+        val recycled = mFrameQueue.offer(frame)
+        onFrameDataReleased(data, recycled)
     }
 
     /**
@@ -171,31 +144,36 @@ public abstract class FrameManager<T> {
      * @param data     data
      * @param recycled recycled
      */
-    protected abstract void onFrameDataReleased(@NonNull T data, boolean recycled);
+    protected abstract fun onFrameDataReleased(data: T, recycled: Boolean)
 
-    @NonNull
-    final T cloneFrameData(@NonNull T data) {
-        return onCloneFrameData(data);
+    fun cloneFrameData(data: T): T {
+        return onCloneFrameData(data)
     }
 
-    @NonNull
-    protected abstract T onCloneFrameData(@NonNull T data);
+    protected abstract fun onCloneFrameData(data: T): T
 
     /**
      * Releases all frames controlled by this manager and
      * clears the pool.
      */
-    public void release() {
-        if (!isSetUp()) {
-            LOG.w("release called twice. Ignoring.");
-            return;
+    open fun release() {
+        if (!this.isSetUp) {
+            LOG.w("release called twice. Ignoring.")
+            return
         }
 
-        LOG.i("release: Clearing the frame and buffer queue.");
-        mFrameQueue.clear();
-        mFrameBytes = -1;
-        mFrameSize = null;
-        mFrameFormat = -1;
-        mAngles = null;
+        LOG.i("release: Clearing the frame and buffer queue.")
+        mFrameQueue.clear()
+        this.frameBytes = -1
+        mFrameSize = null
+        mFrameFormat = -1
+        mAngles = null
+    }
+
+    companion object {
+        private val TAG: String = FrameManager::class.java.simpleName
+
+        @JvmField
+        protected val LOG: CameraLogger = CameraLogger.create(TAG)
     }
 }

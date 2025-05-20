@@ -34,6 +34,8 @@ enum class Facing(val value: Int) : Control {
             }
         }
 
+        fun defaultFacing() = BACK
+
         @JvmStatic
         fun fromValue(value: Int): Facing? {
             val list = Facing.entries.toTypedArray()

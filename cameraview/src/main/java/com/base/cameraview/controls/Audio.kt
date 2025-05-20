@@ -28,7 +28,7 @@ enum class Audio(val value: Int) : Control {
 
     companion object {
         @JvmField
-        val DEFAULT: Audio = Audio.ON
+        val DEFAULT: Audio = ON
 
         @JvmStatic
         fun fromValue(value: Int): Audio {

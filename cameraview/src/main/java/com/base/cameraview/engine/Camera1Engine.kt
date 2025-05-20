@@ -50,8 +50,9 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-class Camera1Engine(callback: Callback) : CameraBaseEngine(callback), PreviewCallback,
-    ErrorCallback, BufferCallback {
+class Camera1Engine(
+    callback: Callback
+) : CameraBaseEngine(callback), PreviewCallback, ErrorCallback, BufferCallback {
     private val mMapper = get()
 
     @VisibleForTesting
@@ -73,8 +74,11 @@ class Camera1Engine(callback: Callback) : CameraBaseEngine(callback), PreviewCal
 
     //endregion
     //region Protected APIs
+    override val previewStreamAvailableSizes: MutableList<Size>
+        get() = getPreviewStreamAvailableSizesEngine1()
+
     @EngineThread
-    override fun getPreviewStreamAvailableSizes(): MutableList<Size?> {
+    fun getPreviewStreamAvailableSizesEngine1(): MutableList<Size> {
         val sizes: MutableList<Camera.Size>
         try {
             sizes = mCamera!!.parameters.supportedPreviewSizes
@@ -85,7 +89,7 @@ class Camera1Engine(callback: Callback) : CameraBaseEngine(callback), PreviewCal
             )
             throw CameraException(e, CameraException.REASON_FAILED_TO_START_PREVIEW)
         }
-        val result: MutableList<Size?> = ArrayList(sizes.size)
+        val result: MutableList<Size> = ArrayList(sizes.size)
         for (size in sizes) {
             val add = Size(size.width, size.height)
             if (!result.contains(add)) result.add(add)
@@ -94,12 +98,13 @@ class Camera1Engine(callback: Callback) : CameraBaseEngine(callback), PreviewCal
         return result
     }
 
-    @EngineThread
-    override fun getFrameProcessingAvailableSizes(): MutableList<Size?> {
-        // We don't choose the frame processing size.
-        // It comes from the preview stream.
-        return mutableListOf<Size?>(mPreviewStreamSize)
-    }
+    override val frameProcessingAvailableSizes: MutableList<Size>
+        @EngineThread get() = if (mPreviewStreamSize == null) {
+            mutableListOf()
+        } else {
+            mutableListOf(mPreviewStreamSize) as MutableList<Size>
+        }
+
 
     @EngineThread
     override fun onPreviewStreamSizeChanged() {
@@ -185,11 +190,12 @@ class Camera1Engine(callback: Callback) : CameraBaseEngine(callback), PreviewCal
     @EngineThread
     override fun onStartBind(): Task<Void?> {
         LOG.i("onStartBind:", "Started")
+        check(mPreview == null) { "Preview is null" }
         try {
-            if (mPreview.getOutputClass() == SurfaceHolder::class.java) {
-                mCamera!!.setPreviewDisplay(mPreview.getOutput() as SurfaceHolder)
-            } else if (mPreview.getOutputClass() == SurfaceTexture::class.java) {
-                mCamera!!.setPreviewTexture(mPreview.getOutput() as SurfaceTexture)
+            if (mPreview?.getOutputClass() == SurfaceHolder::class.java) {
+                mCamera!!.setPreviewDisplay(mPreview!!.getOutput() as SurfaceHolder)
+            } else if (mPreview!!.getOutputClass() == SurfaceTexture::class.java) {
+                mCamera!!.setPreviewTexture(mPreview!!.getOutput() as SurfaceTexture)
             } else {
                 throw RuntimeException("Unknown CameraPreview output class.")
             }
@@ -213,8 +219,8 @@ class Camera1Engine(callback: Callback) : CameraBaseEngine(callback), PreviewCal
 
         val previewSize = getPreviewStreamSize(Reference.VIEW)
         checkNotNull(previewSize) { "previewStreamSize should not be null at this point." }
-        mPreview.setStreamSize(previewSize.width, previewSize.height)
-        mPreview.setDrawRotation(0)
+        mPreview?.setStreamSize(previewSize.width, previewSize.height)
+        mPreview?.setDrawRotation(0)
 
         val params: Camera.Parameters
         try {
@@ -230,10 +236,10 @@ class Camera1Engine(callback: Callback) : CameraBaseEngine(callback), PreviewCal
         // and a few others
         params.previewFormat = ImageFormat.NV21
         // setPreviewSize is not allowed during preview
-        params.setPreviewSize(mPreviewStreamSize.width, mPreviewStreamSize.height)
+        params.setPreviewSize(mPreviewStreamSize!!.width, mPreviewStreamSize!!.height)
         if (mode == Mode.PICTURE) {
             // setPictureSize is allowed during preview
-            params.setPictureSize(mCaptureSize.width, mCaptureSize.height)
+            params.setPictureSize(mCaptureSize!!.width, mCaptureSize!!.height)
         } else {
             // mCaptureSize in this case is a video size. The available video sizes are not
             // necessarily a subset of the picture sizes, so we can't use the mCaptureSize value:
@@ -255,7 +261,9 @@ class Camera1Engine(callback: Callback) : CameraBaseEngine(callback), PreviewCal
 
         mCamera!!.setPreviewCallbackWithBuffer(null) // Release anything left
         mCamera!!.setPreviewCallbackWithBuffer(this) // Add ourselves
-        frameManager.setUp(PREVIEW_FORMAT, mPreviewStreamSize, getAngles())
+        mPreviewStreamSize?.let {
+            frameManager.setUp(PREVIEW_FORMAT, mPreviewStreamSize!!, angles)
+        }
 
         LOG.i("onStartPreview", "Starting preview with startPreview().")
         try {
@@ -273,10 +281,8 @@ class Camera1Engine(callback: Callback) : CameraBaseEngine(callback), PreviewCal
     @EngineThread
     override fun onStopPreview(): Task<Void?> {
         LOG.i("onStopPreview:", "Started.")
-        if (mVideoRecorder != null) {
-            mVideoRecorder.stop(true)
-            mVideoRecorder = null
-        }
+        mVideoRecorder?.stop(true)
+        mVideoRecorder = null
         mPictureRecorder = null
         frameManager.release()
         LOG.i("onStopPreview:", "Releasing preview buffers.")
@@ -296,9 +302,9 @@ class Camera1Engine(callback: Callback) : CameraBaseEngine(callback), PreviewCal
         mPreviewStreamSize = null
         mCaptureSize = null
         try {
-            if (mPreview.getOutputClass() == SurfaceHolder::class.java) {
+            if (mPreview?.getOutputClass() == SurfaceHolder::class.java) {
                 mCamera!!.setPreviewDisplay(null)
-            } else if (mPreview.getOutputClass() == SurfaceTexture::class.java) {
+            } else if (mPreview?.getOutputClass() == SurfaceTexture::class.java) {
                 mCamera!!.setPreviewTexture(null)
             } else {
                 throw RuntimeException("Unknown CameraPreview output class.")
@@ -359,8 +365,8 @@ class Camera1Engine(callback: Callback) : CameraBaseEngine(callback), PreviewCal
             Reference.SENSOR, Reference.OUTPUT, Axis.RELATIVE_TO_SENSOR
         )
         stub.size = getPictureSize(Reference.OUTPUT)
-        mPictureRecorder = Full1PictureRecorder(stub, this@Camera1Engine, mCamera!!)
-        mPictureRecorder.take()
+        mPictureRecorder = Full1PictureRecorder(stub, this, mCamera!!)
+        mPictureRecorder?.take()
         LOG.i("onTakePicture:", "executed.")
     }
 
@@ -381,7 +387,7 @@ class Camera1Engine(callback: Callback) : CameraBaseEngine(callback), PreviewCal
                 angles.offset(Reference.SENSOR, Reference.OUTPUT, Axis.RELATIVE_TO_SENSOR)
             mPictureRecorder = Snapshot1PictureRecorder(stub, this, mCamera!!, outputRatio)
         }
-        mPictureRecorder.take()
+        mPictureRecorder?.take()
         LOG.i("onTakePictureSnapshot:", "executed.")
     }
 
@@ -392,7 +398,7 @@ class Camera1Engine(callback: Callback) : CameraBaseEngine(callback), PreviewCal
         stub.rotation = angles.offset(
             Reference.SENSOR, Reference.OUTPUT, Axis.RELATIVE_TO_SENSOR
         )
-        stub.size = if (angles.flip(Reference.SENSOR, Reference.OUTPUT)) mCaptureSize.flip()
+        stub.size = if (angles.flip(Reference.SENSOR, Reference.OUTPUT)) mCaptureSize?.flip()
         else mCaptureSize
         // Unlock the camera and start recording.
         try {
@@ -404,7 +410,7 @@ class Camera1Engine(callback: Callback) : CameraBaseEngine(callback), PreviewCal
             return
         }
         mVideoRecorder = Full1VideoRecorder(this@Camera1Engine, mCamera!!, mCameraId)
-        mVideoRecorder.start(stub)
+        mVideoRecorder?.start(stub)
     }
 
     @SuppressLint("NewApi")
@@ -435,7 +441,7 @@ class Camera1Engine(callback: Callback) : CameraBaseEngine(callback), PreviewCal
         // Start.
         mVideoRecorder = SnapshotVideoRecorder(this@Camera1Engine, glPreview, overlay)
         try {
-            mVideoRecorder.start(stub)
+            mVideoRecorder?.start(stub)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -495,13 +501,14 @@ class Camera1Engine(callback: Callback) : CameraBaseEngine(callback), PreviewCal
             "flash ($flash)", CameraState.ENGINE
         ) {
             val params = mCamera!!.parameters
-            if (applyFlash(params, old)) mCamera!!.parameters = params
+            if (applyFlash(params, old!!)) mCamera!!.parameters = params
         }
     }
 
     private fun applyFlash(params: Camera.Parameters, oldFlash: Flash): Boolean {
-        if (mCameraOptions.supports(mFlash)) {
-            params.flashMode = mMapper.mapFlash(mFlash)
+        if (mFlash == null) return false
+        if (mCameraOptions?.supports(mFlash!!) == true) {
+            params.flashMode = mMapper.mapFlash(mFlash!!)
             return true
         }
         mFlash = oldFlash
@@ -523,11 +530,11 @@ class Camera1Engine(callback: Callback) : CameraBaseEngine(callback), PreviewCal
         params: Camera.Parameters, @Suppress("unused") oldLocation: Location?
     ): Boolean {
         if (mLocation != null) {
-            params.setGpsLatitude(mLocation.latitude)
-            params.setGpsLongitude(mLocation.longitude)
-            params.setGpsAltitude(mLocation.altitude)
-            params.setGpsTimestamp(mLocation.time)
-            params.setGpsProcessingMethod(mLocation.provider)
+            params.setGpsLatitude(mLocation!!.latitude)
+            params.setGpsLongitude(mLocation!!.longitude)
+            params.setGpsAltitude(mLocation!!.altitude)
+            params.setGpsTimestamp(mLocation!!.time)
+            params.setGpsProcessingMethod(mLocation!!.provider)
         }
         return true
     }
@@ -539,18 +546,25 @@ class Camera1Engine(callback: Callback) : CameraBaseEngine(callback), PreviewCal
             "white balance ($whiteBalance)", CameraState.ENGINE
         ) {
             val params = mCamera!!.parameters
-            if (applyWhiteBalance(params, old)) mCamera!!.parameters = params
+            old?.let {
+                if (applyWhiteBalance(params, old)) mCamera!!.parameters = params
+            }
         }
     }
 
     private fun applyWhiteBalance(
         params: Camera.Parameters, oldWhiteBalance: WhiteBalance
     ): Boolean {
-        if (mCameraOptions.supports(mWhiteBalance)) {
+
+        if (mWhiteBalance == null) {
+            return false
+        }
+
+        if (mCameraOptions?.supports(mWhiteBalance!!) == true) {
             // If this lock key is present, the engine can throw when applying the
             // parameters, not sure why. Since we never lock it, this should be
             // harmless for the rest of the engine.
-            params.whiteBalance = mMapper.mapWhiteBalance(mWhiteBalance)
+            params.whiteBalance = mMapper.mapWhiteBalance(mWhiteBalance!!)
             params.remove("auto-whitebalance-lock")
             return true
         }
@@ -565,13 +579,18 @@ class Camera1Engine(callback: Callback) : CameraBaseEngine(callback), PreviewCal
             "hdr ($hdr)", CameraState.ENGINE
         ) {
             val params = mCamera!!.parameters
-            if (applyHdr(params, old)) mCamera!!.parameters = params
+            old?.let {
+                if (applyHdr(params, old)) mCamera!!.parameters = params
+            }
         }
     }
 
     private fun applyHdr(params: Camera.Parameters, oldHdr: Hdr): Boolean {
-        if (mCameraOptions.supports(mHdr)) {
-            params.sceneMode = mMapper.mapHdr(mHdr)
+        if (mHdr == null) {
+            return false
+        }
+        if (mCameraOptions?.supports(mHdr!!) == true) {
+            params.sceneMode = mMapper.mapHdr(mHdr!!)
             return true
         }
         mHdr = oldHdr
@@ -597,7 +616,7 @@ class Camera1Engine(callback: Callback) : CameraBaseEngine(callback), PreviewCal
     }
 
     private fun applyZoom(params: Camera.Parameters, oldZoom: Float): Boolean {
-        if (mCameraOptions.isZoomSupported) {
+        if (mCameraOptions?.isZoomSupported == true) {
             val max = params.maxZoom.toFloat()
             params.zoom = (mZoomValue * max).toInt()
             mCamera!!.parameters = params
@@ -632,16 +651,16 @@ class Camera1Engine(callback: Callback) : CameraBaseEngine(callback), PreviewCal
     private fun applyExposureCorrection(
         params: Camera.Parameters, oldExposureCorrection: Float
     ): Boolean {
-        if (mCameraOptions.isExposureCorrectionSupported) {
+        if (mCameraOptions == null) {
+            return false
+        }
+        if (mCameraOptions!!.isExposureCorrectionSupported) {
             // Just make sure we're inside boundaries.
-            val max = mCameraOptions.getExposureCorrectionMaxValue()
-            val min = mCameraOptions.getExposureCorrectionMinValue()
-            var `val` = mExposureCorrectionValue
-            `val` = if (`val` < min) min else if (`val` > max) max else `val` // cap
-            mExposureCorrectionValue = `val`
+            val max = mCameraOptions!!.getExposureCorrectionMaxValue()
+            val min = mCameraOptions!!.getExposureCorrectionMinValue()
+            mExposureCorrectionValue = mExposureCorrectionValue.coerceIn(min, max)
             // Apply.
-            val indexValue =
-                (mExposureCorrectionValue / params.exposureCompensationStep).toInt()
+            val indexValue = (mExposureCorrectionValue / params.exposureCompensationStep).toInt()
             params.exposureCompensation = indexValue
             return true
         }
@@ -703,11 +722,14 @@ class Camera1Engine(callback: Callback) : CameraBaseEngine(callback), PreviewCal
             }
         } else {
             // If out of boundaries, adjust it.
+            if (mCameraOptions == null) {
+                return false
+            }
             mPreviewFrameRate = min(
-                mPreviewFrameRate, mCameraOptions.getPreviewFrameRateMaxValue()
+                mPreviewFrameRate, mCameraOptions!!.getPreviewFrameRateMaxValue()
             )
             mPreviewFrameRate = max(
-                mPreviewFrameRate, mCameraOptions.getPreviewFrameRateMinValue()
+                mPreviewFrameRate, mCameraOptions!!.getPreviewFrameRateMinValue()
             )
             for (fpsRange in fpsRanges) {
                 val lower = fpsRange[0].toFloat() / 1000f
@@ -786,7 +808,10 @@ class Camera1Engine(callback: Callback) : CameraBaseEngine(callback), PreviewCal
     ) {
         orchestrator.scheduleStateful("auto focus", CameraState.BIND, object : Runnable {
             override fun run() {
-                if (!mCameraOptions.isAutoFocusSupported) return
+                if (mCameraOptions == null) {
+                    return
+                }
+                if (!mCameraOptions!!.isAutoFocusSupported) return
                 val transform: MeteringTransform<Camera.Area?> = Camera1MeteringTransform(
                     angles, preview.surfaceSize
                 )
@@ -824,9 +849,7 @@ class Camera1Engine(callback: Callback) : CameraBaseEngine(callback), PreviewCal
                         callback.dispatchOnFocusEnd(gesture, success, legacyPoint)
                         if (shouldResetAutoFocus()) {
                             orchestrator.scheduleStatefulDelayed(
-                                JOB_FOCUS_RESET,
-                                CameraState.ENGINE,
-                                autoFocusResetDelay
+                                JOB_FOCUS_RESET, CameraState.ENGINE, autoFocusResetDelay
                             ) {
                                 mCamera!!.cancelAutoFocus()
                                 val params = mCamera!!.parameters
