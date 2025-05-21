@@ -1,111 +1,89 @@
-package com.base.cameraview.metering;
+package com.base.cameraview.metering
 
-import android.graphics.PointF;
-import android.graphics.RectF;
+import android.graphics.PointF
+import android.graphics.RectF
+import androidx.annotation.VisibleForTesting
+import com.base.cameraview.size.Size
+import kotlin.math.min
+import kotlin.math.roundToInt
 
-import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
-
-import com.base.cameraview.size.Size;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-public class MeteringRegions {
-    @VisibleForTesting
-    final static float BLUR_FACTOR_WEIGHT = 0.1F;
-    private final static float POINT_AREA = 0.05F;
-    private final static float BLUR_FACTOR_SIZE = 1.5F;
-
-    @VisibleForTesting
-    final List<MeteringRegion> mRegions;
-
-    private MeteringRegions(@NonNull List<MeteringRegion> regions) {
-        mRegions = regions;
+class MeteringRegions private constructor(@field:VisibleForTesting val mRegions: MutableList<MeteringRegion>) {
+    fun transform(transform: MeteringTransform<*>): MeteringRegions {
+        val regions: MutableList<MeteringRegion> = ArrayList()
+        for (region in mRegions) {
+            regions.add(region.transform(transform))
+        }
+        return MeteringRegions(regions)
     }
 
-    @NonNull
-    public static MeteringRegions fromPoint(@NonNull Size bounds,
-                                            @NonNull PointF point) {
-        return fromPoint(bounds, point, MeteringRegion.MAX_WEIGHT);
+    fun <T> get(atMost: Int, transform: MeteringTransform<T?>): MutableList<T?> {
+        var atMost = atMost
+        val result: MutableList<T?> = ArrayList()
+        mRegions.sort()
+        for (region in mRegions) {
+            result.add(transform.transformMeteringRegion(region.mRegion, region.mWeight))
+        }
+        atMost = min(atMost, result.size)
+        return result.subList(0, atMost)
     }
 
-    @NonNull
-    public static MeteringRegions fromPoint(@NonNull Size bounds,
-                                            @NonNull PointF point,
-                                            int weight) {
-        float width = POINT_AREA * bounds.getWidth();
-        float height = POINT_AREA * bounds.getHeight();
-        RectF rectF = expand(point, width, height);
-        return fromArea(bounds, rectF, weight, true);
-    }
+    companion object {
+        @VisibleForTesting
+        const val BLUR_FACTOR_WEIGHT: Float = 0.1f
+        private const val POINT_AREA = 0.05f
+        private const val BLUR_FACTOR_SIZE = 1.5f
 
-    @NonNull
-    public static MeteringRegions fromArea(@NonNull Size bounds,
-                                           @NonNull RectF area) {
-        return fromArea(bounds, area, MeteringRegion.MAX_WEIGHT);
-    }
+        @JvmOverloads
+        fun fromPoint(
+            bounds: Size,
+            point: PointF,
+            weight: Int = MeteringRegion.MAX_WEIGHT
+        ): MeteringRegions {
+            val width: Float = POINT_AREA * bounds.width
+            val height: Float = POINT_AREA * bounds.height
+            val rectF: RectF = expand(point, width, height)
+            return fromArea(bounds, rectF, weight, true)
+        }
 
-    @NonNull
-    public static MeteringRegions fromArea(@NonNull Size bounds,
-                                           @NonNull RectF area,
-                                           int weight) {
-        return fromArea(bounds, area, weight, false);
-    }
-
-    @NonNull
-    public static MeteringRegions fromArea(@NonNull Size bounds,
-                                           @NonNull RectF area,
-                                           int weight,
-                                           boolean blur) {
-        List<MeteringRegion> regions = new ArrayList<>();
-        final PointF center = new PointF(area.centerX(), area.centerY());
-        final float width = area.width();
-        final float height = area.height();
-        regions.add(new MeteringRegion(area, weight));
-        if (blur) {
-            RectF background = expand(center,
+        @JvmOverloads
+        fun fromArea(
+            bounds: Size,
+            area: RectF,
+            weight: Int = MeteringRegion.MAX_WEIGHT,
+            blur: Boolean = false
+        ): MeteringRegions {
+            val regions: MutableList<MeteringRegion> = ArrayList()
+            val center = PointF(area.centerX(), area.centerY())
+            val width = area.width()
+            val height = area.height()
+            regions.add(MeteringRegion(area, weight))
+            if (blur) {
+                val background: RectF = expand(
+                    center,
                     BLUR_FACTOR_SIZE * width,
-                    BLUR_FACTOR_SIZE * height);
-            regions.add(new MeteringRegion(background,
-                    Math.round(BLUR_FACTOR_WEIGHT * weight)));
+                    BLUR_FACTOR_SIZE * height
+                )
+                regions.add(
+                    MeteringRegion(
+                        background,
+                        (BLUR_FACTOR_WEIGHT * weight).roundToInt()
+                    )
+                )
+            }
+            val clipped: MutableList<MeteringRegion> = ArrayList()
+            for (region in regions) {
+                clipped.add(region.clip(bounds))
+            }
+            return MeteringRegions(clipped)
         }
-        List<MeteringRegion> clipped = new ArrayList<>();
-        for (MeteringRegion region : regions) {
-            clipped.add(region.clip(bounds));
+
+        private fun expand(center: PointF, width: Float, height: Float): RectF {
+            return RectF(
+                center.x - width / 2f,
+                center.y - height / 2f,
+                center.x + width / 2f,
+                center.y + height / 2f
+            )
         }
-        return new MeteringRegions(clipped);
     }
-
-    @NonNull
-    private static RectF expand(@NonNull PointF center, float width, float height) {
-        return new RectF(
-                center.x - width / 2F,
-                center.y - height / 2F,
-                center.x + width / 2F,
-                center.y + height / 2F
-        );
-    }
-
-    @NonNull
-    public MeteringRegions transform(@NonNull MeteringTransform transform) {
-        List<MeteringRegion> regions = new ArrayList<>();
-        for (MeteringRegion region : mRegions) {
-            regions.add(region.transform(transform));
-        }
-        return new MeteringRegions(regions);
-    }
-
-    @NonNull
-    public <T> List<T> get(int atMost, @NonNull MeteringTransform<T> transform) {
-        List<T> result = new ArrayList<>();
-        Collections.sort(mRegions);
-        for (MeteringRegion region : mRegions) {
-            result.add(transform.transformMeteringRegion(region.mRegion, region.mWeight));
-        }
-        atMost = Math.min(atMost, result.size());
-        return result.subList(0, atMost);
-    }
-
 }
