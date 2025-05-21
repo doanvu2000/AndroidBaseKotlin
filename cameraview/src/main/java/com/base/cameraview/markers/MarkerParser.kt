@@ -1,32 +1,23 @@
-package com.base.cameraview.markers;
+package com.base.cameraview.markers
 
-import android.content.res.TypedArray;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import com.base.cameraview.R;
+import android.content.res.TypedArray
+import com.base.cameraview.R
 
 /**
  * Parses markers from XML attributes.
  */
-public class MarkerParser {
+class MarkerParser(array: TypedArray) {
+    var autoFocusMarker: AutoFocusMarker? = null
+        private set
 
-    private AutoFocusMarker autoFocusMarker = null;
-
-    public MarkerParser(@NonNull TypedArray array) {
-        String autoFocusName = array.getString(R.styleable.CameraView_cameraAutoFocusMarker);
+    init {
+        val autoFocusName = array.getString(R.styleable.CameraView_cameraAutoFocusMarker)
         if (autoFocusName != null) {
             try {
-                Class<?> autoFocusClass = Class.forName(autoFocusName);
-                autoFocusMarker = (AutoFocusMarker) autoFocusClass.newInstance();
-            } catch (Exception ignore) {
+                val autoFocusClass = Class.forName(autoFocusName)
+                autoFocusMarker = autoFocusClass.newInstance() as AutoFocusMarker
+            } catch (ignore: Exception) {
             }
         }
-    }
-
-    @Nullable
-    public AutoFocusMarker getAutoFocusMarker() {
-        return autoFocusMarker;
     }
 }

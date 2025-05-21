@@ -1,34 +1,35 @@
-package com.base.cameraview.internal;
+package com.base.cameraview.internal
 
-import android.os.Build;
-import android.util.Range;
+import android.os.Build
+import android.util.Range
+import com.base.cameraview.CameraLogger
 
-import com.base.cameraview.CameraLogger;
+object FpsRangeValidator {
+    private val LOG: CameraLogger = CameraLogger.create("FpsRangeValidator")
+    private val sIssues: MutableMap<String?, MutableList<Range<Int>?>?> =
+        HashMap()
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-public class FpsRangeValidator {
-
-    private final static CameraLogger LOG = CameraLogger.create("FpsRangeValidator");
-    private final static Map<String, List<Range<Integer>>> sIssues = new HashMap<>();
-
-    static {
-        sIssues.put("Google Pixel 4", Arrays.asList(new Range<>(15, 60)));
-        sIssues.put("Google Pixel 4a", Arrays.asList(new Range<>(15, 60)));
-        sIssues.put("Google Pixel 4 XL", Arrays.asList(new Range<>(15, 60)));
+    init {
+        sIssues.put("Google Pixel 4", mutableListOf<Range<Int>?>(Range<Int>(15, 60)))
+        sIssues.put("Google Pixel 4a", mutableListOf<Range<Int>?>(Range<Int>(15, 60)))
+        sIssues.put("Google Pixel 4 XL", mutableListOf<Range<Int>?>(Range<Int>(15, 60)))
     }
 
-    public static boolean validate(Range<Integer> range) {
-        LOG.i("Build.MODEL:", Build.MODEL, "Build.BRAND:", Build.BRAND, "Build.MANUFACTURER:", Build.MANUFACTURER);
-        String descriptor = Build.MANUFACTURER + " " + Build.MODEL;
-        List<Range<Integer>> ranges = sIssues.get(descriptor);
+    fun validate(range: Range<Int>?): Boolean {
+        LOG.i(
+            "Build.MODEL:",
+            Build.MODEL,
+            "Build.BRAND:",
+            Build.BRAND,
+            "Build.MANUFACTURER:",
+            Build.MANUFACTURER
+        )
+        val descriptor = Build.MANUFACTURER + " " + Build.MODEL
+        val ranges = sIssues[descriptor]
         if (ranges != null && ranges.contains(range)) {
-            LOG.i("Dropping range:", range);
-            return false;
+            LOG.i("Dropping range:", range)
+            return false
         }
-        return true;
+        return true
     }
 }

@@ -1,60 +1,42 @@
-package com.base.cameraview.internal;
+package com.base.cameraview.internal
 
-import androidx.exifinterface.media.ExifInterface;
+import androidx.exifinterface.media.ExifInterface
 
 /**
  * Super basic exif utilities.
  */
-public class ExifHelper {
-
+object ExifHelper {
     /**
-     * Maps an {@link ExifInterface} orientation value
+     * Maps an [ExifInterface] orientation value
      * to the actual degrees.
      */
-    public static int getOrientation(int exifOrientation) {
-        int orientation;
-        switch (exifOrientation) {
-            case ExifInterface.ORIENTATION_NORMAL:
-            case ExifInterface.ORIENTATION_FLIP_HORIZONTAL:
-                orientation = 0;
-                break;
+    @JvmStatic
+    fun getOrientation(exifOrientation: Int): Int {
+        val orientation: Int = when (exifOrientation) {
+            ExifInterface.ORIENTATION_NORMAL, ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> 0
 
-            case ExifInterface.ORIENTATION_ROTATE_180:
-            case ExifInterface.ORIENTATION_FLIP_VERTICAL:
-                orientation = 180;
-                break;
+            ExifInterface.ORIENTATION_ROTATE_180, ExifInterface.ORIENTATION_FLIP_VERTICAL -> 180
 
-            case ExifInterface.ORIENTATION_ROTATE_90:
-            case ExifInterface.ORIENTATION_TRANSPOSE:
-                orientation = 90;
-                break;
+            ExifInterface.ORIENTATION_ROTATE_90, ExifInterface.ORIENTATION_TRANSPOSE -> 90
 
-            case ExifInterface.ORIENTATION_ROTATE_270:
-            case ExifInterface.ORIENTATION_TRANSVERSE:
-                orientation = 270;
-                break;
+            ExifInterface.ORIENTATION_ROTATE_270, ExifInterface.ORIENTATION_TRANSVERSE -> 270
 
-            default:
-                orientation = 0;
+            else -> 0
         }
-        return orientation;
+        return orientation
     }
 
     /**
-     * Maps a degree value to {@link ExifInterface} constant.
+     * Maps a degree value to [ExifInterface] constant.
      */
-    public static int getExifOrientation(int orientation) {
-        switch ((orientation + 360) % 360) {
-            case 0:
-                return ExifInterface.ORIENTATION_NORMAL;
-            case 90:
-                return ExifInterface.ORIENTATION_ROTATE_90;
-            case 180:
-                return ExifInterface.ORIENTATION_ROTATE_180;
-            case 270:
-                return ExifInterface.ORIENTATION_ROTATE_270;
-            default:
-                throw new IllegalArgumentException("Invalid orientation: " + orientation);
+    @JvmStatic
+    fun getExifOrientation(orientation: Int): Int {
+        return when ((orientation + 360) % 360) {
+            0 -> ExifInterface.ORIENTATION_NORMAL
+            90 -> ExifInterface.ORIENTATION_ROTATE_90
+            180 -> ExifInterface.ORIENTATION_ROTATE_180
+            270 -> ExifInterface.ORIENTATION_ROTATE_270
+            else -> throw IllegalArgumentException("Invalid orientation: $orientation")
         }
     }
 }

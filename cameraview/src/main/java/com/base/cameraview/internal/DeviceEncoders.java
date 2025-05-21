@@ -40,15 +40,15 @@ import java.util.List;
  * and what {@link android.media.MediaRecorder} also does when recording.
  * <p>
  * The list is ordered based on the encoder definitions in system/etc/media_codecs.xml,
- * as explained here: https://source.android.com/devices/media , for example.
+ * as explained here: <a href="https://source.android.com/devices/media">...</a> , for example.
  * So taking the first means respecting the vendor priorities and should generally be
  * a good idea.
  * <p>
  * About {@link android.media.MediaRecorder}, we know it uses this option from here:
- * https://stackoverflow.com/q/57479564/4288782 where all links to source code are shown.
- * - StagefrightRecorder (https://android.googlesource.com/platform/frameworks/av/+/master/media/libmediaplayerservice/StagefrightRecorder.cpp#1782)
- * - MediaCodecSource (https://android.googlesource.com/platform/frameworks/av/+/master/media/libstagefright/MediaCodecSource.cpp#515)
- * - MediaCodecList (https://android.googlesource.com/platform/frameworks/av/+/master/media/libstagefright/MediaCodecList.cpp#322)
+ * <a href="https://stackoverflow.com/q/57479564/4288782">...</a> where all links to source code are shown.
+ * - StagefrightRecorder (<a href="https://android.googlesource.com/platform/frameworks/av/+/master/media/libmediaplayerservice/StagefrightRecorder.cpp#1782">...</a>)
+ * - MediaCodecSource (<a href="https://android.googlesource.com/platform/frameworks/av/+/master/media/libstagefright/MediaCodecSource.cpp#515">...</a>)
+ * - MediaCodecList (<a href="https://android.googlesource.com/platform/frameworks/av/+/master/media/libstagefright/MediaCodecList.cpp#322">...</a>)
  * <p>
  * To be fair, what {@link android.media.MediaRecorder} does is actually choose the first one
  * that configures itself without errors. We offer this option through
@@ -124,7 +124,7 @@ public class DeviceEncoders {
     /**
      * Whether an encoder is a hardware encoder or not. We don't have an API to check this,
      * but we can follow what libstagefright does:
-     * https://android.googlesource.com/platform/frameworks/av/+/master/media/libstagefright/MediaCodecList.cpp#293
+     * <a href="https://android.googlesource.com/platform/frameworks/av/+/master/media/libstagefright/MediaCodecList.cpp#293">...</a>
      *
      * @param encoder encoder
      * @return true if hardware

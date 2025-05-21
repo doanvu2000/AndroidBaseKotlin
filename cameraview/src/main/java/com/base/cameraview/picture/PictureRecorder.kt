@@ -1,24 +1,25 @@
-package com.base.cameraview.picture;
+package com.base.cameraview.picture
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
-
-import com.base.cameraview.PictureResult;
+import androidx.annotation.VisibleForTesting
+import com.base.cameraview.PictureResult
 
 /**
  * Interface for picture capturing.
  * Don't call start if already started. Don't call stop if already stopped.
  * Don't reuse.
  */
-public abstract class PictureRecorder {
+abstract class PictureRecorder(
+    stub: PictureResult.Stub,
+    listener: PictureResultListener?
+) {
+    protected var mError: Exception? = null
 
-    @SuppressWarnings("WeakerAccess")
-    protected Exception mError;
-    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-    PictureResult.Stub mResult;
+    @JvmField
+    @VisibleForTesting(otherwise = VisibleForTesting.Companion.PROTECTED)
+    var mResult: PictureResult.Stub?
+
     @VisibleForTesting
-    PictureResultListener mListener;
+    var mListener: PictureResultListener?
 
     /**
      * Creates a new picture recorder.
@@ -26,17 +27,15 @@ public abstract class PictureRecorder {
      * @param stub     a picture stub
      * @param listener a listener
      */
-    @SuppressWarnings("WeakerAccess")
-    public PictureRecorder(@NonNull PictureResult.Stub stub,
-                           @Nullable PictureResultListener listener) {
-        mResult = stub;
-        mListener = listener;
+    init {
+        mResult = stub
+        mListener = listener
     }
 
     /**
      * Takes a picture.
      */
-    public abstract void take();
+    abstract fun take()
 
     /**
      * Subclasses can call this to notify that the shutter was activated,
@@ -44,34 +43,32 @@ public abstract class PictureRecorder {
      *
      * @param didPlaySound whether it played sounds
      */
-    @SuppressWarnings("WeakerAccess")
-    protected void dispatchOnShutter(boolean didPlaySound) {
-        if (mListener != null) mListener.onPictureShutter(didPlaySound);
+    protected fun dispatchOnShutter(didPlaySound: Boolean) {
+        if (mListener != null) mListener!!.onPictureShutter(didPlaySound)
     }
 
     /**
      * Subclasses can call this to notify that the result was obtained,
      * either with some error (null result) or with the actual stub, filled.
      */
-    protected void dispatchResult() {
+    protected open fun dispatchResult() {
         if (mListener != null) {
-            mListener.onPictureResult(mResult, mError);
-            mListener = null;
-            mResult = null;
+            mListener!!.onPictureResult(mResult, mError)
+            mListener = null
+            mResult = null
         }
     }
 
     /**
      * Listens for picture recorder events.
      */
-    public interface PictureResultListener {
-
+    interface PictureResultListener {
         /**
          * The shutter was activated.
          *
          * @param didPlaySound whether a sound was played
          */
-        void onPictureShutter(boolean didPlaySound);
+        fun onPictureShutter(didPlaySound: Boolean)
 
         /**
          * Picture was taken or there was some error, if
@@ -80,6 +77,6 @@ public abstract class PictureRecorder {
          * @param result the result or null if there was some error
          * @param error  the error or null if there wasn't any
          */
-        void onPictureResult(@Nullable PictureResult.Stub result, @Nullable Exception error);
+        fun onPictureResult(result: PictureResult.Stub?, error: Exception?)
     }
 }

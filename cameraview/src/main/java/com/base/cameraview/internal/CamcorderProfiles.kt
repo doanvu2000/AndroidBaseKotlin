@@ -1,38 +1,32 @@
-package com.base.cameraview.internal;
+package com.base.cameraview.internal
 
-import android.annotation.SuppressLint;
-import android.media.CamcorderProfile;
-
-import androidx.annotation.NonNull;
-
-import com.base.cameraview.CameraLogger;
-import com.base.cameraview.size.Size;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import android.annotation.SuppressLint
+import android.media.CamcorderProfile
+import com.base.cameraview.CameraLogger
+import com.base.cameraview.size.Size
+import kotlin.math.abs
 
 /**
- * Wraps the {@link CamcorderProfile} static utilities.
+ * Wraps the [CamcorderProfile] static utilities.
  */
-public class CamcorderProfiles {
-
-    private static final String TAG = CamcorderProfiles.class.getSimpleName();
-    private static final CameraLogger LOG = CameraLogger.create(TAG);
+object CamcorderProfiles {
+    private val TAG: String = CamcorderProfiles::class.java.simpleName
+    private val LOG: CameraLogger = CameraLogger.create(TAG)
 
     @SuppressLint("UseSparseArrays")
-    private static Map<Size, Integer> sizeToProfileMap = new HashMap<>();
+    private val sizeToProfileMap: MutableMap<Size?, Int?> = HashMap<Size?, Int?>()
 
-    static {
-        sizeToProfileMap.put(new Size(176, 144), CamcorderProfile.QUALITY_QCIF);
-        sizeToProfileMap.put(new Size(320, 240), CamcorderProfile.QUALITY_QVGA);
-        sizeToProfileMap.put(new Size(352, 288), CamcorderProfile.QUALITY_CIF);
-        sizeToProfileMap.put(new Size(720, 480), CamcorderProfile.QUALITY_480P);
-        sizeToProfileMap.put(new Size(1280, 720), CamcorderProfile.QUALITY_720P);
-        sizeToProfileMap.put(new Size(1920, 1080), CamcorderProfile.QUALITY_1080P);
-        sizeToProfileMap.put(new Size(3840, 2160),
-                CamcorderProfile.QUALITY_2160P);
+    init {
+        sizeToProfileMap.put(Size(176, 144), CamcorderProfile.QUALITY_QCIF)
+        sizeToProfileMap.put(Size(320, 240), CamcorderProfile.QUALITY_QVGA)
+        sizeToProfileMap.put(Size(352, 288), CamcorderProfile.QUALITY_CIF)
+        sizeToProfileMap.put(Size(720, 480), CamcorderProfile.QUALITY_480P)
+        sizeToProfileMap.put(Size(1280, 720), CamcorderProfile.QUALITY_720P)
+        sizeToProfileMap.put(Size(1920, 1080), CamcorderProfile.QUALITY_1080P)
+        sizeToProfileMap.put(
+            Size(3840, 2160),
+            CamcorderProfile.QUALITY_2160P
+        )
     }
 
 
@@ -45,15 +39,16 @@ public class CamcorderProfiles {
      * @param targetSize the target video size
      * @return a profile
      */
-    @NonNull
-    public static CamcorderProfile get(@NonNull String cameraId, @NonNull Size targetSize) {
+    @JvmStatic
+    fun get(cameraId: String, targetSize: Size): CamcorderProfile {
         // It seems that the way to do this is to use Integer.parseInt().
         try {
-            int camera1Id = Integer.parseInt(cameraId);
-            return get(camera1Id, targetSize);
-        } catch (NumberFormatException e) {
-            LOG.w("NumberFormatException for Camera2 id:", cameraId);
-            return CamcorderProfile.get(CamcorderProfile.QUALITY_LOW);
+            val camera1Id = cameraId.toInt()
+            return get(camera1Id, targetSize)
+        } catch (e: NumberFormatException) {
+            e.printStackTrace()
+            LOG.w("NumberFormatException for Camera2 id:", cameraId)
+            return CamcorderProfile.get(CamcorderProfile.QUALITY_LOW)
         }
     }
 
@@ -66,25 +61,23 @@ public class CamcorderProfiles {
      * @param targetSize the target video size
      * @return a profile
      */
-    @NonNull
-    public static CamcorderProfile get(int cameraId, @NonNull Size targetSize) {
-        final long targetArea = (long) targetSize.getWidth() * targetSize.getHeight();
-        List<Size> sizes = new ArrayList<>(sizeToProfileMap.keySet());
-        sizes.sort((s1, s2) -> {
-            long a1 = Math.abs((long) s1.getWidth() * s1.getHeight() - targetArea);
-            long a2 = Math.abs((long) s2.getWidth() * s2.getHeight() - targetArea);
-            //noinspection UseCompareMethod
-            return (a1 < a2) ? -1 : ((a1 == a2) ? 0 : 1);
-        });
-        while (!sizes.isEmpty()) {
-            Size candidate = sizes.remove(0);
-            //noinspection ConstantConditions
-            int quality = sizeToProfileMap.get(candidate);
+    @JvmStatic
+    fun get(cameraId: Int, targetSize: Size): CamcorderProfile {
+        val targetArea = targetSize.width.toLong() * targetSize.height
+        val sizes: MutableList<Size?> = ArrayList(sizeToProfileMap.keys)
+        sizes.sortWith(Comparator { s1: Size?, s2: Size? ->
+            val a1 = abs(s1!!.width.toLong() * s1.height - targetArea)
+            val a2 = abs(s2!!.width.toLong() * s2.height - targetArea)
+            if (a1 < a2) -1 else (if (a1 == a2) 0 else 1)
+        })
+        while (sizes.isNotEmpty()) {
+            val candidate = sizes.removeAt(0)
+            val quality: Int = sizeToProfileMap[candidate]!!
             if (CamcorderProfile.hasProfile(cameraId, quality)) {
-                return CamcorderProfile.get(cameraId, quality);
+                return CamcorderProfile.get(cameraId, quality)
             }
         }
         // Should never happen, but fallback to low.
-        return CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_LOW);
+        return CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_LOW)
     }
 }

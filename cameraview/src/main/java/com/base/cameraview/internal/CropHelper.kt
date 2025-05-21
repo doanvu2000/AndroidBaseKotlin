@@ -1,41 +1,41 @@
-package com.base.cameraview.internal;
+package com.base.cameraview.internal
 
-import android.graphics.Rect;
-
-import androidx.annotation.NonNull;
-
-import com.base.cameraview.size.AspectRatio;
-import com.base.cameraview.size.Size;
+import android.graphics.Rect
+import com.base.cameraview.size.AspectRatio
+import com.base.cameraview.size.Size
+import kotlin.math.roundToInt
 
 /**
  * Simply computes the crop between a full size and a desired aspect ratio.
  */
-public class CropHelper {
-
+object CropHelper {
     // It's important that size and aspect ratio belong to the same reference.
-    @NonNull
-    public static Rect computeCrop(@NonNull Size currentSize, @NonNull AspectRatio targetRatio) {
-        int currentWidth = currentSize.getWidth();
-        int currentHeight = currentSize.getHeight();
-        if (targetRatio.matches(currentSize, 0.0005F)) {
-            return new Rect(0, 0, currentWidth, currentHeight);
+    @JvmStatic
+    fun computeCrop(currentSize: Size, targetRatio: AspectRatio): Rect {
+        val currentWidth = currentSize.width
+        val currentHeight = currentSize.height
+        if (targetRatio.matches(currentSize, 0.0005f)) {
+            return Rect(0, 0, currentWidth, currentHeight)
         }
 
         // They are not equal. Compute.
-        AspectRatio currentRatio = AspectRatio.of(currentWidth, currentHeight);
-        int x, y, width, height;
+        val currentRatio = AspectRatio.of(currentWidth, currentHeight)
+        val x: Int
+        val y: Int
+        val width: Int
+        val height: Int
         if (currentRatio.toFloat() > targetRatio.toFloat()) {
-            height = currentHeight;
-            width = Math.round(height * targetRatio.toFloat());
-            y = 0;
-            x = Math.round((currentWidth - width) / 2F);
+            height = currentHeight
+            width = (height * targetRatio.toFloat()).roundToInt()
+            y = 0
+            x = ((currentWidth - width) / 2f).roundToInt()
         } else {
-            width = currentWidth;
-            height = Math.round(width / targetRatio.toFloat());
-            y = Math.round((currentHeight - height) / 2F);
-            x = 0;
+            width = currentWidth
+            height = (width / targetRatio.toFloat()).roundToInt()
+            y = ((currentHeight - height) / 2f).roundToInt()
+            x = 0
         }
-        return new Rect(x, y, x + width, y + height);
+        return Rect(x, y, x + width, y + height)
     }
 }
 

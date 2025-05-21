@@ -1,20 +1,16 @@
-package com.base.cameraview.markers;
-
-import com.base.cameraview.CameraView;
-import com.base.cameraview.gesture.GestureAction;
+package com.base.cameraview.markers
 
 /**
  * Gives information about what triggered the autofocus operation.
  */
-public enum AutoFocusTrigger {
-
+enum class AutoFocusTrigger {
     /**
-     * Autofocus was triggered by {@link GestureAction#AUTO_FOCUS}.
+     * Autofocus was triggered by [com.base.cameraview.gesture.GestureAction.AUTO_FOCUS].
      */
     GESTURE,
 
     /**
-     * Autofocus was triggered by the {@link CameraView#startAutoFocus(float, float)} method.
+     * Autofocus was triggered by the [com.base.cameraview.CameraView.startAutoFocus] method.
      */
     METHOD
 }

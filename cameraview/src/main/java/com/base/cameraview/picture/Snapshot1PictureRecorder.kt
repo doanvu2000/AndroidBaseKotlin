@@ -1,97 +1,84 @@
-package com.base.cameraview.picture;
+package com.base.cameraview.picture
 
-import android.graphics.Rect;
-import android.graphics.YuvImage;
-import android.hardware.Camera;
-
-import androidx.annotation.NonNull;
-
-import com.base.cameraview.PictureResult;
-import com.base.cameraview.engine.Camera1Engine;
-import com.base.cameraview.engine.offset.Reference;
-import com.base.cameraview.internal.CropHelper;
-import com.base.cameraview.internal.RotationHelper;
-import com.base.cameraview.internal.WorkerHandler;
-import com.base.cameraview.size.AspectRatio;
-import com.base.cameraview.size.Size;
-
-import java.io.ByteArrayOutputStream;
+import android.graphics.YuvImage
+import android.hardware.Camera
+import com.base.cameraview.PictureResult
+import com.base.cameraview.engine.Camera1Engine
+import com.base.cameraview.engine.offset.Reference
+import com.base.cameraview.internal.CropHelper
+import com.base.cameraview.internal.RotationHelper
+import com.base.cameraview.internal.WorkerHandler
+import com.base.cameraview.size.AspectRatio
+import com.base.cameraview.size.Size
+import java.io.ByteArrayOutputStream
 
 /**
- * A {@link PictureRecorder} that uses standard APIs.
+ * A [PictureRecorder] that uses standard APIs.
  */
-public class Snapshot1PictureRecorder extends SnapshotPictureRecorder {
+class Snapshot1PictureRecorder(
+    stub: PictureResult.Stub,
+    engine: Camera1Engine,
+    camera: Camera,
+    outputRatio: AspectRatio
+) : SnapshotPictureRecorder(stub, engine) {
+    private var mEngine1: Camera1Engine?
+    private var mCamera: Camera?
+    private var mOutputRatio: AspectRatio?
+    private var mFormat: Int
 
-    private Camera1Engine mEngine1;
-    private Camera mCamera;
-    private AspectRatio mOutputRatio;
-    private int mFormat;
-
-    public Snapshot1PictureRecorder(
-            @NonNull PictureResult.Stub stub,
-            @NonNull Camera1Engine engine,
-            @NonNull Camera camera,
-            @NonNull AspectRatio outputRatio) {
-        super(stub, engine);
-        mEngine1 = engine;
-        mCamera = camera;
-        mOutputRatio = outputRatio;
-        mFormat = camera.getParameters().getPreviewFormat();
+    init {
+        mEngine1 = engine
+        mCamera = camera
+        mOutputRatio = outputRatio
+        mFormat = camera.parameters.previewFormat
     }
 
-    @Override
-    public void take() {
-        mCamera.setOneShotPreviewCallback(new Camera.PreviewCallback() {
-            @Override
-            public void onPreviewFrame(@NonNull final byte[] yuv, Camera camera) {
-                dispatchOnShutter(false);
+    override fun take() {
+        mCamera!!.setOneShotPreviewCallback { yuv, camera ->
+            dispatchOnShutter(false)
 
-                // Got to rotate the preview frame, since byte[] data here does not include
-                // EXIF tags automatically set by camera. So either we add EXIF, or we rotate.
-                // Adding EXIF to a byte array, unfortunately, is hard.
-                final int sensorToOutput = mResult.rotation;
-                final Size outputSize = mResult.size;
-                final Size previewStreamSize = mEngine1.getPreviewStreamSize(Reference.SENSOR);
-                if (previewStreamSize == null) {
-                    throw new IllegalStateException("Preview stream size " +
-                            "should never be null here.");
-                }
-                WorkerHandler.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Rotate the picture, because no one will write EXIF data,
-                        // then crop if needed. In both cases, transform yuv to jpeg.
-                        //noinspection deprecation
-                        byte[] data = RotationHelper.rotate(yuv, previewStreamSize, sensorToOutput);
-                        YuvImage yuv = new YuvImage(data, mFormat, outputSize.getWidth(),
-                                outputSize.getHeight(), null);
-
-                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                        Rect outputRect = CropHelper.computeCrop(outputSize, mOutputRatio);
-                        yuv.compressToJpeg(outputRect, 90, stream);
-                        data = stream.toByteArray();
-
-                        mResult.data = data;
-                        mResult.size = new Size(outputRect.width(), outputRect.height());
-                        mResult.rotation = 0;
-                        dispatchResult();
-                    }
-                });
-
-                // It seems that the buffers are already cleared here, so we need to allocate again.
-                camera.setPreviewCallbackWithBuffer(null); // Release anything left
-                camera.setPreviewCallbackWithBuffer(mEngine1); // Add ourselves
-                mEngine1.getFrameManager().setUp(mFormat, previewStreamSize, mEngine1.getAngles());
+            // Got to rotate the preview frame, since byte[] data here does not include
+            // EXIF tags automatically set by camera. So either we add EXIF, or we rotate.
+            // Adding EXIF to a byte array, unfortunately, is hard.
+            val sensorToOutput = mResult!!.rotation
+            val outputSize = mResult!!.size
+            val previewStreamSize = mEngine1!!.getPreviewStreamSize(Reference.SENSOR)
+            checkNotNull(previewStreamSize) {
+                "Preview stream size " +
+                        "should never be null here."
             }
-        });
+            WorkerHandler.execute { // Rotate the picture, because no one will write EXIF data,
+                // then crop if needed. In both cases, transform yuv to jpeg.
+                var data = RotationHelper.rotate(yuv, previewStreamSize, sensorToOutput)
+                val yuv = YuvImage(
+                    data, mFormat, outputSize.width,
+                    outputSize.height, null
+                )
+
+                val stream = ByteArrayOutputStream()
+                val outputRect = CropHelper.computeCrop(outputSize, mOutputRatio!!)
+                yuv.compressToJpeg(outputRect, 90, stream)
+                data = stream.toByteArray()
+
+                mResult!!.data = data
+                mResult!!.size = Size(outputRect.width(), outputRect.height())
+                mResult!!.rotation = 0
+                dispatchResult()
+            }
+
+            // It seems that the buffers are already cleared here, so we need to allocate again.
+            camera.setPreviewCallbackWithBuffer(null) // Release anything left
+            camera.setPreviewCallbackWithBuffer(mEngine1) // Add ourselves
+            mEngine1!!.frameManager
+                .setUp(mFormat, previewStreamSize, mEngine1!!.angles)
+        }
     }
 
-    @Override
-    protected void dispatchResult() {
-        mEngine1 = null;
-        mCamera = null;
-        mOutputRatio = null;
-        mFormat = 0;
-        super.dispatchResult();
+    override fun dispatchResult() {
+        mEngine1 = null
+        mCamera = null
+        mOutputRatio = null
+        mFormat = 0
+        super.dispatchResult()
     }
 }
