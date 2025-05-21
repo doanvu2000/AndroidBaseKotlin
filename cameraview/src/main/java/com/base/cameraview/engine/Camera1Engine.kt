@@ -398,8 +398,11 @@ class Camera1Engine(
         stub.rotation = angles.offset(
             Reference.SENSOR, Reference.OUTPUT, Axis.RELATIVE_TO_SENSOR
         )
-        stub.size = if (angles.flip(Reference.SENSOR, Reference.OUTPUT)) mCaptureSize?.flip()
-        else mCaptureSize
+        stub.size = if (angles.flip(Reference.SENSOR, Reference.OUTPUT)) {
+            mCaptureSize?.flip() ?: Size.defaultSize()
+        } else {
+            mCaptureSize ?: Size.defaultSize()
+        }
         // Unlock the camera and start recording.
         try {
             mCamera!!.unlock()

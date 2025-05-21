@@ -1,75 +1,24 @@
-package com.base.cameraview;
+package com.base.cameraview
 
-import android.location.Location;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import com.base.cameraview.controls.Audio;
-import com.base.cameraview.controls.AudioCodec;
-import com.base.cameraview.controls.Facing;
-import com.base.cameraview.controls.VideoCodec;
-import com.base.cameraview.size.Size;
-
-import java.io.File;
-import java.io.FileDescriptor;
+import android.location.Location
+import com.base.cameraview.controls.Audio
+import com.base.cameraview.controls.AudioCodec
+import com.base.cameraview.controls.Facing
+import com.base.cameraview.controls.VideoCodec
+import com.base.cameraview.size.Size
+import java.io.File
+import java.io.FileDescriptor
 
 /**
- * Wraps the result of a video recording started by {@link CameraView#takeVideo(File)}.
+ * Wraps the result of a video recording started by [CameraView.takeVideo].
  */
-@SuppressWarnings("WeakerAccess")
-public class VideoResult {
-
-    @SuppressWarnings({"WeakerAccess", "unused"})
-    public static final int REASON_USER = 0;
-    @SuppressWarnings("WeakerAccess")
-    public static final int REASON_MAX_SIZE_REACHED = 1;
-    @SuppressWarnings("WeakerAccess")
-    public static final int REASON_MAX_DURATION_REACHED = 2;
-    private final boolean isSnapshot;
-    private final Location location;
-    private final int rotation;
-    private final Size size;
-    private final File file;
-    private final FileDescriptor fileDescriptor;
-    private final Facing facing;
-    private final VideoCodec videoCodec;
-    private final AudioCodec audioCodec;
-    private final Audio audio;
-    private final long maxSize;
-    private final int maxDuration;
-    private final int endReason;
-    private final int videoBitRate;
-    private final int videoFrameRate;
-    private final int audioBitRate;
-
-    VideoResult(@NonNull Stub builder) {
-        isSnapshot = builder.isSnapshot;
-        location = builder.location;
-        rotation = builder.rotation;
-        size = builder.size;
-        file = builder.file;
-        fileDescriptor = builder.fileDescriptor;
-        facing = builder.facing;
-        videoCodec = builder.videoCodec;
-        audioCodec = builder.audioCodec;
-        audio = builder.audio;
-        maxSize = builder.maxSize;
-        maxDuration = builder.maxDuration;
-        endReason = builder.endReason;
-        videoBitRate = builder.videoBitRate;
-        videoFrameRate = builder.videoFrameRate;
-        audioBitRate = builder.audioBitRate;
-    }
-
+class VideoResult internal constructor(builder: Stub) {
     /**
      * Returns whether this result comes from a snapshot.
      *
      * @return whether this is a snapshot
      */
-    public boolean isSnapshot() {
-        return isSnapshot;
-    }
+    val isSnapshot: Boolean = builder.isSnapshot
 
     /**
      * Returns geographic information for this video, if any.
@@ -77,10 +26,7 @@ public class VideoResult {
      *
      * @return a nullable Location
      */
-    @Nullable
-    public Location getLocation() {
-        return location;
-    }
+    val location: Location? = builder.location
 
     /**
      * Returns the clock-wise rotation that should be applied to the
@@ -89,75 +35,44 @@ public class VideoResult {
      *
      * @return the clock-wise rotation
      */
-    public int getRotation() {
-        return rotation;
-    }
+    val rotation: Int = builder.rotation
 
     /**
      * Returns the size of the frames after the rotation is applied.
      *
      * @return the Size of this video
      */
-    @NonNull
-    public Size getSize() {
-        return size;
-    }
-
-    /**
-     * Returns the file where the video was saved.
-     *
-     * @return the File of this video
-     */
-    @NonNull
-    public File getFile() {
-        if (file == null) {
-            throw new RuntimeException("File is only available when takeVideo(File) is used.");
-        }
-        return file;
-    }
-
-    /**
-     * Returns the file descriptor where the video was saved.
-     *
-     * @return the File Descriptor of this video
-     */
-    @NonNull
-    public FileDescriptor getFileDescriptor() {
-        if (fileDescriptor == null) {
-            throw new RuntimeException("FileDescriptor is only available when takeVideo(FileDescriptor) is used.");
-        }
-        return fileDescriptor;
-    }
+    val size: Size = builder.size
+    private val file: File = builder.file!!
+    private val fileDescriptor: FileDescriptor = builder.fileDescriptor!!
 
     /**
      * Returns the facing value with which this video was recorded.
      *
      * @return the Facing of this video
      */
-    @NonNull
-    public Facing getFacing() {
-        return facing;
-    }
+    val facing: Facing = builder.facing!!
 
     /**
      * Returns the codec that was used to encode the video frames.
      *
      * @return the video codec
      */
-    @NonNull
-    public VideoCodec getVideoCodec() {
-        return videoCodec;
-    }
+    val videoCodec: VideoCodec = builder.videoCodec
 
     /**
      * Returns the codec that was used to encode the audio frames.
      *
      * @return the audio codec
      */
-    @NonNull
-    public AudioCodec getAudioCodec() {
-        return audioCodec;
-    }
+    val audioCodec: AudioCodec = builder.audioCodec!!
+
+    /**
+     * Returns the [Audio] setting for this video.
+     *
+     * @return the audio setting for this video
+     */
+    val audio: Audio = builder.audio!!
 
     /**
      * Returns the max file size in bytes that was set before recording,
@@ -165,9 +80,7 @@ public class VideoResult {
      *
      * @return the max file size in bytes
      */
-    public long getMaxSize() {
-        return maxSize;
-    }
+    val maxSize: Long = builder.maxSize
 
     /**
      * Returns the max video duration in milliseconds that was set before recording,
@@ -175,38 +88,22 @@ public class VideoResult {
      *
      * @return the max duration in milliseconds
      */
-    public int getMaxDuration() {
-        return maxDuration;
-    }
-
-    /**
-     * Returns the {@link Audio} setting for this video.
-     *
-     * @return the audio setting for this video
-     */
-    @NonNull
-    public Audio getAudio() {
-        return audio;
-    }
+    val maxDuration: Int = builder.maxDuration
 
     /**
      * Returns the reason why the recording was stopped.
      *
-     * @return one of {@link #REASON_USER}, {@link #REASON_MAX_DURATION_REACHED}
-     * or {@link #REASON_MAX_SIZE_REACHED}.
+     * @return one of [.REASON_USER], [.REASON_MAX_DURATION_REACHED]
+     * or [.REASON_MAX_SIZE_REACHED].
      */
-    public int getTerminationReason() {
-        return endReason;
-    }
+    val terminationReason: Int = builder.endReason
 
     /**
      * Returns the bit rate used for video encoding.
      *
      * @return the video bit rate
      */
-    public int getVideoBitRate() {
-        return videoBitRate;
-    }
+    val videoBitRate: Int = builder.videoBitRate
 
     /**
      * Returns the frame rate used for video encoding
@@ -214,42 +111,83 @@ public class VideoResult {
      *
      * @return the video frame rate
      */
-    public int getVideoFrameRate() {
-        return videoFrameRate;
-    }
+    val videoFrameRate: Int = builder.videoFrameRate
 
     /**
      * Returns the bit rate used for audio encoding.
      *
      * @return the audio bit rate
      */
-    public int getAudioBitRate() {
-        return audioBitRate;
+    val audioBitRate: Int = builder.audioBitRate
+
+    /**
+     * Returns the file where the video was saved.
+     *
+     * @return the File of this video
+     */
+    fun getFile(): File {
+        return file
+    }
+
+    /**
+     * Returns the file descriptor where the video was saved.
+     *
+     * @return the File Descriptor of this video
+     */
+    fun getFileDescriptor(): FileDescriptor {
+        return fileDescriptor
     }
 
     /**
      * A result stub, for internal use only.
      */
-    public static class Stub {
+    class Stub internal constructor() {
+        var isSnapshot: Boolean = false
+        var location: Location? = null
 
-        public boolean isSnapshot;
-        public Location location;
-        public int rotation;
-        public Size size;
-        public File file;
-        public FileDescriptor fileDescriptor;
-        public Facing facing;
-        public VideoCodec videoCodec;
-        public AudioCodec audioCodec;
-        public Audio audio;
-        public long maxSize;
-        public int maxDuration;
-        public int endReason;
-        public int videoBitRate;
-        public int videoFrameRate;
-        public int audioBitRate;
+        @JvmField
+        var rotation: Int = 0
 
-        Stub() {
-        }
+        @JvmField
+        var size: Size = Size.defaultSize()
+
+        @JvmField
+        var file: File? = null
+        var fileDescriptor: FileDescriptor? = null
+        var facing: Facing? = null
+
+        @JvmField
+        var videoCodec: VideoCodec = VideoCodec.DEFAULT
+
+        @JvmField
+        var audioCodec: AudioCodec = AudioCodec.DEFAULT
+
+        @JvmField
+        var audio: Audio? = null
+
+        @JvmField
+        var maxSize: Long = 0
+
+        @JvmField
+        var maxDuration: Int = 0
+
+        @JvmField
+        var endReason: Int = 0
+
+        @JvmField
+        var videoBitRate: Int = 0
+
+        @JvmField
+        var videoFrameRate: Int = 0
+
+        @JvmField
+        var audioBitRate: Int = 0
+    }
+
+    companion object {
+        @Suppress("unused")
+        const val REASON_USER: Int = 0
+        const val REASON_MAX_SIZE_REACHED: Int = 1
+        const val REASON_MAX_DURATION_REACHED: Int = 2
     }
 }

@@ -845,10 +845,11 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
     override fun onTakeVideo(stub: VideoResult.Stub) {
         LOG.i("onTakeVideo", "called.")
         stub.rotation = angles.offset(Reference.SENSOR, Reference.OUTPUT, Axis.RELATIVE_TO_SENSOR)
-        stub.size = if (angles.flip(
-                Reference.SENSOR, Reference.OUTPUT
-            )
-        ) mCaptureSize?.flip() else mCaptureSize
+        stub.size = if (angles.flip(Reference.SENSOR, Reference.OUTPUT)) {
+            mCaptureSize?.flip() ?: Size.defaultSize()
+        } else {
+            mCaptureSize ?: Size.defaultSize()
+        }
         // We must restart the session at each time.
         // Save the pending data and restart the session.
         LOG.w("onTakeVideo", "calling restartBind.")
@@ -1435,8 +1436,7 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
         } else if (state == CameraState.PREVIEW && !isChangingState) {
             // After preview, the frame manager is correctly set up
             val frame = (getFrameManager() as FrameManager<Image>).getFrame(
-                image,
-                System.currentTimeMillis()
+                image, System.currentTimeMillis()
             )
             if (frame != null) {
                 LOG.v("onImageAvailable:", "Image acquired, dispatching.")

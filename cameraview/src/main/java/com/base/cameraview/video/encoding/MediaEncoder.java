@@ -83,33 +83,17 @@ public abstract class MediaEncoder {
         long millis = System.currentTimeMillis() - mDebugSetStateTimestamp;
         mDebugSetStateTimestamp = System.currentTimeMillis();
 
-        String newStateName = null;
-        switch (newState) {
-            case STATE_NONE:
-                newStateName = "NONE";
-                break;
-            case STATE_PREPARING:
-                newStateName = "PREPARING";
-                break;
-            case STATE_PREPARED:
-                newStateName = "PREPARED";
-                break;
-            case STATE_STARTING:
-                newStateName = "STARTING";
-                break;
-            case STATE_STARTED:
-                newStateName = "STARTED";
-                break;
-            case STATE_LIMIT_REACHED:
-                newStateName = "LIMIT_REACHED";
-                break;
-            case STATE_STOPPING:
-                newStateName = "STOPPING";
-                break;
-            case STATE_STOPPED:
-                newStateName = "STOPPED";
-                break;
-        }
+        String newStateName = switch (newState) {
+            case STATE_NONE -> "NONE";
+            case STATE_PREPARING -> "PREPARING";
+            case STATE_PREPARED -> "PREPARED";
+            case STATE_STARTING -> "STARTING";
+            case STATE_STARTED -> "STARTED";
+            case STATE_LIMIT_REACHED -> "LIMIT_REACHED";
+            case STATE_STOPPING -> "STOPPING";
+            case STATE_STOPPED -> "STOPPED";
+            default -> null;
+        };
         LOG.w(mName, "setState:", newStateName, "millisSinceLastState:", millis);
         mState = newState;
     }

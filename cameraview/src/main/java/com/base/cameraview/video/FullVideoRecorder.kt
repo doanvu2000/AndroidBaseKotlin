@@ -80,6 +80,10 @@ abstract class FullVideoRecorder internal constructor(listener: VideoResultListe
         // 2. Set the video and audio sources.
         applyVideoSource(stub, mMediaRecorder!!)
         val audioChannels = when (stub.audio) {
+            null -> {
+                0
+            }
+
             Audio.OFF -> {
                 0
             }
@@ -114,6 +118,7 @@ abstract class FullVideoRecorder internal constructor(listener: VideoResultListe
         }
         // Set audio codec if the user has specified a specific codec.
         when (stub.audioCodec) {
+            null -> {}
             AudioCodec.DEVICE_DEFAULT -> {
 
             }
@@ -231,7 +236,7 @@ abstract class FullVideoRecorder internal constructor(listener: VideoResultListe
                 }
             }
             // D. Apply results
-            stub.size = newVideoSize
+            stub.size = newVideoSize ?: Size.defaultSize()
             stub.videoBitRate = newVideoBitRate
             stub.audioBitRate = newAudioBitRate
             stub.videoFrameRate = newVideoFrameRate
@@ -257,14 +262,14 @@ abstract class FullVideoRecorder internal constructor(listener: VideoResultListe
         }
 
         // 7. Set other params
-        if (stub.location != null) {
+        stub.location?.let { location ->
             mMediaRecorder!!.setLocation(
-                stub.location.latitude.toFloat(), stub.location.longitude.toFloat()
+                location.latitude.toFloat(), location.longitude.toFloat()
             )
         }
 
         if (stub.file != null) {
-            mMediaRecorder!!.setOutputFile(stub.file.absolutePath)
+            mMediaRecorder!!.setOutputFile(stub.file!!.absolutePath)
         } else if (stub.fileDescriptor != null) {
             mMediaRecorder!!.setOutputFile(stub.fileDescriptor)
         } else {

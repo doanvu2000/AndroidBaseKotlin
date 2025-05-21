@@ -133,30 +133,15 @@ public class SnapshotVideoRecorder extends VideoRecorder implements RendererFram
             if (mResult.audioBitRate <= 0) mResult.audioBitRate = DEFAULT_AUDIO_BITRATE;
 
             // Define mime types
-            String videoType = "";
-            switch (mResult.videoCodec) {
-                case H_263:
-                    videoType = "video/3gpp";
-                    break; // MediaFormat.MIMETYPE_VIDEO_H263;
-                case H_264:
-                    videoType = "video/avc";
-                    break; // MediaFormat.MIMETYPE_VIDEO_AVC:
-                case DEVICE_DEFAULT:
-                    videoType = "video/avc";
-                    break;
-            }
-            String audioType = "";
-            switch (mResult.audioCodec) {
-                case AAC:
-                case HE_AAC:
-                case AAC_ELD:
-                    audioType = "audio/mp4a-latm";
-                    break; // MediaFormat.MIMETYPE_AUDIO_AAC:
-                case DEVICE_DEFAULT:
-                    audioType = "audio/mp4a-latm";
-                    break;
-
-            }
+            String videoType = switch (mResult.videoCodec) {
+                case H_263 -> "video/3gpp"; // MediaFormat.MIMETYPE_VIDEO_H263;
+                case H_264 -> "video/avc"; // MediaFormat.MIMETYPE_VIDEO_AVC:
+                case DEVICE_DEFAULT -> "video/avc";
+            };
+            String audioType = switch (mResult.audioCodec) {
+                case AAC, HE_AAC, AAC_ELD -> "audio/mp4a-latm"; // MediaFormat.MIMETYPE_AUDIO_AAC:
+                case DEVICE_DEFAULT -> "audio/mp4a-latm";
+            };
             TextureConfig videoConfig = new TextureConfig();
             AudioConfig audioConfig = new AudioConfig();
 

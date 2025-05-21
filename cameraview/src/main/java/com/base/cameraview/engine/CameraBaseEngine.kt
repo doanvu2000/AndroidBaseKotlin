@@ -460,7 +460,7 @@ abstract class CameraBaseEngine protected constructor(callback: Callback) : Came
 
     override fun onPictureResult(result: PictureResult.Stub?, error: Exception?) {
         mPictureRecorder = null
-        if (result != null && result.data != null) {
+        if (result != null) {
             callback.dispatchOnPictureTaken(result)
         } else {
             LOG.e("onPictureResult", "result or data is null: something went wrong.")
@@ -491,8 +491,8 @@ abstract class CameraBaseEngine protected constructor(callback: Callback) : Came
                 throw IllegalStateException("file and fileDescriptor are both null.")
             }
             stub.isSnapshot = false
-            stub.videoCodec = mVideoCodec
-            stub.audioCodec = mAudioCodec
+            stub.videoCodec = mVideoCodec ?: VideoCodec.DEFAULT
+            stub.audioCodec = mAudioCodec ?: AudioCodec.DEFAULT
             stub.location = mLocation
             stub.facing = mFacing
             stub.audio = mAudio
@@ -517,8 +517,8 @@ abstract class CameraBaseEngine protected constructor(callback: Callback) : Came
             LOG.i("takeVideoSnapshot:", "running. isTakingVideo:", isTakingVideo)
             stub.file = file
             stub.isSnapshot = true
-            stub.videoCodec = mVideoCodec
-            stub.audioCodec = mAudioCodec
+            stub.videoCodec = mVideoCodec ?: VideoCodec.DEFAULT
+            stub.audioCodec = mAudioCodec ?: AudioCodec.DEFAULT
             stub.location = mLocation
             stub.facing = mFacing
             stub.videoBitRate = mVideoBitRate

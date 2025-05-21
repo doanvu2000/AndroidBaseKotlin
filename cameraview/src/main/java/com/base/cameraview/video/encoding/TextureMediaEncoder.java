@@ -2,6 +2,7 @@ package com.base.cameraview.video.encoding;
 
 import android.graphics.SurfaceTexture;
 import android.opengl.Matrix;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -59,11 +60,13 @@ public class TextureMediaEncoder extends VideoMediaEncoder<TextureConfig> {
         super.onPrepare(controller, maxLengthUs);
         try {
             mEglCore = new EglCore(mConfig.eglContext, EglCore.FLAG_RECORDABLE);
-            mWindow = new EglWindowSurface(mEglCore, mSurface, true);
-            mWindow.makeCurrent();
-            mDrawer = new GlTextureDrawer(mConfig.textureId);
+            if (mSurface != null) {
+                mWindow = new EglWindowSurface(mEglCore, mSurface, true);
+                mWindow.makeCurrent();
+                mDrawer = new GlTextureDrawer(mConfig.textureId);
+            }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("CameraException", e.toString());
         }
     }
 
