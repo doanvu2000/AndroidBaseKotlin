@@ -16,13 +16,13 @@ class DocumentaryFilter : BaseFilter() {
     private var mScaleLocation = -1
     private var mMaxDistLocation = -1
 
-    public override fun setSize(width: Int, height: Int) {
+    override fun setSize(width: Int, height: Int) {
         super.setSize(width, height)
         mWidth = width
         mHeight = height
     }
 
-    public override fun onCreate(programHandle: Int) {
+    override fun onCreate(programHandle: Int) {
         super.onCreate(programHandle)
         mScaleLocation = GLES20.glGetUniformLocation(programHandle, "scale")
         checkGlProgramLocation(mScaleLocation, "scale")
@@ -30,7 +30,7 @@ class DocumentaryFilter : BaseFilter() {
         checkGlProgramLocation(mMaxDistLocation, "inv_max_dist")
     }
 
-    public override fun onDestroy() {
+    override fun onDestroy() {
         super.onDestroy()
         mScaleLocation = -1
         mMaxDistLocation = -1

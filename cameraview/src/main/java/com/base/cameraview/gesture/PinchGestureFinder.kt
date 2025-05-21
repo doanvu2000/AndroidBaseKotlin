@@ -1,65 +1,61 @@
-package com.base.cameraview.gesture;
+package com.base.cameraview.gesture
 
-import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
+import android.view.MotionEvent
+import android.view.ScaleGestureDetector
+import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener
 
-import androidx.annotation.NonNull;
+class PinchGestureFinder(controller: Controller) : GestureFinder(controller, 2) {
+    private val mDetector: ScaleGestureDetector
+    private var mNotify = false
 
-public class PinchGestureFinder extends GestureFinder {
+    /* for tests */
+    private var factor: Float = 0f
 
-    private final static float ADD_SENSITIVITY = 2f;
+    init {
+        gesture = Gesture.PINCH
 
-    private ScaleGestureDetector mDetector;
-    private boolean mNotify;
-    private float mFactor = 0;
+        mDetector = ScaleGestureDetector(
+            controller.context,
+            object : SimpleOnScaleGestureListener() {
+                override fun onScale(detector: ScaleGestureDetector): Boolean {
+                    mNotify = true
+                    factor = ((detector.scaleFactor - 1) * ADD_SENSITIVITY)
+                    return true
+                }
+            })
 
-    public PinchGestureFinder(@NonNull Controller controller) {
-        super(controller, 2);
-        setGesture(Gesture.PINCH);
-        mDetector = new ScaleGestureDetector(controller.getContext(),
-                new ScaleGestureDetector.SimpleOnScaleGestureListener() {
-                    @Override
-                    public boolean onScale(@NonNull ScaleGestureDetector detector) {
-                        mNotify = true;
-                        mFactor = ((detector.getScaleFactor() - 1) * ADD_SENSITIVITY);
-                        return true;
-                    }
-                });
-
-        mDetector.setQuickScaleEnabled(false);
+        mDetector.isQuickScaleEnabled = false
     }
 
-    @Override
-    protected boolean handleTouchEvent(@NonNull MotionEvent event) {
+    override fun handleTouchEvent(event: MotionEvent): Boolean {
         // Reset the mNotify flag on a new gesture.
         // This is to ensure that the mNotify flag stays on until the
         // previous gesture ends.
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            mNotify = false;
+        if (event.action == MotionEvent.ACTION_DOWN) {
+            mNotify = false
         }
 
         // Let's see if we detect something. This will call onScale().
-        mDetector.onTouchEvent(event);
+        mDetector.onTouchEvent(event)
 
         // Keep notifying CameraView as long as the gesture goes.
         if (mNotify) {
-            getPoint(0).x = event.getX(0);
-            getPoint(0).y = event.getY(0);
-            if (event.getPointerCount() > 1) {
-                getPoint(1).x = event.getX(1);
-                getPoint(1).y = event.getY(1);
+            getPoint(0).x = event.getX(0)
+            getPoint(0).y = event.getY(0)
+            if (event.pointerCount > 1) {
+                getPoint(1).x = event.getX(1)
+                getPoint(1).y = event.getY(1)
             }
-            return true;
+            return true
         }
-        return false;
+        return false
     }
 
-    @Override
-    public float getValue(float currValue, float minValue, float maxValue) {
-        float add = getFactor();
+    public override fun getValue(currValue: Float, minValue: Float, maxValue: Float): Float {
+        var add = this.factor
         // ^ This works well if minValue = 0, maxValue = 1.
         // Account for the different range:
-        add *= (maxValue - minValue);
+        add *= (maxValue - minValue)
 
         // ^ This works well if currValue = 0.
         // Account for a different starting point:
@@ -68,12 +64,11 @@ public class PinchGestureFinder extends GestureFinder {
         } else if (add < 0) {
             add *= (currValue - minValue);
         } Nope, I don't like this, it slows everything down. */
-        return currValue + add;
+        return currValue + add
     }
 
 
-    /* for tests */
-    protected float getFactor() {
-        return mFactor;
+    companion object {
+        private const val ADD_SENSITIVITY = 2f
     }
 }

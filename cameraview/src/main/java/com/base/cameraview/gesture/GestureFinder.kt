@@ -1,116 +1,36 @@
-package com.base.cameraview.gesture;
+package com.base.cameraview.gesture
 
-import android.content.Context;
-import android.graphics.PointF;
-import android.view.MotionEvent;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
+import android.content.Context
+import android.graphics.PointF
+import android.view.MotionEvent
+import androidx.annotation.VisibleForTesting
 
 /**
  * Base class for gesture finders.
  * Gesture finders are passed down touch events to detect gestures.
  */
-public abstract class GestureFinder {
-
-    // The number of possible values between minValue and maxValue, for the getValue method.
-    // We could make this non-static (e.g. larger granularity for exposure correction).
-    private final static int GRANULARITY = 50;
-    @VisibleForTesting
-    Gesture mType;
-    private boolean mActive;
-    private PointF[] mPoints;
-    private Controller mController;
-
-    GestureFinder(@NonNull Controller controller, int points) {
-        mController = controller;
-        mPoints = new PointF[points];
-        for (int i = 0; i < points; i++) {
-            mPoints[i] = new PointF(0, 0);
-        }
-    }
-
+abstract class GestureFinder internal constructor(
     /**
-     * Checks for newValue to be between minValue and maxValue,
-     * and checks that it is 'far enough' from the oldValue, in order
-     * to reduce useless updates.
+     * Returns the controller for this finder.
+     *
+     * @return the controller
      */
-    private static float capValue(float oldValue, float newValue, float minValue, float maxValue) {
-        if (newValue < minValue) newValue = minValue;
-        if (newValue > maxValue) newValue = maxValue;
-
-        float distance = (maxValue - minValue) / (float) GRANULARITY;
-        float half = distance / 2;
-        if (newValue >= oldValue - half && newValue <= oldValue + half) {
-            // Too close! Return the oldValue.
-            return oldValue;
-        }
-        return newValue;
-    }
-
+    protected val controller: Controller, points: Int
+) {
+    @VisibleForTesting
+    var mType: Gesture? = null
     /**
      * Whether this instance is active, which means, it is listening
      * to events and identifying new gestures.
      *
      * @return true if active
      */
-    public boolean isActive() {
-        return mActive;
-    }
-
     /**
      * Makes this instance active, which means, listening to events.
      *
      * @param active whether this should be active or not
      */
-    public void setActive(boolean active) {
-        mActive = active;
-    }
-
-    /**
-     * Called when new events are available.
-     * If true is returned, users will call {@link #getGesture()}, {@link #getPoints()}
-     * and maybe {@link #getValue(float, float, float)} to know more about the gesture.
-     *
-     * @param event the new event
-     * @return true if a gesture was detected
-     */
-    public final boolean onTouchEvent(@NonNull MotionEvent event) {
-        if (!mActive) return false;
-        return handleTouchEvent(event);
-    }
-
-    /**
-     * Called when new events are available.
-     * If true is returned, users will call {@link #getGesture()}, {@link #getPoints()}
-     * and maybe {@link #getValue(float, float, float)} to know more about the gesture.
-     *
-     * @param event the new event
-     * @return true if a gesture was detected
-     */
-    protected abstract boolean handleTouchEvent(@NonNull MotionEvent event);
-
-    /**
-     * Returns the gesture that this instance is currently detecting.
-     * This is mutable - for instance, a scroll layout can detect both
-     * horizontal and vertical scroll gestures.
-     *
-     * @return the current gesture
-     */
-    @NonNull
-    public final Gesture getGesture() {
-        return mType;
-    }
-
-    /**
-     * Sets the currently detected gesture.
-     *
-     * @param gesture the current gesture
-     * @see #getGesture()
-     */
-    protected final void setGesture(Gesture gesture) {
-        mType = gesture;
-    }
+    var isActive: Boolean = false
 
     /**
      * Returns an array of points that identify the currently
@@ -119,26 +39,69 @@ public abstract class GestureFinder {
      *
      * @return array of gesture points
      */
-    @NonNull
-    public final PointF[] getPoints() {
-        return mPoints;
+    val points: Array<PointF> = arrayOfNulls<PointF>(points) as Array<PointF>
+
+    init {
+        for (i in 0..<points) {
+            this.points[i] = PointF(0f, 0f)
+        }
     }
 
     /**
+     * Called when new events are available.
+     * If true is returned, users will call [.getGesture], [.getPoints]
+     * and maybe [.getValue] to know more about the gesture.
+     *
+     * @param event the new event
+     * @return true if a gesture was detected
+     */
+    fun onTouchEvent(event: MotionEvent): Boolean {
+        if (!this.isActive) return false
+        return handleTouchEvent(event)
+    }
+
+    /**
+     * Called when new events are available.
+     * If true is returned, users will call [.getGesture], [.getPoints]
+     * and maybe [.getValue] to know more about the gesture.
+     *
+     * @param event the new event
+     * @return true if a gesture was detected
+     */
+    protected abstract fun handleTouchEvent(event: MotionEvent): Boolean
+
+    var gesture: Gesture
+        /**
+         * Returns the gesture that this instance is currently detecting.
+         * This is mutable - for instance, a scroll layout can detect both
+         * horizontal and vertical scroll gestures.
+         *
+         * @return the current gesture
+         */
+        get() = mType!!
+        /**
+         * Sets the currently detected gesture.
+         *
+         * @param gesture the current gesture
+         * @see .getGesture
+         */
+        protected set(gesture) {
+            mType = gesture
+        }
+
+    /**
      * Utility function to access an item in the
-     * {@link #getPoints()} array.
+     * [.getPoints] array.
      *
      * @param which the array position
      * @return the point
      */
-    @SuppressWarnings("WeakerAccess")
-    @NonNull
-    protected final PointF getPoint(int which) {
-        return mPoints[which];
+    protected fun getPoint(which: Int): PointF {
+        return this.points[which]
     }
 
     /**
-     * For {@link GestureType#CONTINUOUS} gestures, returns the float value at the current
+     * For [GestureType.CONTINUOUS] gestures, returns the float value at the current
      * gesture state. This means, for example, scaling the old value with a pinch factor,
      * taking into account the minimum and maximum values.
      *
@@ -147,12 +110,12 @@ public abstract class GestureFinder {
      * @param maxValue  the max possible value
      * @return the new continuous value
      */
-    public final float computeValue(float currValue, float minValue, float maxValue) {
-        return capValue(currValue, getValue(currValue, minValue, maxValue), minValue, maxValue);
+    fun computeValue(currValue: Float, minValue: Float, maxValue: Float): Float {
+        return capValue(currValue, getValue(currValue, minValue, maxValue), minValue, maxValue)
     }
 
     /**
-     * For {@link GestureType#CONTINUOUS} gestures, returns the float value at the current
+     * For [GestureType.CONTINUOUS] gestures, returns the float value at the current
      * gesture state. This means, for example, scaling the old value with a pinch factor,
      * taking into account the minimum and maximum values.
      *
@@ -161,24 +124,41 @@ public abstract class GestureFinder {
      * @param maxValue  the max possible value
      * @return the new continuous value
      */
-    protected abstract float getValue(float currValue, float minValue, float maxValue);
+    protected abstract fun getValue(currValue: Float, minValue: Float, maxValue: Float): Float
 
-    /**
-     * Returns the controller for this finder.
-     *
-     * @return the controller
-     */
-    @NonNull
-    protected Controller getController() {
-        return mController;
+    interface Controller {
+        val context: Context
+        val width: Int
+        val height: Int
     }
 
-    public interface Controller {
-        @NonNull
-        Context getContext();
+    companion object {
+        // The number of possible values between minValue and maxValue, for the getValue method.
+        // We could make this non-static (e.g. larger granularity for exposure correction).
+        private const val GRANULARITY = 50
 
-        int getWidth();
+        /**
+         * Checks for newValue to be between minValue and maxValue,
+         * and checks that it is 'far enough' from the oldValue, in order
+         * to reduce useless updates.
+         */
+        private fun capValue(
+            oldValue: Float,
+            newValue: Float,
+            minValue: Float,
+            maxValue: Float
+        ): Float {
+            var newValue = newValue
+            if (newValue < minValue) newValue = minValue
+            if (newValue > maxValue) newValue = maxValue
 
-        int getHeight();
+            val distance = (maxValue - minValue) / GRANULARITY.toFloat()
+            val half = distance / 2
+            if (newValue >= oldValue - half && newValue <= oldValue + half) {
+                // Too close! Return the oldValue.
+                return oldValue
+            }
+            return newValue
+        }
     }
 }

@@ -1,70 +1,60 @@
-package com.base.cameraview.gesture;
+package com.base.cameraview.gesture
 
-import android.view.GestureDetector;
-import android.view.MotionEvent;
+import android.view.GestureDetector
+import android.view.GestureDetector.SimpleOnGestureListener
+import android.view.MotionEvent
 
-import androidx.annotation.NonNull;
+class TapGestureFinder(controller: Controller) : GestureFinder(controller, 1) {
+    private val mDetector: GestureDetector
+    private var mNotify = false
 
+    init {
+        mDetector = GestureDetector(
+            controller.context,
+            object : SimpleOnGestureListener() {
+                override fun onSingleTapUp(e: MotionEvent): Boolean {
+                    mNotify = true
+                    gesture = Gesture.TAP
+                    return true
+                }
 
-public class TapGestureFinder extends GestureFinder {
-
-    private GestureDetector mDetector;
-    private boolean mNotify;
-
-    public TapGestureFinder(@NonNull Controller controller) {
-        super(controller, 1);
-        mDetector = new GestureDetector(controller.getContext(),
-                new GestureDetector.SimpleOnGestureListener() {
-
-                    @Override
-                    public boolean onSingleTapUp(MotionEvent e) {
-                        mNotify = true;
-                        setGesture(Gesture.TAP);
-                        return true;
-                    }
-
-            /*
+                /*
             TODO should use onSingleTapConfirmed and enable this.
             public boolean onDoubleTap(MotionEvent e) {
                 mNotify = true;
                 mType = Gesture.DOUBLE_TAP;
                 return true;
             } */
+                override fun onLongPress(e: MotionEvent) {
+                    mNotify = true
+                    gesture = Gesture.LONG_TAP
+                }
+            })
 
-                    @Override
-                    public void onLongPress(MotionEvent e) {
-                        mNotify = true;
-                        setGesture(Gesture.LONG_TAP);
-                    }
-                });
-
-        mDetector.setIsLongpressEnabled(true);
+        mDetector.setIsLongpressEnabled(true)
     }
 
-    @Override
-    protected boolean handleTouchEvent(@NonNull MotionEvent event) {
+    override fun handleTouchEvent(event: MotionEvent): Boolean {
         // Reset the mNotify flag on a new gesture.
         // This is to ensure that the mNotify flag stays on until the
         // previous gesture ends.
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            mNotify = false;
+        if (event.action == MotionEvent.ACTION_DOWN) {
+            mNotify = false
         }
 
         // Let's see if we detect something.
-        mDetector.onTouchEvent(event);
+        mDetector.onTouchEvent(event)
 
         // Keep notifying CameraView as long as the gesture goes.
         if (mNotify) {
-            getPoint(0).x = event.getX();
-            getPoint(0).y = event.getY();
-            return true;
+            getPoint(0).x = event.x
+            getPoint(0).y = event.y
+            return true
         }
-        return false;
+        return false
     }
 
-    @Override
-    public float getValue(float currValue, float minValue, float maxValue) {
-        return 0;
+    public override fun getValue(currValue: Float, minValue: Float, maxValue: Float): Float {
+        return 0f
     }
-
 }

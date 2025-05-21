@@ -19,13 +19,13 @@ class LomoishFilter : BaseFilter() {
     private var stepSizeXLocation = -1
     private var stepSizeYLocation = -1
 
-    public override fun setSize(width: Int, height: Int) {
+    override fun setSize(width: Int, height: Int) {
         super.setSize(width, height)
         this.width = width
         this.height = height
     }
 
-    public override fun onCreate(programHandle: Int) {
+    override fun onCreate(programHandle: Int) {
         super.onCreate(programHandle)
         scaleLocation = GLES20.glGetUniformLocation(programHandle, "scale")
         checkGlProgramLocation(scaleLocation, "scale")
@@ -37,7 +37,7 @@ class LomoishFilter : BaseFilter() {
         checkGlProgramLocation(stepSizeYLocation, "stepsizeY")
     }
 
-    public override fun onDestroy() {
+    override fun onDestroy() {
         super.onDestroy()
         scaleLocation = -1
         maxDistLocation = -1
