@@ -1,111 +1,15 @@
-package com.base.cameraview;
+package com.base.cameraview
 
-import android.util.Log;
-
-import androidx.annotation.IntDef;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
+import android.util.Log
+import androidx.annotation.VisibleForTesting
+import java.util.concurrent.CopyOnWriteArraySet
 
 /**
  * Utility class that can log traces and info.
  */
-@SuppressWarnings({"WeakerAccess", "UnusedReturnValue"})
-public final class CameraLogger {
-
-    public final static int LEVEL_VERBOSE = 0;
-    public final static int LEVEL_INFO = 1;
-    public final static int LEVEL_WARNING = 2;
-    public final static int LEVEL_ERROR = 3;
-    @VisibleForTesting
-    static String lastMessage;
-    @VisibleForTesting
-    static String lastTag;
-    @VisibleForTesting
-    static Logger sAndroidLogger = (level, tag, message, throwable) -> {
-        switch (level) {
-            case LEVEL_VERBOSE:
-                Log.v(tag, message, throwable);
-                break;
-            case LEVEL_INFO:
-                Log.i(tag, message, throwable);
-                break;
-            case LEVEL_WARNING:
-                Log.w(tag, message, throwable);
-                break;
-            case LEVEL_ERROR:
-                Log.e(tag, message, throwable);
-                break;
-        }
-    };
-    private static int sLevel;
-    private static Set<Logger> sLoggers = new CopyOnWriteArraySet<>();
-
-    static {
-        setLogLevel(LEVEL_ERROR);
-        sLoggers.add(sAndroidLogger);
-    }
-
-    @NonNull
-    private String mTag;
-
-    private CameraLogger(@NonNull String tag) {
-        mTag = tag;
-    }
-
-    /**
-     * Creates a CameraLogger that will stream logs into the
-     * internal logs and dispatch them to {@link Logger}s.
-     *
-     * @param tag the logger tag
-     * @return a new CameraLogger
-     */
-    public static CameraLogger create(@NonNull String tag) {
-        return new CameraLogger(tag);
-    }
-
-    /**
-     * Sets the log sLevel for logcat events.
-     *
-     * @param logLevel the desired log sLevel
-     * @see #LEVEL_VERBOSE
-     * @see #LEVEL_INFO
-     * @see #LEVEL_WARNING
-     * @see #LEVEL_ERROR
-     */
-    public static void setLogLevel(@LogLevel int logLevel) {
-        sLevel = logLevel;
-    }
-
-    /**
-     * Registers an external {@link Logger} for log events.
-     * Make sure to unregister using {@link #unregisterLogger(Logger)}.
-     *
-     * @param logger logger to add
-     */
-    @SuppressWarnings("WeakerAccess")
-    public static void registerLogger(@NonNull Logger logger) {
-        sLoggers.add(logger);
-    }
-
-    /**
-     * Unregisters a previously registered {@link Logger} for log events.
-     * This is needed in order to avoid leaks.
-     *
-     * @param logger logger to remove
-     */
-    @SuppressWarnings("WeakerAccess")
-    public static void unregisterLogger(@NonNull Logger logger) {
-        sLoggers.remove(logger);
-    }
-
-    private boolean should(int messageLevel) {
-        return sLevel <= messageLevel && sLoggers.size() > 0;
+class CameraLogger private constructor(private val mTag: String) {
+    private fun should(messageLevel: Int): Boolean {
+        return sLevel <= messageLevel && sLoggers.isNotEmpty()
     }
 
     /**
@@ -114,9 +18,8 @@ public final class CameraLogger {
      * @param data log contents
      * @return the log message, if logged
      */
-    @Nullable
-    public String v(@NonNull Object... data) {
-        return log(LEVEL_VERBOSE, data);
+    fun v(vararg data: Any): String? {
+        return log(LEVEL_VERBOSE, *data)
     }
 
     /**
@@ -125,9 +28,8 @@ public final class CameraLogger {
      * @param data log contents
      * @return the log message, if logged
      */
-    @Nullable
-    public String i(@NonNull Object... data) {
-        return log(LEVEL_INFO, data);
+    fun i(vararg data: Any): String? {
+        return log(LEVEL_INFO, *data)
     }
 
     /**
@@ -136,9 +38,8 @@ public final class CameraLogger {
      * @param data log contents
      * @return the log message, if logged
      */
-    @Nullable
-    public String w(@NonNull Object... data) {
-        return log(LEVEL_WARNING, data);
+    fun w(vararg data: Any): String? {
+        return log(LEVEL_WARNING, *data)
     }
 
     /**
@@ -147,53 +48,52 @@ public final class CameraLogger {
      * @param data log contents
      * @return the log message, if logged
      */
-    @Nullable
-    public String e(@NonNull Object... data) {
-        return log(LEVEL_ERROR, data);
+    fun e(vararg data: Any): String? {
+        return log(LEVEL_ERROR, *data)
     }
 
-    @Nullable
-    private String log(@LogLevel int level, @NonNull Object... data) {
-        if (!should(level)) return null;
+    private fun log(@LogLevel level: Int, vararg data: Any): String? {
+        if (!should(level)) return null
 
-        StringBuilder message = new StringBuilder();
-        Throwable throwable = null;
-        for (Object object : data) {
-            if (object instanceof Throwable) {
-                throwable = (Throwable) object;
+        val message = StringBuilder()
+        var throwable: Throwable? = null
+        for (`object` in data) {
+            if (`object` is Throwable) {
+                throwable = `object`
             }
-            message.append(object);
-            message.append(" ");
+            message.append(`object`)
+            message.append(" ")
         }
-        String string = message.toString().trim();
-        for (Logger logger : sLoggers) {
-            logger.log(level, mTag, string, throwable);
+        val string = message.toString().trim { it <= ' ' }
+        for (logger in sLoggers) {
+            logger.log(level, mTag, string, throwable)
         }
-        lastMessage = string;
-        lastTag = mTag;
-        return string;
+        lastMessage = string
+        lastTag = mTag
+        return string
     }
 
     /**
      * Interface of integers representing log levels.
      *
-     * @see #LEVEL_VERBOSE
-     * @see #LEVEL_INFO
-     * @see #LEVEL_WARNING
-     * @see #LEVEL_ERROR
+     * @see .LEVEL_VERBOSE
+     *
+     * @see .LEVEL_INFO
+     *
+     * @see .LEVEL_WARNING
+     *
+     * @see .LEVEL_ERROR
      */
-    @IntDef({LEVEL_VERBOSE, LEVEL_INFO, LEVEL_WARNING, LEVEL_ERROR})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface LogLevel {
-    }
+//    @IntDef([LEVEL_VERBOSE, LEVEL_INFO, LEVEL_WARNING, LEVEL_ERROR])
+    @Retention(AnnotationRetention.SOURCE)
+    annotation class LogLevel
 
     /**
      * A Logger can listen to internal log events
      * and log them to different providers.
      * The default logger will simply post to logcat.
      */
-    public interface Logger {
-
+    fun interface Logger {
         /**
          * Notifies that an internal log event was just triggered.
          *
@@ -202,10 +102,91 @@ public final class CameraLogger {
          * @param message   the log message
          * @param throwable an optional throwable
          */
-        void log(@LogLevel int level,
-                 @NonNull String tag,
-                 @NonNull String message,
-                 @Nullable Throwable throwable);
+        fun log(
+            @LogLevel level: Int,
+            tag: String,
+            message: String,
+            throwable: Throwable?
+        )
+    }
+
+    companion object {
+        const val LEVEL_VERBOSE: Int = 0
+        const val LEVEL_INFO: Int = 1
+        const val LEVEL_WARNING: Int = 2
+        const val LEVEL_ERROR: Int = 3
+
+        @VisibleForTesting
+        var lastMessage: String? = null
+
+        @VisibleForTesting
+        var lastTag: String? = null
+
+        @VisibleForTesting
+        var sAndroidLogger: Logger =
+            Logger { level: Int, tag: String, message: String, throwable: Throwable? ->
+                when (level) {
+                    LEVEL_VERBOSE -> Log.v(tag, message, throwable)
+                    LEVEL_INFO -> Log.i(tag, message, throwable)
+                    LEVEL_WARNING -> Log.w(tag, message, throwable)
+                    LEVEL_ERROR -> Log.e(tag, message, throwable)
+                }
+            }
+        private var sLevel = 0
+        private val sLoggers: MutableSet<Logger> = CopyOnWriteArraySet<Logger>()
+
+        init {
+            setLogLevel(LEVEL_ERROR)
+            sLoggers.add(sAndroidLogger)
+        }
+
+        /**
+         * Creates a CameraLogger that will stream logs into the
+         * internal logs and dispatch them to [Logger]s.
+         *
+         * @param tag the logger tag
+         * @return a new CameraLogger
+         */
+        @JvmStatic
+        fun create(tag: String): CameraLogger {
+            return CameraLogger(tag)
+        }
+
+        /**
+         * Sets the log sLevel for logcat events.
+         *
+         * @param logLevel the desired log sLevel
+         * @see .LEVEL_VERBOSE
+         *
+         * @see .LEVEL_INFO
+         *
+         * @see .LEVEL_WARNING
+         *
+         * @see .LEVEL_ERROR
+         */
+        fun setLogLevel(@LogLevel logLevel: Int) {
+            sLevel = logLevel
+        }
+
+        /**
+         * Registers an external [Logger] for log events.
+         * Make sure to unregister using [.unregisterLogger].
+         *
+         * @param logger logger to add
+         */
+        fun registerLogger(logger: Logger) {
+            sLoggers.add(logger)
+        }
+
+        /**
+         * Unregisters a previously registered [Logger] for log events.
+         * This is needed in order to avoid leaks.
+         *
+         * @param logger logger to remove
+         */
+        fun unregisterLogger(logger: Logger) {
+            sLoggers.remove(logger)
+        }
     }
 }
 

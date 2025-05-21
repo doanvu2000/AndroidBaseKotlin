@@ -261,11 +261,11 @@ public class CameraView extends FrameLayout implements DefaultLifecycleObserver 
         setAudio(controls.getAudio());
         setAudioBitRate(audioBitRate);
         setAudioCodec(controls.getAudioCodec());
-        setPictureSize(sizeSelectors.getPictureSizeSelector());
+        setPictureSize(sizeSelectors.pictureSizeSelector);
         setPictureMetering(pictureMetering);
         setPictureSnapshotMetering(pictureSnapshotMetering);
         setPictureFormat(controls.getPictureFormat());
-        setVideoSize(sizeSelectors.getVideoSizeSelector());
+        setVideoSize(sizeSelectors.videoSizeSelector);
         setVideoCodec(controls.getVideoCodec());
         setVideoMaxSize(videoMaxSize);
         setVideoMaxDuration(videoMaxDuration);

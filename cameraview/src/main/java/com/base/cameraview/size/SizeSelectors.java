@@ -182,12 +182,7 @@ public class SizeSelectors {
     @SuppressWarnings("WeakerAccess")
     @NonNull
     public static SizeSelector minArea(final int area) {
-        return withFilter(new Filter() {
-            @Override
-            public boolean accepts(@NonNull Size size) {
-                return size.getHeight() * size.getWidth() >= area;
-            }
-        });
+        return withFilter(size -> size.getHeight() * size.getWidth() >= area);
     }
 
     /**
@@ -287,7 +282,7 @@ public class SizeSelectors {
                     break;
                 }
             }
-            return temp == null ? new ArrayList<Size>() : temp;
+            return temp == null ? new ArrayList<>() : temp;
         }
 
     }

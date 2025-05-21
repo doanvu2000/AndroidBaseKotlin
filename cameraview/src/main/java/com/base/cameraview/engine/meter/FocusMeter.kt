@@ -69,7 +69,7 @@ class FocusMeter(areas: MutableList<MeteringRectangle?>, skipIfPossible: Boolean
     ) {
         super.onCaptureCompleted(holder, request, result)
         val afState = result.get(CaptureResult.CONTROL_AF_STATE)
-        LOG.i("onCaptureCompleted:", "afState:", afState)
+        LOG.i("onCaptureCompleted:", "afState: $afState")
         if (afState == null) return
         when (afState) {
             CaptureRequest.CONTROL_AF_STATE_FOCUSED_LOCKED -> {

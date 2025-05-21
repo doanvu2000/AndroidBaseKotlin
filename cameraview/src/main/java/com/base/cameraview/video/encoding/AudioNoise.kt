@@ -1,58 +1,60 @@
-package com.base.cameraview.video.encoding;
+package com.base.cameraview.video.encoding
 
-import androidx.annotation.NonNull;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.ShortBuffer;
-import java.util.Random;
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.util.Random
+import kotlin.math.sin
 
 /**
  * An AudioNoise instance offers buffers of noise that we can use when recording
  * some samples failed for some reason.
- * <p>
+ *
+ *
  * Since we can't create noise anytime it's needed - that would be expensive and
  * slow down the recording thread - we create a big noise buffer at start time.
- * <p>
- * We'd like to work with {@link ShortBuffer}s, but this requires converting the
+ *
+ *
+ * We'd like to work with [java.nio.ShortBuffer]s, but this requires converting the
  * input buffer to ShortBuffer each time, and this can be expensive.
  */
-class AudioNoise {
+internal class AudioNoise(config: AudioConfig) {
+    private val mNoiseBuffer: ByteBuffer
 
-    private final static int FRAMES = 1; // After testing, it looks like this is the best setup
-    private final static Random RANDOM = new Random();
-
-    private final ByteBuffer mNoiseBuffer;
-
-    AudioNoise(@NonNull AudioConfig config) {
-        //noinspection ConstantConditions
-        if (config.sampleSizePerChannel != 2) {
-            throw new IllegalArgumentException("AudioNoise expects 2bytes-1short samples.");
-        }
+    init {
+        require(config.sampleSizePerChannel == 2) { "AudioNoise expects 2bytes-1short samples." }
         mNoiseBuffer = ByteBuffer
-                .allocateDirect(config.frameSize() * FRAMES)
-                .order(ByteOrder.nativeOrder());
-        double i = 0;
-        double frequency = config.frameSize() / 2D; // each X samples, the signal repeats
-        double step = Math.PI / frequency; // the increase in radians
-        double max = 10; // might choose this from 0 to Short.MAX_VALUE
+            .allocateDirect(config.frameSize() * FRAMES)
+            .order(ByteOrder.nativeOrder())
+        var i = 0.0
+        val frequency = config.frameSize() / 2.0 // each X samples, the signal repeats
+        val step = Math.PI / frequency // the increase in radians
+        val max = 10.0 // might choose this from 0 to Short.MAX_VALUE
         while (mNoiseBuffer.hasRemaining()) {
-            short noise = (short) (Math.sin(++i * step) * max);
-            mNoiseBuffer.put((byte) noise);
-            mNoiseBuffer.put((byte) (noise >> 8));
+            val noise = (sin(++i * step) * max).toInt().toShort()
+            mNoiseBuffer.put(noise.toByte())
+            mNoiseBuffer.put((noise.toInt() shr 8).toByte())
         }
-        mNoiseBuffer.rewind();
+        mNoiseBuffer.rewind()
     }
 
-    void fill(@NonNull ByteBuffer outBuffer) {
-        mNoiseBuffer.clear();
+    fun fill(outBuffer: ByteBuffer) {
+        mNoiseBuffer.clear()
         if (mNoiseBuffer.capacity() == outBuffer.remaining()) {
-            mNoiseBuffer.position(0); // Happens if FRAMES = 1.
+            mNoiseBuffer.position(0) // Happens if FRAMES = 1.
         } else {
-            mNoiseBuffer.position(RANDOM.nextInt(mNoiseBuffer.capacity()
-                    - outBuffer.remaining()));
+            mNoiseBuffer.position(
+                RANDOM.nextInt(
+                    mNoiseBuffer.capacity()
+                            - outBuffer.remaining()
+                )
+            )
         }
-        mNoiseBuffer.limit(mNoiseBuffer.position() + outBuffer.remaining());
-        outBuffer.put(mNoiseBuffer);
+        mNoiseBuffer.limit(mNoiseBuffer.position() + outBuffer.remaining())
+        outBuffer.put(mNoiseBuffer)
+    }
+
+    companion object {
+        private const val FRAMES = 1 // After testing, it looks like this is the best setup
+        private val RANDOM = Random()
     }
 }

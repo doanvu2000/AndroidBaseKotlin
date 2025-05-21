@@ -1,18 +1,9 @@
-package com.base.cameraview.video.encoding;
+package com.base.cameraview.video.encoding
 
-import com.base.cameraview.internal.Pool;
+import com.base.cameraview.internal.Pool
 
 /**
- * A simple {@link Pool(int, Factory)} implementation for input buffers.
+ * A simple [] implementation for input buffers.
  */
-class InputBufferPool extends Pool<InputBuffer> {
-
-    InputBufferPool() {
-        super(Integer.MAX_VALUE, new Factory<InputBuffer>() {
-            @Override
-            public InputBuffer create() {
-                return new InputBuffer();
-            }
-        });
-    }
-}
+internal class InputBufferPool :
+    Pool<InputBuffer?>(Int.Companion.MAX_VALUE, Factory { InputBuffer() })

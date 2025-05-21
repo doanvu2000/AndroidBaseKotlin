@@ -47,7 +47,7 @@ class WhiteBalanceLock : BaseLock() {
     ) {
         super.onCaptureCompleted(holder, request, result)
         val awbState = result.get(CaptureResult.CONTROL_AWB_STATE)
-        LOG.i("processCapture:", "awbState:", awbState)
+        LOG.i("processCapture:", "awbState: $awbState")
         if (awbState == null) return
         when (awbState) {
             CaptureRequest.CONTROL_AWB_STATE_LOCKED -> {

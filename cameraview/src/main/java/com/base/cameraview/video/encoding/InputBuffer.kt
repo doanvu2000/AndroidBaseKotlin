@@ -1,17 +1,27 @@
-package com.base.cameraview.video.encoding;
+package com.base.cameraview.video.encoding
 
-import java.nio.ByteBuffer;
+import java.nio.ByteBuffer
 
 /**
  * Represents an input buffer, which means,
  * raw data that should be encoded by MediaCodec.
  */
-@SuppressWarnings("WeakerAccess")
-public class InputBuffer {
-    public ByteBuffer data;
-    public ByteBuffer source;
-    public int index;
-    public int length;
-    public long timestamp;
-    public boolean isEndOfStream;
+class InputBuffer {
+    @JvmField
+    var data: ByteBuffer? = null
+
+    @JvmField
+    var source: ByteBuffer? = null
+
+    @JvmField
+    var index: Int = 0
+
+    @JvmField
+    var length: Int = 0
+
+    @JvmField
+    var timestamp: Long = 0
+
+    @JvmField
+    var isEndOfStream: Boolean = false
 }

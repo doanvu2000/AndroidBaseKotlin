@@ -1,100 +1,112 @@
-package com.base.cameraview.video.encoding;
+package com.base.cameraview.video.encoding
 
-import android.media.AudioFormat;
-
-import androidx.annotation.NonNull;
+import android.media.AudioFormat
 
 /**
  * Audio configuration to be passed as input to the constructor
- * of an {@link AudioMediaEncoder}.
+ * of an [AudioMediaEncoder].
  */
-@SuppressWarnings("WeakerAccess")
-public class AudioConfig {
-
+class AudioConfig {
     // Not configurable options (for now)
-    final int encoding = AudioFormat.ENCODING_PCM_16BIT; // Determines the sampleSizePerChannel
+    @JvmField
+    val encoding: Int = AudioFormat.ENCODING_PCM_16BIT // Determines the sampleSizePerChannel
+
     // The 44.1KHz frequency is the only setting guaranteed to be available on all devices.
     // If sampleSizePerChannel changes, review noise introduction
-    final int sampleSizePerChannel = 2; // byte/sample/channel [16bit].
+    val sampleSizePerChannel: Int = 2 // byte/sample/channel [16bit].
+
     // Configurable options
-    public int bitRate; // ENCODED bit rate
-    public int channels = 1;
-    public String encoder;
-    public String mimeType = "audio/mp4a-latm";
-    public int samplingFrequency = 44100; // samples/sec
-    final int byteRatePerChannel = samplingFrequency * sampleSizePerChannel; // byte/sec/channel
+    @JvmField
+    var bitRate: Int = 0 // ENCODED bit rate
 
-    @NonNull
-    AudioConfig copy() {
-        AudioConfig config = new AudioConfig();
-        config.bitRate = bitRate;
-        config.channels = channels;
-        config.encoder = encoder;
-        config.mimeType = mimeType;
-        config.samplingFrequency = samplingFrequency;
-        return config;
+    @JvmField
+    var channels: Int = 1
+
+    @JvmField
+    var encoder: String? = null
+
+    @JvmField
+    var mimeType: String? = "audio/mp4a-latm"
+
+    @JvmField
+    var samplingFrequency: Int = 44100 // samples/sec
+    val byteRatePerChannel: Int = samplingFrequency * sampleSizePerChannel // byte/sec/channel
+
+    fun copy(): AudioConfig {
+        val config = AudioConfig()
+        config.bitRate = bitRate
+        config.channels = channels
+        config.encoder = encoder
+        config.mimeType = mimeType
+        config.samplingFrequency = samplingFrequency
+        return config
     }
 
-    int byteRate() { // RAW byte rate
-        return byteRatePerChannel * channels; // byte/sec
+    fun byteRate(): Int { // RAW byte rate
+        return byteRatePerChannel * channels // byte/sec
     }
 
-    @SuppressWarnings("unused")
-    int bitRate() { // RAW bit rate
-        return byteRate() * 8; // bit/sec
+    @Suppress("unused")
+    fun bitRate(): Int { // RAW bit rate
+        return byteRate() * 8 // bit/sec
     }
 
-    int audioFormatChannels() {
+    fun audioFormatChannels(): Int {
         if (channels == 1) {
-            return AudioFormat.CHANNEL_IN_MONO;
+            return AudioFormat.CHANNEL_IN_MONO
         } else if (channels == 2) {
-            return AudioFormat.CHANNEL_IN_STEREO;
+            return AudioFormat.CHANNEL_IN_STEREO
         }
-        throw new RuntimeException("Invalid number of channels: " + channels);
+        throw RuntimeException("Invalid number of channels: $channels")
     }
 
     /**
      * We call FRAME here the chunk of data that we want to read at each loop cycle.
-     * <p>
+     *
+     *
      * When this number is HIGH, the AudioRecord might be unable to keep a good pace and
      * we might end up skip some frames.
-     * <p>
+     *
+     *
      * When this number is LOW, we pull a bigger number of frames and this might end up
      * delaying our recorder/encoder balance (more frames means more encoding operations).
      * In the end, this means that the recorder will skip some frames to restore the balance.
      *
      * @return the frame size
      */
-    int frameSize() {
-        return 1024 * channels;
+    fun frameSize(): Int {
+        return 1024 * channels
     }
 
     /**
-     * Number of frames contained in the {@link android.media.AudioRecord} buffer.
+     * Number of frames contained in the [android.media.AudioRecord] buffer.
      * In theory, the higher this value is, the safer it is to delay reading as the
      * audioRecord will hold the recorded samples anyway and return to us next time we read.
-     * <p>
-     * Should be coordinated with {@link #frameSize()}.
+     *
+     *
+     * Should be coordinated with [.frameSize].
      *
      * @return the number of frames
      */
-    int audioRecordBufferFrames() {
-        return 50;
+    fun audioRecordBufferFrames(): Int {
+        return 50
     }
 
     /**
-     * We allocate buffers of {@link #frameSize()} each, which is not much.
-     * <p>
+     * We allocate buffers of [.frameSize] each, which is not much.
+     *
+     *
      * This value indicates the maximum number of these buffers that we can allocate at a given
-     * instant. This value is the number of runnables that the encoder thread is allowed to be
+     * instant. This value is the number of runnable that the encoder thread is allowed to be
      * 'behind' the recorder thread. It's not safe to have it very large or we can end encoding
      * A LOT AFTER the actual recording. It's better to reduce this and skip recording at all.
-     * <p>
-     * Should be coordinated with {@link #frameSize()}.
+     *
+     *
+     * Should be coordinated with [.frameSize].
      *
      * @return the buffer pool max size
      */
-    int bufferPoolMaxSize() {
-        return 500;
+    fun bufferPoolMaxSize(): Int {
+        return 500
     }
 }

@@ -27,7 +27,7 @@ object FpsRangeValidator {
         val descriptor = Build.MANUFACTURER + " " + Build.MODEL
         val ranges = sIssues[descriptor]
         if (ranges != null && ranges.contains(range)) {
-            LOG.i("Dropping range:", range)
+            LOG.i("Dropping range: $range")
             return false
         }
         return true

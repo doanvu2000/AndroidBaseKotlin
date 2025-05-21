@@ -9,7 +9,7 @@ import com.base.cameraview.engine.action.ActionHolder
 
 class WhiteBalanceReset : BaseReset(true) {
     override fun onStarted(holder: ActionHolder, area: MeteringRectangle?) {
-        LOG.w("onStarted:", "with area:", area)
+        LOG.w("onStarted:", "with area: $area")
         val maxRegions: Int = readCharacteristic<Int?>(
             CameraCharacteristics.CONTROL_MAX_REGIONS_AWB,
             0

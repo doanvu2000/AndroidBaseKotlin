@@ -1,128 +1,164 @@
-package com.base.cameraview.size;
+package com.base.cameraview.size
 
-import android.content.res.TypedArray;
-
-import androidx.annotation.NonNull;
-
-import com.base.cameraview.R;
-
-import java.util.ArrayList;
-import java.util.List;
+import android.content.res.TypedArray
+import com.base.cameraview.R
 
 /**
  * Parses size selectors from XML attributes.
  */
-public class SizeSelectorParser {
+class SizeSelectorParser(array: TypedArray) {
+    @JvmField
+    val pictureSizeSelector: SizeSelector
 
-    private SizeSelector pictureSizeSelector;
-    private SizeSelector videoSizeSelector;
+    @JvmField
+    val videoSizeSelector: SizeSelector
 
-    public SizeSelectorParser(@NonNull TypedArray array) {
-        List<SizeSelector> pictureConstraints = new ArrayList<>(3);
+    init {
+        val pictureConstraints: MutableList<SizeSelector?> = ArrayList(3)
+
         if (array.hasValue(R.styleable.CameraView_cameraPictureSizeMinWidth)) {
-            pictureConstraints.add(SizeSelectors.minWidth(
+            pictureConstraints.add(
+                SizeSelectors.minWidth(
                     array.getInteger(R.styleable.CameraView_cameraPictureSizeMinWidth, 0)
-            ));
+                )
+            )
         }
+
         if (array.hasValue(R.styleable.CameraView_cameraPictureSizeMaxWidth)) {
-            pictureConstraints.add(SizeSelectors.maxWidth(
+            pictureConstraints.add(
+                SizeSelectors.maxWidth(
                     array.getInteger(R.styleable.CameraView_cameraPictureSizeMaxWidth, 0)
-            ));
+                )
+            )
         }
+
         if (array.hasValue(R.styleable.CameraView_cameraPictureSizeMinHeight)) {
-            pictureConstraints.add(SizeSelectors.minHeight(
+            pictureConstraints.add(
+                SizeSelectors.minHeight(
                     array.getInteger(R.styleable.CameraView_cameraPictureSizeMinHeight, 0)
-            ));
+                )
+            )
         }
+
         if (array.hasValue(R.styleable.CameraView_cameraPictureSizeMaxHeight)) {
-            pictureConstraints.add(SizeSelectors.maxHeight(
+            pictureConstraints.add(
+                SizeSelectors.maxHeight(
                     array.getInteger(R.styleable.CameraView_cameraPictureSizeMaxHeight, 0)
-            ));
+                )
+            )
         }
+
         if (array.hasValue(R.styleable.CameraView_cameraPictureSizeMinArea)) {
-            pictureConstraints.add(SizeSelectors.minArea(
+            pictureConstraints.add(
+                SizeSelectors.minArea(
                     array.getInteger(R.styleable.CameraView_cameraPictureSizeMinArea, 0)
-            ));
+                )
+            )
         }
+
         if (array.hasValue(R.styleable.CameraView_cameraPictureSizeMaxArea)) {
-            pictureConstraints.add(SizeSelectors.maxArea(
+            pictureConstraints.add(
+                SizeSelectors.maxArea(
                     array.getInteger(R.styleable.CameraView_cameraPictureSizeMaxArea, 0)
-            ));
+                )
+            )
         }
+
         if (array.hasValue(R.styleable.CameraView_cameraPictureSizeAspectRatio)) {
-            //noinspection ConstantConditions
-            pictureConstraints.add(SizeSelectors.aspectRatio(
-                    AspectRatio.parse(array.getString(
-                            R.styleable.CameraView_cameraPictureSizeAspectRatio)), 0));
+            pictureConstraints.add(
+                SizeSelectors.aspectRatio(
+                    AspectRatio.parse(
+                        array.getString(
+                            R.styleable.CameraView_cameraPictureSizeAspectRatio
+                        )!!
+                    ), 0f
+                )
+            )
         }
 
         if (array.getBoolean(R.styleable.CameraView_cameraPictureSizeSmallest, false)) {
-            pictureConstraints.add(SizeSelectors.smallest());
+            pictureConstraints.add(SizeSelectors.smallest())
         }
+
         if (array.getBoolean(R.styleable.CameraView_cameraPictureSizeBiggest, false)) {
-            pictureConstraints.add(SizeSelectors.biggest());
+            pictureConstraints.add(SizeSelectors.biggest())
         }
-        pictureSizeSelector = !pictureConstraints.isEmpty() ?
-                SizeSelectors.and(pictureConstraints.toArray(new SizeSelector[0])) :
-                SizeSelectors.biggest();
+
+        pictureSizeSelector =
+            if (!pictureConstraints.isEmpty()) SizeSelectors.and(*pictureConstraints.toTypedArray<SizeSelector?>()) else SizeSelectors.biggest()
 
         // Video size selector
-        List<SizeSelector> videoConstraints = new ArrayList<>(3);
+        val videoConstraints: MutableList<SizeSelector?> = ArrayList(3)
+
         if (array.hasValue(R.styleable.CameraView_cameraVideoSizeMinWidth)) {
-            videoConstraints.add(SizeSelectors.minWidth(
+            videoConstraints.add(
+                SizeSelectors.minWidth(
                     array.getInteger(R.styleable.CameraView_cameraVideoSizeMinWidth, 0)
-            ));
+                )
+            )
         }
+
         if (array.hasValue(R.styleable.CameraView_cameraVideoSizeMaxWidth)) {
-            videoConstraints.add(SizeSelectors.maxWidth(
+            videoConstraints.add(
+                SizeSelectors.maxWidth(
                     array.getInteger(R.styleable.CameraView_cameraVideoSizeMaxWidth, 0)
-            ));
+                )
+            )
         }
+
         if (array.hasValue(R.styleable.CameraView_cameraVideoSizeMinHeight)) {
-            videoConstraints.add(SizeSelectors.minHeight(
+            videoConstraints.add(
+                SizeSelectors.minHeight(
                     array.getInteger(R.styleable.CameraView_cameraVideoSizeMinHeight, 0)
-            ));
+                )
+            )
         }
+
         if (array.hasValue(R.styleable.CameraView_cameraVideoSizeMaxHeight)) {
-            videoConstraints.add(SizeSelectors.maxHeight(
+            videoConstraints.add(
+                SizeSelectors.maxHeight(
                     array.getInteger(R.styleable.CameraView_cameraVideoSizeMaxHeight, 0)
-            ));
+                )
+            )
         }
+
         if (array.hasValue(R.styleable.CameraView_cameraVideoSizeMinArea)) {
-            videoConstraints.add(SizeSelectors.minArea(
+            videoConstraints.add(
+                SizeSelectors.minArea(
                     array.getInteger(R.styleable.CameraView_cameraVideoSizeMinArea, 0)
-            ));
+                )
+            )
         }
+
         if (array.hasValue(R.styleable.CameraView_cameraVideoSizeMaxArea)) {
-            videoConstraints.add(SizeSelectors.maxArea(
+            videoConstraints.add(
+                SizeSelectors.maxArea(
                     array.getInteger(R.styleable.CameraView_cameraVideoSizeMaxArea, 0)
-            ));
+                )
+            )
         }
+
         if (array.hasValue(R.styleable.CameraView_cameraVideoSizeAspectRatio)) {
-            //noinspection ConstantConditions
-            videoConstraints.add(SizeSelectors.aspectRatio(
-                    AspectRatio.parse(array.getString(
-                            R.styleable.CameraView_cameraVideoSizeAspectRatio)), 0));
+            videoConstraints.add(
+                SizeSelectors.aspectRatio(
+                    AspectRatio.parse(
+                        array.getString(
+                            R.styleable.CameraView_cameraVideoSizeAspectRatio
+                        )!!
+                    ), 0f
+                )
+            )
         }
+
         if (array.getBoolean(R.styleable.CameraView_cameraVideoSizeSmallest, false)) {
-            videoConstraints.add(SizeSelectors.smallest());
+            videoConstraints.add(SizeSelectors.smallest())
         }
+
         if (array.getBoolean(R.styleable.CameraView_cameraVideoSizeBiggest, false)) {
-            videoConstraints.add(SizeSelectors.biggest());
+            videoConstraints.add(SizeSelectors.biggest())
         }
-        videoSizeSelector = !videoConstraints.isEmpty() ?
-                SizeSelectors.and(videoConstraints.toArray(new SizeSelector[0])) :
-                SizeSelectors.biggest();
-    }
 
-    @NonNull
-    public SizeSelector getPictureSizeSelector() {
-        return pictureSizeSelector;
+        videoSizeSelector =
+            if (!videoConstraints.isEmpty()) SizeSelectors.and(*videoConstraints.toTypedArray<SizeSelector?>()) else SizeSelectors.biggest()
     }
-
-    @NonNull
-    public SizeSelector getVideoSizeSelector() {
-        return videoSizeSelector;
-    }
-
 }

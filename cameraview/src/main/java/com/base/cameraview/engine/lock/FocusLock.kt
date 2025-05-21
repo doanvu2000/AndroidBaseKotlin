@@ -61,7 +61,7 @@ class FocusLock : BaseLock() {
         super.onCaptureCompleted(holder, request, result)
         val afState = result.get(CaptureResult.CONTROL_AF_STATE)
         val afMode = result.get(CaptureResult.CONTROL_AF_MODE)
-        LOG.i("onCapture:", "afState:", afState, "afMode:", afMode)
+        LOG.i("onCapture:", "afState: ${afState}, afMode: $afMode")
         if (afState == null || afMode == null) return
         if (afMode != CaptureResult.CONTROL_AF_MODE_AUTO) return
         when (afState) {

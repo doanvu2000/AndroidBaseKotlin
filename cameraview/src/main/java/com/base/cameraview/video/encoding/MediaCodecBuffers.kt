@@ -1,33 +1,28 @@
-package com.base.cameraview.video.encoding;
+package com.base.cameraview.video.encoding
 
-import android.media.MediaCodec;
-
-import java.nio.ByteBuffer;
+import android.media.MediaCodec
+import java.nio.ByteBuffer
 
 /**
  * A Wrapper to MediaCodec that facilitates the use of API-dependent get{Input/Output}Buffer
- * methods, in order to prevent: http://stackoverflow.com/q/30646885
+ * methods, in order to prevent: [...](http://stackoverflow.com/q/30646885)
  */
-class MediaCodecBuffers {
+internal class MediaCodecBuffers(private val mMediaCodec: MediaCodec) {
+    private val mInputBuffers: Array<ByteBuffer?>?
+    private val mOutputBuffers: Array<ByteBuffer?>? = null
 
-    private final MediaCodec mMediaCodec;
-    private final ByteBuffer[] mInputBuffers;
-    private ByteBuffer[] mOutputBuffers;
-
-    MediaCodecBuffers(MediaCodec mediaCodec) {
-        mMediaCodec = mediaCodec;
-
-        mInputBuffers = mOutputBuffers = null;
+    init {
+        mInputBuffers = mOutputBuffers
     }
 
-    ByteBuffer getInputBuffer(final int index) {
-        return mMediaCodec.getInputBuffer(index);
+    fun getInputBuffer(index: Int): ByteBuffer? {
+        return mMediaCodec.getInputBuffer(index)
     }
 
-    ByteBuffer getOutputBuffer(final int index) {
-        return mMediaCodec.getOutputBuffer(index);
+    fun getOutputBuffer(index: Int): ByteBuffer? {
+        return mMediaCodec.getOutputBuffer(index)
     }
 
-    void onOutputBuffersChanged() {
+    fun onOutputBuffersChanged() {
     }
 }

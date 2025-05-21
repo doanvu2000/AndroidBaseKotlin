@@ -1,87 +1,79 @@
-package com.base.cameraview;
+package com.base.cameraview
 
 /**
  * Holds an error with the camera configuration.
  */
-public class CameraException extends RuntimeException {
+class CameraException : RuntimeException {
+    var reason: Int = REASON_UNKNOWN
+        private set
 
-    /**
-     * Unknown error. No further info available.
-     */
-    public static final int REASON_UNKNOWN = 0;
+    constructor(cause: Throwable?) : super(cause)
 
-    /**
-     * We failed to connect to the camera service.
-     * The camera might be in use by another app.
-     */
-    public static final int REASON_FAILED_TO_CONNECT = 1;
-
-    /**
-     * Failed to start the camera preview.
-     * Again, the camera might be in use by another app.
-     */
-    public static final int REASON_FAILED_TO_START_PREVIEW = 2;
-
-    /**
-     * Camera was forced to disconnect.
-     * In Camera1, this is thrown when android.hardware.Camera.CAMERA_ERROR_EVICTED
-     * is caught.
-     */
-    public static final int REASON_DISCONNECTED = 3;
-
-    /**
-     * Could not take a picture or a picture snapshot,
-     * for some not specified reason.
-     */
-    public static final int REASON_PICTURE_FAILED = 4;
-
-    /**
-     * Could not take a video or a video snapshot,
-     * for some not specified reason.
-     */
-    public static final int REASON_VIDEO_FAILED = 5;
-
-    /**
-     * value.
-     * This can be solved by changing the facing value and starting again.
-     */
-    public static final int REASON_NO_CAMERA = 6;
-
-    private int reason = REASON_UNKNOWN;
-
-    @SuppressWarnings("WeakerAccess")
-    public CameraException(Throwable cause) {
-        super(cause);
+    constructor(cause: Throwable?, reason: Int) : super(cause) {
+        this.reason = reason
     }
 
-    public CameraException(Throwable cause, int reason) {
-        super(cause);
-        this.reason = reason;
+    constructor(reason: Int) : super() {
+        this.reason = reason
     }
 
-    public CameraException(int reason) {
-        super();
-        this.reason = reason;
-    }
+    @get:Suppress("unused")
+    val isUnrecoverable: Boolean
+        /**
+         * Whether this error is unrecoverable. If this function returns true,
+         * the Camera has been closed (or will be soon) and it is likely showing a black preview.
+         * This is the right moment to show an error dialog to the user.
+         *
+         * @return true if this error is unrecoverable
+         */
+        get() = when (this.reason) {
+            REASON_FAILED_TO_CONNECT -> true
+            REASON_FAILED_TO_START_PREVIEW -> true
+            REASON_DISCONNECTED -> true
+            else -> false
+        }
 
-    public int getReason() {
-        return reason;
-    }
+    companion object {
+        /**
+         * Unknown error. No further info available.
+         */
+        const val REASON_UNKNOWN: Int = 0
 
-    /**
-     * Whether this error is unrecoverable. If this function returns true,
-     * the Camera has been closed (or will be soon) and it is likely showing a black preview.
-     * This is the right moment to show an error dialog to the user.
-     *
-     * @return true if this error is unrecoverable
-     */
-    @SuppressWarnings("unused")
-    public boolean isUnrecoverable() {
-        return switch (getReason()) {
-            case REASON_FAILED_TO_CONNECT -> true;
-            case REASON_FAILED_TO_START_PREVIEW -> true;
-            case REASON_DISCONNECTED -> true;
-            default -> false;
-        };
+        /**
+         * We failed to connect to the camera service.
+         * The camera might be in use by another app.
+         */
+        const val REASON_FAILED_TO_CONNECT: Int = 1
+
+        /**
+         * Failed to start the camera preview.
+         * Again, the camera might be in use by another app.
+         */
+        const val REASON_FAILED_TO_START_PREVIEW: Int = 2
+
+        /**
+         * Camera was forced to disconnect.
+         * In Camera1, this is thrown when android.hardware.Camera.CAMERA_ERROR_EVICTED
+         * is caught.
+         */
+        const val REASON_DISCONNECTED: Int = 3
+
+        /**
+         * Could not take a picture or a picture snapshot,
+         * for some not specified reason.
+         */
+        const val REASON_PICTURE_FAILED: Int = 4
+
+        /**
+         * Could not take a video or a video snapshot,
+         * for some not specified reason.
+         */
+        const val REASON_VIDEO_FAILED: Int = 5
+
+        /**
+         * value.
+         * This can be solved by changing the facing value and starting again.
+         */
+        const val REASON_NO_CAMERA: Int = 6
     }
 }

@@ -47,10 +47,9 @@ public class CameraUtils {
     public static boolean hasCameras(@NonNull Context context) {
         PackageManager manager = context.getPackageManager();
         // There's also FEATURE_CAMERA_EXTERNAL , should we support it?
-        return manager.hasSystemFeature(PackageManager.FEATURE_CAMERA)
+        return manager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)
                 || manager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT);
     }
-
 
     /**
      * Determines whether the device has a valid camera sensor with the given
@@ -70,7 +69,6 @@ public class CameraUtils {
         }
         return false;
     }
-
 
     /**
      * Simply writes the given data to the given file. It is done synchronously. If you are
@@ -99,7 +97,6 @@ public class CameraUtils {
         }
     }
 
-
     /**
      * Writes the given data to the given file in a background thread, returning on the
      * original thread (typically the UI thread) once writing is done.
@@ -115,17 +112,9 @@ public class CameraUtils {
                                    @NonNull final File file,
                                    @NonNull final FileCallback callback) {
         final Handler ui = new Handler();
-        WorkerHandler.execute(new Runnable() {
-            @Override
-            public void run() {
-                final File result = writeToFile(data, file);
-                ui.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        callback.onFileReady(result);
-                    }
-                });
-            }
+        WorkerHandler.execute(() -> {
+            final File result = writeToFile(data, file);
+            ui.post(() -> callback.onFileReady(result));
         });
     }
 
@@ -210,17 +199,14 @@ public class CameraUtils {
                              final int rotation,
                              @NonNull final BitmapCallback callback) {
         final Handler ui = new Handler();
-        WorkerHandler.execute(new Runnable() {
-            @Override
-            public void run() {
-                final Bitmap bitmap = decodeBitmap(source, maxWidth, maxHeight, options, rotation);
-                ui.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        callback.onBitmapReady(bitmap);
-                    }
-                });
-            }
+        WorkerHandler.execute(() -> {
+            final Bitmap bitmap = decodeBitmap(source, maxWidth, maxHeight, options, rotation);
+            ui.post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onBitmapReady(bitmap);
+                }
+            });
         });
     }
 

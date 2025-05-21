@@ -95,7 +95,7 @@ class ExposureMeter(areas: MutableList<MeteringRectangle?>, skipIfPossible: Bool
         super.onCaptureCompleted(holder, request, result)
         val aeState = result.get(CaptureResult.CONTROL_AE_STATE)
         val aeTriggerState = result.get(CaptureResult.CONTROL_AE_PRECAPTURE_TRIGGER)
-        LOG.i("onCaptureCompleted:", "aeState:", aeState, "aeTriggerState:", aeTriggerState)
+        LOG.i("onCaptureCompleted:", "aeState: $aeState, aeTriggerState: $aeTriggerState")
         if (aeState == null) return
 
         if (state == STATE_WAITING_PRECAPTURE) {

@@ -25,7 +25,7 @@ class ExposureReset : BaseReset(true) {
         // NOTE: precapture might not be supported, in which case I think it will be ignored.
         val lastResult: CaptureResult? = holder.getLastResult(this)
         val trigger = lastResult?.get(CaptureResult.CONTROL_AE_PRECAPTURE_TRIGGER)
-        LOG.i("onStarted:", "last precapture trigger is", trigger)
+        LOG.i("onStarted:", "last precapture trigger is $trigger")
         if (trigger != null && trigger == CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START) {
             LOG.i("onStarted:", "canceling precapture.")
             val newTrigger = CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_CANCEL

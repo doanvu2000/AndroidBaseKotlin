@@ -55,7 +55,7 @@ class ExposureLock : BaseLock() {
     ) {
         super.onCaptureCompleted(holder, request, result)
         val aeState = result.get(CaptureResult.CONTROL_AE_STATE)
-        LOG.i("processCapture:", "aeState:", aeState)
+        LOG.i("processCapture:", "aeState: $aeState")
         if (aeState == null) return
         when (aeState) {
             CaptureRequest.CONTROL_AE_STATE_LOCKED -> {

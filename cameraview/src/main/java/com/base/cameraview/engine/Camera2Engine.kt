@@ -970,7 +970,7 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
     private fun applyAllParameters(
         builder: CaptureRequest.Builder, oldBuilder: CaptureRequest.Builder?
     ) {
-        LOG.i("applyAllParameters:", "called for tag", builder.build().tag)
+        LOG.i("applyAllParameters:", "called for tag")
         builder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO)
         applyDefaultFocus(builder)
         applyFlash(builder, Flash.OFF)
@@ -1138,8 +1138,8 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
             val pairs: MutableList<Pair<Int?, Int?>> = mMapper.mapFlash(mFlash!!)
             for (pair in pairs) {
                 if (availableAeModes.contains(pair.first)) {
-                    LOG.i("applyFlash: setting CONTROL_AE_MODE to", pair.first)
-                    LOG.i("applyFlash: setting FLASH_MODE to", pair.second)
+                    LOG.i("applyFlash: setting CONTROL_AE_MODE to ${pair.first}")
+                    LOG.i("applyFlash: setting FLASH_MODE to ${pair.second}")
                     builder.set(CaptureRequest.CONTROL_AE_MODE, pair.first)
                     builder.set(CaptureRequest.FLASH_MODE, pair.second)
                     return true

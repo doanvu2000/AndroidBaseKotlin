@@ -463,7 +463,7 @@ abstract class CameraBaseEngine protected constructor(callback: Callback) : Came
         if (result != null && result.data != null) {
             callback.dispatchOnPictureTaken(result)
         } else {
-            LOG.e("onPictureResult", "result or data is null: something went wrong.", error)
+            LOG.e("onPictureResult", "result or data is null: something went wrong.")
             callback.dispatchError(
                 CameraException(
                     error, CameraException.REASON_PICTURE_FAILED
@@ -554,7 +554,7 @@ abstract class CameraBaseEngine protected constructor(callback: Callback) : Came
         if (result != null) {
             callback.dispatchOnVideoTaken(result)
         } else {
-            LOG.e("onVideoResult", "result is null: something went wrong.", exception)
+            LOG.e("onVideoResult", "result is null: something went wrong.")
             callback.dispatchError(
                 CameraException(
                     exception, CameraException.REASON_VIDEO_FAILED
@@ -590,7 +590,7 @@ abstract class CameraBaseEngine protected constructor(callback: Callback) : Came
     //endregion
     //region Size / Surface
     override fun onSurfaceChanged() {
-        LOG.i("onSurfaceChanged:", "Size is", getPreviewSurfaceSize(Reference.VIEW))
+        LOG.i("onSurfaceChanged:", "Size is ${getPreviewSurfaceSize(Reference.VIEW)}")
         orchestrator.scheduleStateful(
             "surface changed", CameraState.BIND
         ) {

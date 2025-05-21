@@ -26,7 +26,7 @@ class FocusReset : BaseReset(true) {
         // NOTE: trigger might not be supported, in which case I think it will be ignored.
         val lastResult: CaptureResult? = holder.getLastResult(this)
         val trigger = lastResult?.get(CaptureResult.CONTROL_AF_TRIGGER)
-        LOG.w("onStarted:", "last focus trigger is", trigger)
+        LOG.w("onStarted:", "last focus trigger is $trigger")
         if (trigger != null && trigger == CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START) {
             holder.getBuilder(this).set(
                 CaptureRequest.CONTROL_AF_TRIGGER,

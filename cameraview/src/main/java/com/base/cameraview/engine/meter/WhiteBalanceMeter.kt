@@ -61,7 +61,7 @@ class WhiteBalanceMeter(areas: MutableList<MeteringRectangle?>, skipIfPossible: 
     ) {
         super.onCaptureCompleted(holder, request, result)
         val awbState = result.get(CaptureResult.CONTROL_AWB_STATE)
-        LOG.i("onCaptureCompleted:", "awbState:", awbState)
+        LOG.i("onCaptureCompleted:", "awbState: $awbState")
         if (awbState == null) return
 
         when (awbState) {
