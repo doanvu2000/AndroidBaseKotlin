@@ -1,148 +1,143 @@
-package com.base.cameraview.internal;
+package com.base.cameraview.internal
 
-import android.annotation.SuppressLint;
-import android.media.AudioFormat;
-import android.media.MediaCodec;
-import android.media.MediaCodecInfo;
-import android.media.MediaCodecList;
-import android.media.MediaFormat;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
-
-import com.base.cameraview.CameraLogger;
-import com.base.cameraview.size.Size;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import android.annotation.SuppressLint
+import android.media.AudioFormat
+import android.media.MediaCodec
+import android.media.MediaCodecInfo
+import android.media.MediaCodecInfo.AudioCapabilities
+import android.media.MediaCodecInfo.VideoCapabilities
+import android.media.MediaCodecList
+import android.media.MediaFormat
+import androidx.annotation.VisibleForTesting
+import com.base.cameraview.CameraLogger.Companion.create
+import com.base.cameraview.size.Size
+import java.util.Locale
+import kotlin.math.roundToInt
 
 /**
  * Checks the capabilities of device encoders and adjust parameters to ensure
  * that they'll be supported by the final encoder.
- * <p>
- * Methods in this class might throw either a {@link VideoException} or a {@link AudioException}.
+ *
+ *
+ * Methods in this class might throw either a [VideoException] or a [AudioException].
  * Throwing this exception means that the given parameters will not be supported by the encoder
  * for that type, and cannot be tweaked to be.
- * <p>
- * When this happens, users should retry with a new {@link DeviceEncoders} instance, but with
+ *
+ *
+ * When this happens, users should retry with a new [DeviceEncoders] instance, but with
  * the audio or video encoder offset incremented. This offset is the position in the encoder list
  * from which we'll choose the potential encoder.
- * <p>
+ *
+ *
  * This class will inspect the encoders list in two ways, based on the mode flag:
- * <p>
- * 1. {@link #MODE_RESPECT_ORDER}
- * <p>
+ *
+ *
+ * 1. [.MODE_RESPECT_ORDER]
+ *
+ *
  * Chooses the encoder as the first one that matches the given mime type.
- * This is what {@link MediaCodec#createEncoderByType(String)} does,
- * and what {@link android.media.MediaRecorder} also does when recording.
- * <p>
+ * This is what [MediaCodec.createEncoderByType] does,
+ * and what [android.media.MediaRecorder] also does when recording.
+ *
+ *
  * The list is ordered based on the encoder definitions in system/etc/media_codecs.xml,
- * as explained here: <a href="https://source.android.com/devices/media">...</a> , for example.
+ * as explained here: [...](https://source.android.com/devices/media) , for example.
  * So taking the first means respecting the vendor priorities and should generally be
  * a good idea.
- * <p>
- * About {@link android.media.MediaRecorder}, we know it uses this option from here:
- * <a href="https://stackoverflow.com/q/57479564/4288782">...</a> where all links to source code are shown.
- * - StagefrightRecorder (<a href="https://android.googlesource.com/platform/frameworks/av/+/master/media/libmediaplayerservice/StagefrightRecorder.cpp#1782">...</a>)
- * - MediaCodecSource (<a href="https://android.googlesource.com/platform/frameworks/av/+/master/media/libstagefright/MediaCodecSource.cpp#515">...</a>)
- * - MediaCodecList (<a href="https://android.googlesource.com/platform/frameworks/av/+/master/media/libstagefright/MediaCodecList.cpp#322">...</a>)
- * <p>
- * To be fair, what {@link android.media.MediaRecorder} does is actually choose the first one
+ *
+ *
+ * About [android.media.MediaRecorder], we know it uses this option from here:
+ * [...](https://stackoverflow.com/q/57479564/4288782) where all links to source code are shown.
+ * - StagefrightRecorder ([...](https://android.googlesource.com/platform/frameworks/av/+/master/media/libmediaplayerservice/StagefrightRecorder.cpp#1782))
+ * - MediaCodecSource ([...](https://android.googlesource.com/platform/frameworks/av/+/master/media/libstagefright/MediaCodecSource.cpp#515))
+ * - MediaCodecList ([...](https://android.googlesource.com/platform/frameworks/av/+/master/media/libstagefright/MediaCodecList.cpp#322))
+ *
+ *
+ * To be fair, what [android.media.MediaRecorder] does is actually choose the first one
  * that configures itself without errors. We offer this option through
- * {@link #tryConfigureVideo(String, Size, int, int)} and
- * {@link #tryConfigureAudio(String, int, int, int)}.
- * <p>
- * 2. {@link #MODE_PREFER_HARDWARE}
- * <p>
+ * [.tryConfigureVideo] and
+ * [.tryConfigureAudio].
+ *
+ *
+ * 2. [.MODE_PREFER_HARDWARE]
+ *
+ *
  * This takes the list - as ordered by the vendor - and just sorts it so that hardware encoders
  * are preferred over software ones. It's questionable whether this is good or not. Some vendors
  * might forget to put hardware encoders first in the list, some others might put poor hardware
  * encoders on the bottom of the list on purpose.
  */
-public class DeviceEncoders {
+class DeviceEncoders @SuppressLint("NewApi") constructor(
+    mode: Int, videoType: String, audioType: String, videoOffset: Int, audioOffset: Int
+) {
+    private val mVideoEncoder: MediaCodecInfo?
+    private val mAudioEncoder: MediaCodecInfo?
+    private val mVideoCapabilities: VideoCapabilities?
+    private val mAudioCapabilities: AudioCapabilities?
 
-    public final static int MODE_RESPECT_ORDER = 0;
-    public final static int MODE_PREFER_HARDWARE = 1;
-    private final static String TAG = DeviceEncoders.class.getSimpleName();
-    private final static CameraLogger LOG = CameraLogger.create(TAG);
-    @VisibleForTesting
-    static boolean ENABLED = true;
-    @SuppressWarnings("FieldCanBeLocal")
-    private final MediaCodecInfo mVideoEncoder;
-    @SuppressWarnings("FieldCanBeLocal")
-    private final MediaCodecInfo mAudioEncoder;
-    private final MediaCodecInfo.VideoCapabilities mVideoCapabilities;
-    private final MediaCodecInfo.AudioCapabilities mAudioCapabilities;
-
-    @SuppressLint("NewApi")
-    public DeviceEncoders(int mode,
-                          @NonNull String videoType,
-                          @NonNull String audioType,
-                          int videoOffset,
-                          int audioOffset) {
+    init {
         // We could still get a list of MediaCodecInfo for API >= 16, but it seems that the APIs
         // for querying the availability of a specified MediaFormat were only added in 21 anyway.
         if (ENABLED) {
-            List<MediaCodecInfo> encoders = getDeviceEncoders();
-            mVideoEncoder = findDeviceEncoder(encoders, videoType, mode, videoOffset);
-            LOG.i("Enabled. Found video encoder:", mVideoEncoder.getName());
-            mAudioEncoder = findDeviceEncoder(encoders, audioType, mode, audioOffset);
-            LOG.i("Enabled. Found audio encoder:", mAudioEncoder.getName());
-            mVideoCapabilities = mVideoEncoder.getCapabilitiesForType(videoType)
-                    .getVideoCapabilities();
-            mAudioCapabilities = mAudioEncoder.getCapabilitiesForType(audioType)
-                    .getAudioCapabilities();
+            val encoders = this.deviceEncoders
+            mVideoEncoder = findDeviceEncoder(encoders, videoType, mode, videoOffset)
+            LOG.i("Enabled. Found video encoder:", mVideoEncoder.name)
+            mAudioEncoder = findDeviceEncoder(encoders, audioType, mode, audioOffset)
+            LOG.i("Enabled. Found audio encoder:", mAudioEncoder.name)
+            mVideoCapabilities =
+                mVideoEncoder.getCapabilitiesForType(videoType).videoCapabilities
+            mAudioCapabilities =
+                mAudioEncoder.getCapabilitiesForType(audioType).audioCapabilities
         } else {
-            mVideoEncoder = null;
-            mAudioEncoder = null;
-            mVideoCapabilities = null;
-            mAudioCapabilities = null;
-            LOG.i("Disabled.");
+            mVideoEncoder = null
+            mAudioEncoder = null
+            mVideoCapabilities = null
+            mAudioCapabilities = null
+            LOG.i("Disabled.")
         }
     }
 
-    /**
-     * Collects all the device encoders, which means excluding decoders.
-     *
-     * @return encoders
-     */
-    @NonNull
-    @SuppressLint("NewApi")
-    @VisibleForTesting
-    List<MediaCodecInfo> getDeviceEncoders() {
-        ArrayList<MediaCodecInfo> results = new ArrayList<>();
-        MediaCodecInfo[] array = new MediaCodecList(MediaCodecList.REGULAR_CODECS).getCodecInfos();
-        for (MediaCodecInfo info : array) {
-            if (info.isEncoder()) results.add(info);
+    @get:VisibleForTesting
+    @get:SuppressLint("NewApi")
+    val deviceEncoders: MutableList<MediaCodecInfo>
+        /**
+         * Collects all the device encoders, which means excluding decoders.
+         *
+         * @return encoders
+         */
+        get() {
+            val results = ArrayList<MediaCodecInfo>()
+            val array = MediaCodecList(MediaCodecList.REGULAR_CODECS).codecInfos
+            for (info in array) {
+                if (info.isEncoder) results.add(info)
+            }
+            return results
         }
-        return results;
-    }
 
     /**
      * Whether an encoder is a hardware encoder or not. We don't have an API to check this,
-     * but we can follow what libstagefright does:
-     * <a href="https://android.googlesource.com/platform/frameworks/av/+/master/media/libstagefright/MediaCodecList.cpp#293">...</a>
+     * but we can follow what frightfulness does:
+     * [...](https://android.googlesource.com/platform/frameworks/av/+/master/media/libstagefright/MediaCodecList.cpp#293)
      *
      * @param encoder encoder
      * @return true if hardware
      */
     @SuppressLint("NewApi")
     @VisibleForTesting
-    boolean isHardwareEncoder(@NonNull String encoder) {
-        encoder = encoder.toLowerCase();
-        boolean isSoftwareEncoder = encoder.startsWith("omx.google.")
-                || encoder.startsWith("c2.android.")
-                || (!encoder.startsWith("omx.") && !encoder.startsWith("c2."));
-        return !isSoftwareEncoder;
+    fun isHardwareEncoder(encoder: String): Boolean {
+        var encoder = encoder
+        encoder = encoder.lowercase(Locale.getDefault())
+        val isSoftwareEncoder =
+            encoder.startsWith("omx.google.") || encoder.startsWith("c2.android.") || (!encoder.startsWith(
+                "omx."
+            ) && !encoder.startsWith("c2."))
+        return !isSoftwareEncoder
     }
 
     /**
      * Finds the encoder we'll be using, depending on the given mode flag:
-     * - {@link #MODE_RESPECT_ORDER} will just take the first of the list
-     * - {@link #MODE_PREFER_HARDWARE} will prefer hardware encoders
+     * - [.MODE_RESPECT_ORDER] will just take the first of the list
+     * - [.MODE_PREFER_HARDWARE] will prefer hardware encoders
      * Throws if we find no encoder for this type.
      *
      * @param encoders encoders
@@ -151,39 +146,35 @@ public class DeviceEncoders {
      * @return encoder
      */
     @SuppressLint("NewApi")
-    @NonNull
     @VisibleForTesting
-    MediaCodecInfo findDeviceEncoder(@NonNull List<MediaCodecInfo> encoders,
-                                     @NonNull String mimeType,
-                                     int mode,
-                                     int offset) {
-        ArrayList<MediaCodecInfo> results = new ArrayList<>();
-        for (MediaCodecInfo encoder : encoders) {
-            String[] types = encoder.getSupportedTypes();
-            for (String type : types) {
-                if (type.equalsIgnoreCase(mimeType)) {
-                    results.add(encoder);
-                    break;
+    fun findDeviceEncoder(
+        encoders: MutableList<MediaCodecInfo>, mimeType: String, mode: Int, offset: Int
+    ): MediaCodecInfo {
+        val results = ArrayList<MediaCodecInfo>()
+        for (encoder in encoders) {
+            val types = encoder.supportedTypes
+            for (type in types) {
+                if (type.equals(mimeType, ignoreCase = true)) {
+                    results.add(encoder)
+                    break
                 }
             }
         }
-        LOG.i("findDeviceEncoder -", "type:", mimeType, "encoders:", results.size());
+        LOG.i("findDeviceEncoder -", "type:", mimeType, "encoders:", results.size)
         if (mode == MODE_PREFER_HARDWARE) {
-            Collections.sort(results, new Comparator<MediaCodecInfo>() {
-                @Override
-                public int compare(MediaCodecInfo o1, MediaCodecInfo o2) {
-                    boolean hw1 = isHardwareEncoder(o1.getName());
-                    boolean hw2 = isHardwareEncoder(o2.getName());
-                    return Boolean.compare(hw2, hw1);
-                }
-            });
+            results.sortWith { o1, o2 ->
+                val hw1 = isHardwareEncoder(o1!!.name)
+                val hw2 = isHardwareEncoder(o2!!.name)
+                val comparator = hw1.compareTo(hw2)
+                return@sortWith comparator
+            }
         }
-        if (results.size() < offset + 1) {
+        if (results.size < offset + 1) {
             // This should not be a VideoException or AudioException - we want the process
             // to crash here.
-            throw new RuntimeException("No encoders for type:" + mimeType);
+            throw RuntimeException("No encoders for type:$mimeType")
         }
-        return results.get(offset);
+        return results[offset]
     }
 
     /**
@@ -194,77 +185,83 @@ public class DeviceEncoders {
      * @return adjusted size
      */
     @SuppressLint("NewApi")
-    @NonNull
-    public Size getSupportedVideoSize(@NonNull Size size) {
-        if (!ENABLED) return size;
-        int width = size.getWidth();
-        int height = size.getHeight();
-        double aspect = (double) width / height;
-        LOG.i("getSupportedVideoSize - started. width:", width, "height:", height);
+    fun getSupportedVideoSize(size: Size): Size {
+        if (!ENABLED) return size
+        var width = size.width
+        var height = size.height
+        val aspect = width.toDouble() / height
+        LOG.i("getSupportedVideoSize - started. width:", width, "height:", height)
 
         // If width is too large, scale down, but keep aspect ratio.
-        if (mVideoCapabilities.getSupportedWidths().getUpper() < width) {
-            width = mVideoCapabilities.getSupportedWidths().getUpper();
-            height = (int) Math.round(width / aspect);
-            LOG.i("getSupportedVideoSize - exceeds maxWidth! width:", width,
-                    "height:", height);
+        if (mVideoCapabilities!!.supportedWidths.getUpper() < width) {
+            width = mVideoCapabilities.supportedWidths.getUpper()
+            height = (width / aspect).roundToInt()
+            LOG.i(
+                "getSupportedVideoSize - exceeds maxWidth! width:", width, "height:", height
+            )
         }
 
         // If height is too large, scale down, but keep aspect ratio.
-        if (mVideoCapabilities.getSupportedHeights().getUpper() < height) {
-            height = mVideoCapabilities.getSupportedHeights().getUpper();
-            width = (int) Math.round(aspect * height);
-            LOG.i("getSupportedVideoSize - exceeds maxHeight! width:", width,
-                    "height:", height);
+        if (mVideoCapabilities.supportedHeights.getUpper() < height) {
+            height = mVideoCapabilities.supportedHeights.getUpper()
+            width = (aspect * height).roundToInt()
+            LOG.i(
+                "getSupportedVideoSize - exceeds maxHeight! width:", width, "height:", height
+            )
         }
 
         // Adjust the alignment.
-        while (width % mVideoCapabilities.getWidthAlignment() != 0) width--;
-        while (height % mVideoCapabilities.getHeightAlignment() != 0) height--;
-        LOG.i("getSupportedVideoSize - aligned. width:", width, "height:", height);
+        while (width % mVideoCapabilities.widthAlignment != 0) width--
+        while (height % mVideoCapabilities.heightAlignment != 0) height--
+        LOG.i("getSupportedVideoSize - aligned. width:", width, "height:", height)
 
         // It's still possible that we're BELOW the lower.
-        if (!mVideoCapabilities.getSupportedWidths().contains(width)) {
-            throw new VideoException("Width not supported after adjustment." +
-                    " Desired:" + width +
-                    " Range:" + mVideoCapabilities.getSupportedWidths());
+        if (!mVideoCapabilities.supportedWidths.contains(width)) {
+            throw VideoException(
+                "Width not supported after adjustment." + " Desired:" + width + " Range:" + mVideoCapabilities.supportedWidths
+            )
         }
-        if (!mVideoCapabilities.getSupportedHeights().contains(height)) {
-            throw new VideoException("Height not supported after adjustment." +
-                    " Desired:" + height +
-                    " Range:" + mVideoCapabilities.getSupportedHeights());
+        if (!mVideoCapabilities.supportedHeights.contains(height)) {
+            throw VideoException(
+                "Height not supported after adjustment." + " Desired:" + height + " Range:" + mVideoCapabilities.supportedHeights
+            )
         }
 
         // We cannot change the aspect ratio, but the max block count might also be the
         // issue. Try to find a width that contains a height that would accept our AR.
         try {
             if (!mVideoCapabilities.getSupportedHeightsFor(width).contains(height)) {
-                int candidateWidth = width;
-                int minWidth = mVideoCapabilities.getSupportedWidths().getLower();
-                int widthAlignment = mVideoCapabilities.getWidthAlignment();
+                var candidateWidth = width
+                val minWidth = mVideoCapabilities.supportedWidths.getLower()
+                val widthAlignment = mVideoCapabilities.widthAlignment
                 while (candidateWidth >= minWidth) {
                     // Reduce by 32 and realign just in case, then check if our AR is now
                     // supported. If it is, restart from scratch to go through the other checks.
-                    candidateWidth -= 32;
-                    while (candidateWidth % widthAlignment != 0) candidateWidth--;
-                    int candidateHeight = (int) Math.round(candidateWidth / aspect);
+                    candidateWidth -= 32
+                    while (candidateWidth % widthAlignment != 0) candidateWidth--
+                    val candidateHeight = (candidateWidth / aspect).roundToInt()
                     if (mVideoCapabilities.getSupportedHeightsFor(candidateWidth)
-                            .contains(candidateHeight)) {
-                        LOG.w("getSupportedVideoSize - restarting with smaller size.");
-                        return getSupportedVideoSize(new Size(candidateWidth, candidateHeight));
+                            .contains(candidateHeight)
+                    ) {
+                        LOG.w("getSupportedVideoSize - restarting with smaller size.")
+                        return getSupportedVideoSize(Size(candidateWidth, candidateHeight))
                     }
                 }
             }
-        } catch (IllegalArgumentException ignore) {
+        } catch (ignore: IllegalArgumentException) {
+            ignore.printStackTrace()
         }
 
         // It's still possible that we're unsupported for other reasons.
         if (!mVideoCapabilities.isSizeSupported(width, height)) {
-            throw new VideoException("Size not supported for unknown reason." +
-                    " Might be an aspect ratio issue." +
-                    " Desired size:" + new Size(width, height));
+            throw VideoException(
+                "Size not supported for unknown reason." + " Might be an aspect ratio issue." + " Desired size:" + Size(
+                    width,
+                    height
+                )
+            )
         }
-        return new Size(width, height);
+        return Size(width, height)
     }
 
     /**
@@ -275,13 +272,13 @@ public class DeviceEncoders {
      * @return adjusted rate
      */
     @SuppressLint("NewApi")
-    public int getSupportedVideoBitRate(int bitRate) {
-        if (!ENABLED) return bitRate;
-        int newBitRate = mVideoCapabilities.getBitrateRange().clamp(bitRate);
-        LOG.i("getSupportedVideoBitRate -",
-                "inputRate:", bitRate,
-                "adjustedRate:", newBitRate);
-        return newBitRate;
+    fun getSupportedVideoBitRate(bitRate: Int): Int {
+        if (!ENABLED) return bitRate
+        val newBitRate = mVideoCapabilities!!.bitrateRange.clamp(bitRate)
+        LOG.i(
+            "getSupportedVideoBitRate -", "inputRate:", bitRate, "adjustedRate:", newBitRate
+        )
+        return newBitRate
     }
 
     /**
@@ -292,15 +289,15 @@ public class DeviceEncoders {
      * @return adjusted rate
      */
     @SuppressLint("NewApi")
-    public int getSupportedVideoFrameRate(@NonNull Size size, int frameRate) {
-        if (!ENABLED) return frameRate;
-        int newFrameRate = (int) (double) mVideoCapabilities
-                .getSupportedFrameRatesFor(size.getWidth(), size.getHeight())
-                .clamp((double) frameRate);
-        LOG.i("getSupportedVideoFrameRate -",
-                "inputRate:", frameRate,
-                "adjustedRate:", newFrameRate);
-        return newFrameRate;
+    fun getSupportedVideoFrameRate(size: Size, frameRate: Int): Int {
+        if (!ENABLED) return frameRate
+        val newFrameRate =
+            (mVideoCapabilities!!.getSupportedFrameRatesFor(size.width, size.height)
+                .clamp(frameRate.toDouble()) as Double).toInt()
+        LOG.i(
+            "getSupportedVideoFrameRate -", "inputRate:", frameRate, "adjustedRate:", newFrameRate
+        )
+        return newFrameRate
     }
 
     /**
@@ -311,74 +308,69 @@ public class DeviceEncoders {
      * @return adjusted rate
      */
     @SuppressLint("NewApi")
-    public int getSupportedAudioBitRate(int bitRate) {
-        if (!ENABLED) return bitRate;
-        int newBitRate = mAudioCapabilities.getBitrateRange().clamp(bitRate);
-        LOG.i("getSupportedAudioBitRate -",
-                "inputRate:", bitRate,
-                "adjustedRate:", newBitRate);
-        return newBitRate;
+    fun getSupportedAudioBitRate(bitRate: Int): Int {
+        if (!ENABLED) return bitRate
+        val newBitRate = mAudioCapabilities!!.bitrateRange.clamp(bitRate)
+        LOG.i(
+            "getSupportedAudioBitRate -", "inputRate:", bitRate, "adjustedRate:", newBitRate
+        )
+        return newBitRate
     }
 
-    /**
-     * Returns the name of the video encoder if we were able to determine one.
-     *
-     * @return encoder name
-     */
-    @SuppressLint("NewApi")
-    @Nullable
-    public String getVideoEncoder() {
-        if (mVideoEncoder != null) {
-            return mVideoEncoder.getName();
-        } else {
-            return null;
+    @get:SuppressLint("NewApi")
+    val videoEncoder: String?
+        /**
+         * Returns the name of the video encoder if we were able to determine one.
+         *
+         * @return encoder name
+         */
+        get() {
+            return mVideoEncoder?.name
         }
-    }
 
-    /**
-     * Returns the name of the audio encoder if we were able to determine one.
-     *
-     * @return encoder name
-     */
-    @SuppressLint("NewApi")
-    @Nullable
-    public String getAudioEncoder() {
-        if (mAudioEncoder != null) {
-            return mAudioEncoder.getName();
-        } else {
-            return null;
+    @get:SuppressLint("NewApi")
+    val audioEncoder: String?
+        /**
+         * Returns the name of the audio encoder if we were able to determine one.
+         *
+         * @return encoder name
+         */
+        get() {
+            return mAudioEncoder?.name
         }
-    }
 
 
     // Won't do this for audio sample rate. As far as I remember, the value we're using,
     // 44.1kHz, is guaranteed to be available, and it's not configurable.
-
     @SuppressLint("NewApi")
-    public void tryConfigureVideo(@NonNull String mimeType,
-                                  @NonNull Size size,
-                                  int frameRate,
-                                  int bitRate) {
+    fun tryConfigureVideo(
+        mimeType: String, size: Size, frameRate: Int, bitRate: Int
+    ) {
         if (mVideoEncoder != null) {
-            MediaCodec codec = null;
+            var codec: MediaCodec? = null
             try {
-                MediaFormat format = MediaFormat.createVideoFormat(mimeType, size.getWidth(),
-                        size.getHeight());
-                format.setInteger(MediaFormat.KEY_COLOR_FORMAT,
-                        MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
-                format.setInteger(MediaFormat.KEY_BIT_RATE, bitRate);
-                format.setInteger(MediaFormat.KEY_FRAME_RATE, frameRate);
-                format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1);
-                codec = MediaCodec.createByCodecName(mVideoEncoder.getName());
-                codec.configure(format, null, null,
-                        MediaCodec.CONFIGURE_FLAG_ENCODE);
-            } catch (Exception e) {
-                throw new VideoException("Failed to configure video codec: " + e.getMessage());
+                val format = MediaFormat.createVideoFormat(
+                    mimeType, size.width, size.height
+                )
+                format.setInteger(
+                    MediaFormat.KEY_COLOR_FORMAT,
+                    MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface
+                )
+                format.setInteger(MediaFormat.KEY_BIT_RATE, bitRate)
+                format.setInteger(MediaFormat.KEY_FRAME_RATE, frameRate)
+                format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1)
+                codec = MediaCodec.createByCodecName(mVideoEncoder.name)
+                codec.configure(
+                    format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE
+                )
+            } catch (e: Exception) {
+                throw VideoException("Failed to configure video codec: " + e.message)
             } finally {
                 if (codec != null) {
                     try {
-                        codec.release();
-                    } catch (Exception ignore) {
+                        codec.release()
+                    } catch (ignore: Exception) {
+                        ignore.printStackTrace()
                     }
                 }
             }
@@ -386,30 +378,32 @@ public class DeviceEncoders {
     }
 
     @SuppressLint("NewApi")
-    public void tryConfigureAudio(@NonNull String mimeType,
-                                  int bitRate,
-                                  int sampleRate,
-                                  int channels) {
+    fun tryConfigureAudio(
+        mimeType: String, bitRate: Int, sampleRate: Int, channels: Int
+    ) {
         if (mAudioEncoder != null) {
-            MediaCodec codec = null;
+            var codec: MediaCodec? = null
             try {
-                final MediaFormat format = MediaFormat.createAudioFormat(mimeType, sampleRate,
-                        channels);
-                int channelMask = channels == 2 ? AudioFormat.CHANNEL_IN_STEREO
-                        : AudioFormat.CHANNEL_IN_MONO;
-                format.setInteger(MediaFormat.KEY_CHANNEL_MASK, channelMask);
-                format.setInteger(MediaFormat.KEY_BIT_RATE, bitRate);
+                val format = MediaFormat.createAudioFormat(
+                    mimeType, sampleRate, channels
+                )
+                val channelMask = if (channels == 2) AudioFormat.CHANNEL_IN_STEREO
+                else AudioFormat.CHANNEL_IN_MONO
+                format.setInteger(MediaFormat.KEY_CHANNEL_MASK, channelMask)
+                format.setInteger(MediaFormat.KEY_BIT_RATE, bitRate)
 
-                codec = MediaCodec.createByCodecName(mAudioEncoder.getName());
-                codec.configure(format, null, null,
-                        MediaCodec.CONFIGURE_FLAG_ENCODE);
-            } catch (Exception e) {
-                throw new AudioException("Failed to configure video audio: " + e.getMessage());
+                codec = MediaCodec.createByCodecName(mAudioEncoder.name)
+                codec.configure(
+                    format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE
+                )
+            } catch (e: Exception) {
+                throw AudioException("Failed to configure video audio: " + e.message)
             } finally {
                 if (codec != null) {
                     try {
-                        codec.release();
-                    } catch (Exception ignore) {
+                        codec.release()
+                    } catch (ignore: Exception) {
+                        ignore.printStackTrace()
                     }
                 }
             }
@@ -420,20 +414,21 @@ public class DeviceEncoders {
      * Exception thrown when trying to find appropriate values
      * for a video encoder.
      */
-    public class VideoException extends RuntimeException {
-        private VideoException(@NonNull String message) {
-            super(message);
-        }
-    }
+    class VideoException(message: String) : RuntimeException(message)
 
     /**
      * Exception thrown when trying to find appropriate values
      * for an audio encoder. Currently never thrown.
      */
-    public class AudioException extends RuntimeException {
-        private AudioException(@NonNull String message) {
-            super(message);
-        }
-    }
+    class AudioException(message: String) : RuntimeException(message)
 
+    companion object {
+        const val MODE_RESPECT_ORDER: Int = 0
+        const val MODE_PREFER_HARDWARE: Int = 1
+        private val TAG: String = DeviceEncoders::class.java.simpleName
+        private val LOG = create(TAG)
+
+        @VisibleForTesting
+        var ENABLED: Boolean = true
+    }
 }
