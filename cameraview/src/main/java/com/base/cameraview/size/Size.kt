@@ -1,68 +1,49 @@
-package com.base.cameraview.size;
-
-import androidx.annotation.NonNull;
+package com.base.cameraview.size
 
 /**
  * A simple class representing a size, with width and height values.
  */
-public class Size implements Comparable<Size> {
-
-    private final int mWidth;
-    private final int mHeight;
-
-    public Size(int width, int height) {
-        mWidth = width;
-        mHeight = height;
-    }
-
-    public int getWidth() {
-        return mWidth;
-    }
-
-    public int getHeight() {
-        return mHeight;
-    }
-
+class Size(val width: Int, val height: Int) : Comparable<Size> {
     /**
      * Returns a flipped size, with height equal to this size's width
      * and width equal to this size's height.
      *
      * @return a flipped size
      */
-    @SuppressWarnings("SuspiciousNameCombination")
-    public Size flip() {
-        return new Size(mHeight, mWidth);
+    fun flip(): Size {
+        return Size(this.height, this.width)
     }
 
-    @Override
-    public boolean equals(Object o) {
+    override fun equals(o: Any?): Boolean {
         if (o == null) {
-            return false;
+            return false
         }
-        if (this == o) {
-            return true;
+        if (this === o) {
+            return true
         }
-        if (o instanceof Size) {
-            Size size = (Size) o;
-            return mWidth == size.mWidth && mHeight == size.mHeight;
+        if (o is Size) {
+            val size = o
+            return this.width == size.width && this.height == size.height
         }
-        return false;
+        return false
     }
 
-    @NonNull
-    @Override
-    public String toString() {
-        return mWidth + "x" + mHeight;
+    override fun toString(): String {
+        return width.toString() + "x" + this.height
     }
 
-    @Override
-    public int hashCode() {
-        return mHeight ^ ((mWidth << (Integer.SIZE / 2)) | (mWidth >>> (Integer.SIZE / 2)));
+    override fun hashCode(): Int {
+        return this.height xor ((this.width shl (Integer.SIZE / 2)) or (this.width ushr (Integer.SIZE / 2)))
     }
 
-    @Override
-    public int compareTo(@NonNull Size another) {
-        return mWidth * mHeight - another.mWidth * another.mHeight;
+    override fun compareTo(other: Size): Int {
+        return this.width * this.height - other.width * other.height
     }
 
+    companion object {
+        const val DEFAULT_WIDTH = 480
+        const val DEFAULT_HEIGHT = 640
+
+        fun defaultSize() = Size(DEFAULT_WIDTH, DEFAULT_HEIGHT)
+    }
 }

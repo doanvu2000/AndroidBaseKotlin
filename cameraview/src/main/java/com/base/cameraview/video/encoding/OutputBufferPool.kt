@@ -1,23 +1,15 @@
-package com.base.cameraview.video.encoding;
+package com.base.cameraview.video.encoding
 
-import android.media.MediaCodec;
-
-import com.base.cameraview.internal.Pool;
+import android.media.MediaCodec
+import com.base.cameraview.internal.Pool
 
 /**
- * A simple {@link Pool(int, Factory)} implementation for output buffers.
+ * A simple [] implementation for output buffers.
  */
-class OutputBufferPool extends Pool<OutputBuffer> {
-
-    OutputBufferPool(final int trackIndex) {
-        super(Integer.MAX_VALUE, new Factory<OutputBuffer>() {
-            @Override
-            public OutputBuffer create() {
-                OutputBuffer buffer = new OutputBuffer();
-                buffer.trackIndex = trackIndex;
-                buffer.info = new MediaCodec.BufferInfo();
-                return buffer;
-            }
-        });
-    }
-}
+internal class OutputBufferPool(trackIndex: Int) :
+    Pool<OutputBuffer?>(Int.Companion.MAX_VALUE, Factory {
+        val buffer = OutputBuffer()
+        buffer.trackIndex = trackIndex
+        buffer.info = MediaCodec.BufferInfo()
+        buffer
+    })

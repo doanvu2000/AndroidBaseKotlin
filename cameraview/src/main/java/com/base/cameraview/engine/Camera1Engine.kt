@@ -656,8 +656,8 @@ class Camera1Engine(
         }
         if (mCameraOptions!!.isExposureCorrectionSupported) {
             // Just make sure we're inside boundaries.
-            val max = mCameraOptions!!.getExposureCorrectionMaxValue()
-            val min = mCameraOptions!!.getExposureCorrectionMinValue()
+            val max = mCameraOptions!!.exposureCorrectionMaxValue
+            val min = mCameraOptions!!.exposureCorrectionMinValue
             mExposureCorrectionValue = mExposureCorrectionValue.coerceIn(min, max)
             // Apply.
             val indexValue = (mExposureCorrectionValue / params.exposureCompensationStep).toInt()
@@ -726,10 +726,10 @@ class Camera1Engine(
                 return false
             }
             mPreviewFrameRate = min(
-                mPreviewFrameRate, mCameraOptions!!.getPreviewFrameRateMaxValue()
+                mPreviewFrameRate, mCameraOptions!!.previewFrameRateMaxValue
             )
             mPreviewFrameRate = max(
-                mPreviewFrameRate, mCameraOptions!!.getPreviewFrameRateMinValue()
+                mPreviewFrameRate, mCameraOptions!!.previewFrameRateMinValue
             )
             for (fpsRange in fpsRanges) {
                 val lower = fpsRange[0].toFloat() / 1000f

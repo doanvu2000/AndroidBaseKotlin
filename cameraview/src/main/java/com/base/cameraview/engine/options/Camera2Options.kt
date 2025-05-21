@@ -66,7 +66,7 @@ class Camera2Options(
         val maxZoom =
             cameraCharacteristics.get(CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM)
         if (maxZoom != null) {
-            zoomSupported = maxZoom > 1
+            isZoomSupported = maxZoom > 1
         }
 
 
@@ -81,7 +81,7 @@ class Camera2Options(
             cameraCharacteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AE)
         val awbRegions =
             cameraCharacteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AWB)
-        autoFocusSupported =
+        isAutoFocusSupported =
             (afRegions != null && afRegions > 0) || (aeRegions != null && aeRegions > 0) || (awbRegions != null && awbRegions > 0)
 
         // Exposure correction
@@ -93,7 +93,7 @@ class Camera2Options(
             exposureCorrectionMinValue = exposureRange.getLower()!! / exposureStep.toFloat()
             exposureCorrectionMaxValue = exposureRange.getUpper()!! / exposureStep.toFloat()
         }
-        exposureCorrectionSupported =
+        isExposureCorrectionSupported =
             exposureCorrectionMinValue != 0f && exposureCorrectionMaxValue != 0f
 
 

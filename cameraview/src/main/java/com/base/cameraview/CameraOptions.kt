@@ -1,59 +1,102 @@
-package com.base.cameraview;
+package com.base.cameraview
 
+import com.base.cameraview.controls.Audio
+import com.base.cameraview.controls.AudioCodec
+import com.base.cameraview.controls.Control
+import com.base.cameraview.controls.Engine
+import com.base.cameraview.controls.Facing
+import com.base.cameraview.controls.Flash
+import com.base.cameraview.controls.Grid
+import com.base.cameraview.controls.Hdr
+import com.base.cameraview.controls.Mode
+import com.base.cameraview.controls.PictureFormat
+import com.base.cameraview.controls.Preview
+import com.base.cameraview.controls.VideoCodec
+import com.base.cameraview.controls.WhiteBalance
+import com.base.cameraview.gesture.GestureAction
+import com.base.cameraview.size.AspectRatio
+import com.base.cameraview.size.Size
+import java.util.Collections
 
-import android.graphics.ImageFormat;
-
-import androidx.annotation.NonNull;
-
-import com.base.cameraview.controls.Audio;
-import com.base.cameraview.controls.AudioCodec;
-import com.base.cameraview.controls.Control;
-import com.base.cameraview.controls.Engine;
-import com.base.cameraview.controls.Facing;
-import com.base.cameraview.controls.Flash;
-import com.base.cameraview.controls.Grid;
-import com.base.cameraview.controls.Hdr;
-import com.base.cameraview.controls.Mode;
-import com.base.cameraview.controls.PictureFormat;
-import com.base.cameraview.controls.Preview;
-import com.base.cameraview.controls.VideoCodec;
-import com.base.cameraview.controls.WhiteBalance;
-import com.base.cameraview.gesture.GestureAction;
-import com.base.cameraview.size.AspectRatio;
-import com.base.cameraview.size.Size;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Options telling you what is available and what is not.
  */
-public abstract class CameraOptions {
+abstract class CameraOptions protected constructor() {
+    protected var supportedWhiteBalance: MutableSet<WhiteBalance?> = HashSet(5)
+    protected var supportedFacing: MutableSet<Facing?> = HashSet(2)
+    protected var supportedFlash: MutableSet<Flash?> = HashSet(4)
+    protected var supportedHdr: MutableSet<Hdr?> = HashSet(2)
+    protected var supportedPictureSizes: MutableSet<Size?> = HashSet(15)
+    protected var supportedVideoSizes: MutableSet<Size?> = HashSet(5)
+    protected var supportedPictureAspectRatio: MutableSet<AspectRatio?> = HashSet(4)
+    protected var supportedVideoAspectRatio: MutableSet<AspectRatio?> = HashSet(3)
+    protected var supportedPictureFormats: MutableSet<PictureFormat?> = HashSet(2)
+    protected var supportedFrameProcessingFormats: MutableSet<Int?> = HashSet(2)
 
-    protected Set<WhiteBalance> supportedWhiteBalance = new HashSet<>(5);
-    protected Set<Facing> supportedFacing = new HashSet<>(2);
-    protected Set<Flash> supportedFlash = new HashSet<>(4);
-    protected Set<Hdr> supportedHdr = new HashSet<>(2);
-    protected Set<Size> supportedPictureSizes = new HashSet<>(15);
-    protected Set<Size> supportedVideoSizes = new HashSet<>(5);
-    protected Set<AspectRatio> supportedPictureAspectRatio = new HashSet<>(4);
-    protected Set<AspectRatio> supportedVideoAspectRatio = new HashSet<>(3);
-    protected Set<PictureFormat> supportedPictureFormats = new HashSet<>(2);
-    protected Set<Integer> supportedFrameProcessingFormats = new HashSet<>(2);
+    /**
+     * Whether zoom is supported. If this is false, pinch-to-zoom
+     * will not work and [CameraView.setZoom] will have no effect.
+     *
+     * @return whether zoom is supported.
+     */
+    var isZoomSupported: Boolean = false
+        protected set
 
-    protected boolean zoomSupported;
-    protected boolean exposureCorrectionSupported;
-    protected float exposureCorrectionMinValue;
-    protected float exposureCorrectionMaxValue;
-    protected boolean autoFocusSupported;
-    protected float previewFrameRateMinValue;
-    protected float previewFrameRateMaxValue;
+    /**
+     * Whether exposure correction is supported. If this is false, calling
+     * [CameraView.setExposureCorrection] has no effect.
+     *
+     * @return whether exposure correction is supported.
+     * @see .getExposureCorrectionMinValue
+     * @see .getExposureCorrectionMaxValue
+     */
+    var isExposureCorrectionSupported: Boolean = false
+        protected set
 
-    protected CameraOptions() {
-    }
+    /**
+     * The minimum value of negative exposure correction, in EV stops.
+     * This is presumably negative or 0 if not supported.
+     *
+     * @return min EV value
+     */
+    var exposureCorrectionMinValue: Float = 0f
+        protected set
+
+    /**
+     * The maximum value of positive exposure correction, in EV stops.
+     * This is presumably positive or 0 if not supported.
+     *
+     * @return max EV value
+     */
+    var exposureCorrectionMaxValue: Float = 0f
+        protected set
+
+    /**
+     * Whether touch metering (metering with respect to a specific region of the screen) is
+     * supported. If it is, you can map gestures to [GestureAction.AUTO_FOCUS]
+     * and metering will change on tap.
+     *
+     * @return whether auto focus is supported.
+     */
+    var isAutoFocusSupported: Boolean = false
+        protected set
+
+    /**
+     * The minimum value for the preview frame rate, in frames per second (FPS).
+     *
+     * @return the min value
+     */
+    var previewFrameRateMinValue: Float = 0f
+        protected set
+
+    /**
+     * The maximum value for the preview frame rate, in frames per second (FPS).
+     *
+     * @return the max value
+     */
+    var previewFrameRateMaxValue: Float = 0f
+        protected set
 
     /**
      * Shorthand for getSupported*().contains(value).
@@ -61,8 +104,8 @@ public abstract class CameraOptions {
      * @param control value to check
      * @return whether it's supported
      */
-    public final boolean supports(@NonNull Control control) {
-        return getSupportedControls(control.getClass()).contains(control);
+    fun supports(control: Control): Boolean {
+        return getSupportedControls(control.javaClass).contains(control)
     }
 
     /**
@@ -72,54 +115,71 @@ public abstract class CameraOptions {
      * @param action value to be checked
      * @return whether it's supported
      */
-    public final boolean supports(@NonNull GestureAction action) {
-        switch (action) {
-            case AUTO_FOCUS:
-                return isAutoFocusSupported();
-            case TAKE_PICTURE:
-            case FILTER_CONTROL_1:
-            case FILTER_CONTROL_2:
-            case NONE:
-                return true;
-            case ZOOM:
-                return isZoomSupported();
-            case EXPOSURE_CORRECTION:
-                return isExposureCorrectionSupported();
+    fun supports(action: GestureAction): Boolean {
+        when (action) {
+            GestureAction.AUTO_FOCUS -> return this.isAutoFocusSupported
+            GestureAction.TAKE_PICTURE, GestureAction.FILTER_CONTROL_1, GestureAction.FILTER_CONTROL_2, GestureAction.NONE -> return true
+            GestureAction.ZOOM -> return this.isZoomSupported
+            GestureAction.EXPOSURE_CORRECTION -> return this.isExposureCorrectionSupported
+            GestureAction.TAKE_PICTURE_SNAPSHOT -> {}
         }
-        return false;
+        return false
     }
 
-    @SuppressWarnings("unchecked")
-    @NonNull
-    public final <T extends Control> Collection<T> getSupportedControls(
-            @NonNull Class<T> controlClass) {
-        if (controlClass.equals(Audio.class)) {
-            return (Collection<T>) Arrays.asList(Audio.values());
-        } else if (controlClass.equals(Facing.class)) {
-            return (Collection<T>) getSupportedFacing();
-        } else if (controlClass.equals(Flash.class)) {
-            return (Collection<T>) getSupportedFlash();
-        } else if (controlClass.equals(Grid.class)) {
-            return (Collection<T>) Arrays.asList(Grid.values());
-        } else if (controlClass.equals(Hdr.class)) {
-            return (Collection<T>) getSupportedHdr();
-        } else if (controlClass.equals(Mode.class)) {
-            return (Collection<T>) Arrays.asList(Mode.values());
-        } else if (controlClass.equals(VideoCodec.class)) {
-            return (Collection<T>) Arrays.asList(VideoCodec.values());
-        } else if (controlClass.equals(AudioCodec.class)) {
-            return (Collection<T>) Arrays.asList(AudioCodec.values());
-        } else if (controlClass.equals(WhiteBalance.class)) {
-            return (Collection<T>) getSupportedWhiteBalance();
-        } else if (controlClass.equals(Engine.class)) {
-            return (Collection<T>) Arrays.asList(Engine.values());
-        } else if (controlClass.equals(Preview.class)) {
-            return (Collection<T>) Arrays.asList(Preview.values());
-        } else if (controlClass.equals(PictureFormat.class)) {
-            return (Collection<T>) getSupportedPictureFormats();
+    fun <T : Control?> getSupportedControls(
+        controlClass: Class<T>
+    ): MutableCollection<T> {
+        return when (controlClass) {
+            Audio::class.java -> {
+                Audio.entries as MutableCollection<T>
+            }
+
+            Facing::class.java -> {
+                getSupportedFacing() as MutableCollection<T>
+            }
+
+            Flash::class.java -> {
+                getSupportedFlash() as MutableCollection<T>
+            }
+
+            Grid::class.java -> {
+                Grid.entries as MutableCollection<T>
+            }
+
+            Hdr::class.java -> {
+                getSupportedHdr() as MutableCollection<T>
+            }
+
+            Mode::class.java -> {
+                Mode.entries as MutableCollection<T>
+            }
+
+            VideoCodec::class.java -> {
+                VideoCodec.entries as MutableCollection<T>
+            }
+
+            AudioCodec::class.java -> {
+                AudioCodec.entries as MutableCollection<T>
+            }
+
+            WhiteBalance::class.java -> {
+                getSupportedWhiteBalance() as MutableCollection<T>
+            }
+
+            Engine::class.java -> {
+                Engine.entries as MutableCollection<T>
+            }
+
+            Preview::class.java -> {
+                Preview.entries as MutableCollection<T>
+            }
+
+            PictureFormat::class.java -> {
+                getSupportedPictureFormats() as MutableCollection<T>
+            }
+            // Unrecognized control.
+            else -> mutableListOf()
         }
-        // Unrecognized control.
-        return Collections.emptyList();
     }
 
     /**
@@ -127,188 +187,113 @@ public abstract class CameraOptions {
      *
      * @return a collection of supported values.
      */
-    @NonNull
-    public final Collection<Size> getSupportedPictureSizes() {
-        return Collections.unmodifiableSet(supportedPictureSizes);
+    fun getSupportedPictureSizes(): MutableCollection<Size?> {
+        return Collections.unmodifiableSet<Size?>(supportedPictureSizes)
     }
 
-    /**
-     * Set of supported picture aspect ratios for the currently opened camera.
-     *
-     * @return a collection of supported values.
-     */
-    @NonNull
-    public final Collection<AspectRatio> getSupportedPictureAspectRatios() {
-        return Collections.unmodifiableSet(supportedPictureAspectRatio);
-    }
+    val supportedPictureAspectRatios: MutableCollection<AspectRatio?>
+        /**
+         * Set of supported picture aspect ratios for the currently opened camera.
+         *
+         * @return a collection of supported values.
+         */
+        get() = Collections.unmodifiableSet<AspectRatio?>(supportedPictureAspectRatio)
 
     /**
      * Set of supported video sizes for the currently opened camera.
      *
      * @return a collection of supported values.
      */
-    @NonNull
-    public final Collection<Size> getSupportedVideoSizes() {
-        return Collections.unmodifiableSet(supportedVideoSizes);
+    fun getSupportedVideoSizes(): MutableCollection<Size?> {
+        return Collections.unmodifiableSet<Size?>(supportedVideoSizes)
     }
 
-    /**
-     * Set of supported picture aspect ratios for the currently opened camera.
-     *
-     * @return a set of supported values.
-     */
-    @NonNull
-    public final Collection<AspectRatio> getSupportedVideoAspectRatios() {
-        return Collections.unmodifiableSet(supportedVideoAspectRatio);
-    }
+    val supportedVideoAspectRatios: MutableCollection<AspectRatio?>
+        /**
+         * Set of supported picture aspect ratios for the currently opened camera.
+         *
+         * @return a set of supported values.
+         */
+        get() = Collections.unmodifiableSet<AspectRatio?>(supportedVideoAspectRatio)
 
     /**
      * Set of supported facing values.
      *
      * @return a collection of supported values.
-     * @see Facing#BACK
-     * @see Facing#FRONT
+     * @see Facing.BACK
+     *
+     * @see Facing.FRONT
      */
-    @NonNull
-    public final Collection<Facing> getSupportedFacing() {
-        return Collections.unmodifiableSet(supportedFacing);
+    fun getSupportedFacing(): MutableCollection<Facing?> {
+        return Collections.unmodifiableSet<Facing?>(supportedFacing)
     }
 
     /**
      * Set of supported flash values.
      *
      * @return a collection of supported values.
-     * @see Flash#AUTO
-     * @see Flash#OFF
-     * @see Flash#ON
-     * @see Flash#TORCH
+     * @see Flash.AUTO
+     *
+     * @see Flash.OFF
+     *
+     * @see Flash.ON
+     *
+     * @see Flash.TORCH
      */
-    @NonNull
-    public final Collection<Flash> getSupportedFlash() {
-        return Collections.unmodifiableSet(supportedFlash);
+    fun getSupportedFlash(): MutableCollection<Flash?> {
+        return Collections.unmodifiableSet<Flash?>(supportedFlash)
     }
 
     /**
      * Set of supported white balance values.
      *
      * @return a collection of supported values.
-     * @see WhiteBalance#AUTO
-     * @see WhiteBalance#INCANDESCENT
-     * @see WhiteBalance#FLUORESCENT
-     * @see WhiteBalance#DAYLIGHT
-     * @see WhiteBalance#CLOUDY
+     * @see WhiteBalance.AUTO
+     *
+     * @see WhiteBalance.INCANDESCENT
+     *
+     * @see WhiteBalance.FLUORESCENT
+     *
+     * @see WhiteBalance.DAYLIGHT
+     *
+     * @see WhiteBalance.CLOUDY
      */
-    @NonNull
-    public final Collection<WhiteBalance> getSupportedWhiteBalance() {
-        return Collections.unmodifiableSet(supportedWhiteBalance);
+    fun getSupportedWhiteBalance(): MutableCollection<WhiteBalance?> {
+        return Collections.unmodifiableSet<WhiteBalance?>(supportedWhiteBalance)
     }
 
     /**
      * Set of supported hdr values.
      *
      * @return a collection of supported values.
-     * @see Hdr#OFF
-     * @see Hdr#ON
+     * @see Hdr.OFF
+     *
+     * @see Hdr.ON
      */
-    @NonNull
-    public final Collection<Hdr> getSupportedHdr() {
-        return Collections.unmodifiableSet(supportedHdr);
+    fun getSupportedHdr(): MutableCollection<Hdr?> {
+        return Collections.unmodifiableSet<Hdr?>(supportedHdr)
     }
 
     /**
      * Set of supported picture formats.
      *
      * @return a collection of supported values.
-     * @see PictureFormat#JPEG
-     * @see PictureFormat#DNG
+     * @see PictureFormat.JPEG
+     *
+     * @see PictureFormat.DNG
      */
-    @NonNull
-    public final Collection<PictureFormat> getSupportedPictureFormats() {
-        return Collections.unmodifiableSet(supportedPictureFormats);
+    fun getSupportedPictureFormats(): MutableCollection<PictureFormat?> {
+        return Collections.unmodifiableSet<PictureFormat?>(supportedPictureFormats)
     }
 
     /**
      * Set of supported formats for frame processing,
-     * as {@link ImageFormat} constants.
+     * as [android.graphics.ImageFormat] constants.
      *
      * @return a collection of supported values.
-     * @see CameraView#setFrameProcessingFormat(int)
+     * @see CameraView.setFrameProcessingFormat
      */
-    @NonNull
-    public final Collection<Integer> getSupportedFrameProcessingFormats() {
-        return Collections.unmodifiableSet(supportedFrameProcessingFormats);
-    }
-
-    /**
-     * Whether zoom is supported. If this is false, pinch-to-zoom
-     * will not work and {@link CameraView#setZoom(float)} will have no effect.
-     *
-     * @return whether zoom is supported.
-     */
-    public final boolean isZoomSupported() {
-        return zoomSupported;
-    }
-
-
-    /**
-     * Whether touch metering (metering with respect to a specific region of the screen) is
-     * supported. If it is, you can map gestures to {@link GestureAction#AUTO_FOCUS}
-     * and metering will change on tap.
-     *
-     * @return whether auto focus is supported.
-     */
-    public final boolean isAutoFocusSupported() {
-        return autoFocusSupported;
-    }
-
-    /**
-     * Whether exposure correction is supported. If this is false, calling
-     * {@link CameraView#setExposureCorrection(float)} has no effect.
-     *
-     * @return whether exposure correction is supported.
-     * @see #getExposureCorrectionMinValue()
-     * @see #getExposureCorrectionMaxValue()
-     */
-    public final boolean isExposureCorrectionSupported() {
-        return exposureCorrectionSupported;
-    }
-
-    /**
-     * The minimum value of negative exposure correction, in EV stops.
-     * This is presumably negative or 0 if not supported.
-     *
-     * @return min EV value
-     */
-    public final float getExposureCorrectionMinValue() {
-        return exposureCorrectionMinValue;
-    }
-
-
-    /**
-     * The maximum value of positive exposure correction, in EV stops.
-     * This is presumably positive or 0 if not supported.
-     *
-     * @return max EV value
-     */
-    public final float getExposureCorrectionMaxValue() {
-        return exposureCorrectionMaxValue;
-    }
-
-    /**
-     * The minimum value for the preview frame rate, in frames per second (FPS).
-     *
-     * @return the min value
-     */
-    public final float getPreviewFrameRateMinValue() {
-        return previewFrameRateMinValue;
-    }
-
-    /**
-     * The maximum value for the preview frame rate, in frames per second (FPS).
-     *
-     * @return the max value
-     */
-    public final float getPreviewFrameRateMaxValue() {
-        return previewFrameRateMaxValue;
+    fun getSupportedFrameProcessingFormats(): MutableCollection<Int?> {
+        return Collections.unmodifiableSet<Int?>(supportedFrameProcessingFormats)
     }
 }

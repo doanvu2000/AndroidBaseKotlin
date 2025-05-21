@@ -1360,9 +1360,9 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
             // If out of boundaries, adjust it.
             mCameraOptions?.let {
                 mPreviewFrameRate =
-                    min(mPreviewFrameRate, mCameraOptions!!.getPreviewFrameRateMaxValue())
+                    min(mPreviewFrameRate, mCameraOptions!!.previewFrameRateMaxValue)
                 mPreviewFrameRate =
-                    max(mPreviewFrameRate, mCameraOptions!!.getPreviewFrameRateMinValue())
+                    max(mPreviewFrameRate, mCameraOptions!!.previewFrameRateMinValue)
                 for (fpsRange in filterFrameRateRanges(fpsRanges)) {
                     if (fpsRange.contains(mPreviewFrameRate.roundToInt())) {
                         builder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fpsRange)
@@ -1394,8 +1394,8 @@ class Camera2Engine(callback: Callback) : CameraBaseEngine(callback), OnImageAva
             return mutableListOf()
         }
 
-        val min = mCameraOptions!!.getPreviewFrameRateMinValue().roundToInt()
-        val max = mCameraOptions!!.getPreviewFrameRateMaxValue().roundToInt()
+        val min = mCameraOptions!!.previewFrameRateMinValue.roundToInt()
+        val max = mCameraOptions!!.previewFrameRateMaxValue.roundToInt()
         for (fpsRange in fpsRanges) {
             if (!fpsRange.contains(min) && !fpsRange.contains(max)) continue
             if (!FpsRangeValidator.validate(fpsRange)) continue

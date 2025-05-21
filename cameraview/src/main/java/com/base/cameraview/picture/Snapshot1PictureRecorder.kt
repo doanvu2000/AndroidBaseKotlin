@@ -16,10 +16,7 @@ import java.io.ByteArrayOutputStream
  * A [PictureRecorder] that uses standard APIs.
  */
 class Snapshot1PictureRecorder(
-    stub: PictureResult.Stub,
-    engine: Camera1Engine,
-    camera: Camera,
-    outputRatio: AspectRatio
+    stub: PictureResult.Stub, engine: Camera1Engine, camera: Camera, outputRatio: AspectRatio
 ) : SnapshotPictureRecorder(stub, engine) {
     private var mEngine1: Camera1Engine?
     private var mCamera: Camera?
@@ -44,15 +41,17 @@ class Snapshot1PictureRecorder(
             val outputSize = mResult!!.size
             val previewStreamSize = mEngine1!!.getPreviewStreamSize(Reference.SENSOR)
             checkNotNull(previewStreamSize) {
-                "Preview stream size " +
-                        "should never be null here."
+                "Preview stream size " + "should never be null here."
             }
             WorkerHandler.execute { // Rotate the picture, because no one will write EXIF data,
                 // then crop if needed. In both cases, transform yuv to jpeg.
+                if (outputSize == null) {
+                    dispatchResult()
+                    return@execute
+                }
                 var data = RotationHelper.rotate(yuv, previewStreamSize, sensorToOutput)
                 val yuv = YuvImage(
-                    data, mFormat, outputSize.width,
-                    outputSize.height, null
+                    data, mFormat, outputSize.width, outputSize.height, null
                 )
 
                 val stream = ByteArrayOutputStream()
@@ -69,8 +68,7 @@ class Snapshot1PictureRecorder(
             // It seems that the buffers are already cleared here, so we need to allocate again.
             camera.setPreviewCallbackWithBuffer(null) // Release anything left
             camera.setPreviewCallbackWithBuffer(mEngine1) // Add ourselves
-            mEngine1!!.frameManager
-                .setUp(mFormat, previewStreamSize, mEngine1!!.angles)
+            mEngine1!!.frameManager.setUp(mFormat, previewStreamSize, mEngine1!!.angles)
         }
     }
 

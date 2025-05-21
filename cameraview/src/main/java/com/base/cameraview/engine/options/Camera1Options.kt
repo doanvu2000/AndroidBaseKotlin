@@ -60,17 +60,17 @@ class Camera1Options(params: Camera.Parameters, cameraId: Int, flipSizes: Boolea
         }
 
         // zoom
-        zoomSupported = params.isZoomSupported
+        isZoomSupported = params.isZoomSupported
 
         // autofocus
-        autoFocusSupported = params.supportedFocusModes
+        isAutoFocusSupported = params.supportedFocusModes
             .contains(Camera.Parameters.FOCUS_MODE_AUTO)
 
         // Exposure correction
         val step = params.exposureCompensationStep
         exposureCorrectionMinValue = params.minExposureCompensation.toFloat() * step
         exposureCorrectionMaxValue = params.maxExposureCompensation.toFloat() * step
-        exposureCorrectionSupported = params.minExposureCompensation != 0
+        isExposureCorrectionSupported = params.minExposureCompensation != 0
                 || params.maxExposureCompensation != 0
 
         // Picture Sizes

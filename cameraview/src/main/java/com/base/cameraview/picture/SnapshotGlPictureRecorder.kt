@@ -77,13 +77,11 @@ open class SnapshotGlPictureRecorder(
 
             @RendererThread
             override fun onRendererFrame(
-                surfaceTexture: SurfaceTexture,
-                rotation: Int, scaleX: Float, scaleY: Float
+                surfaceTexture: SurfaceTexture, rotation: Int, scaleX: Float, scaleY: Float
             ) {
                 mPreview.removeRendererFrameCallback(this)
                 this@SnapshotGlPictureRecorder.onRendererFrame(
-                    surfaceTexture,
-                    rotation, scaleX, scaleY
+                    surfaceTexture, rotation, scaleX, scaleY
                 )
             }
         })
@@ -93,10 +91,16 @@ open class SnapshotGlPictureRecorder(
     protected fun onRendererTextureCreated(textureId: Int) {
         mTextureDrawer = GlTextureDrawer(textureId)
         // Need to crop the size.
-        val crop = CropHelper.computeCrop(mResult!!.size, mOutputRatio!!)
-        mResult!!.size = Size(crop.width(), crop.height())
-        if (mHasOverlay) {
-            mOverlayDrawer = OverlayDrawer(mOverlay!!, mResult!!.size)
+        if (mResult?.size == null) {
+            mResult?.size = Size.defaultSize()
+        }
+
+        mResult?.size?.let { resultSize ->
+            val crop = CropHelper.computeCrop(resultSize, mOutputRatio!!)
+            mResult?.size = Size(crop.width(), crop.height())
+            if (mHasOverlay) {
+                mOverlayDrawer = OverlayDrawer(mOverlay!!, resultSize)
+            }
         }
     }
 
@@ -162,8 +166,8 @@ open class SnapshotGlPictureRecorder(
         val fakeOutputTextureId = 9999
         val fakeOutputSurface = SurfaceTexture(fakeOutputTextureId)
         fakeOutputSurface.setDefaultBufferSize(
-            mResult!!.size.width,
-            mResult!!.size.height
+            mResult!!.size?.width ?: Size.DEFAULT_WIDTH,
+            mResult!!.size?.height ?: Size.DEFAULT_HEIGHT
         )
 
         // 1. Create an EGL surface
@@ -183,12 +187,7 @@ open class SnapshotGlPictureRecorder(
         // If this doesn't work, rotate "rotation" before scaling, like GlCameraPreview does.
         Matrix.translateM(transform, 0, 0.5f, 0.5f, 0f) // Go back to 0,0
         Matrix.rotateM(
-            transform,
-            0,
-            (rotation + mResult!!.rotation).toFloat(),
-            0f,
-            0f,
-            1f
+            transform, 0, (rotation + mResult!!.rotation).toFloat(), 0f, 0f, 1f
         ) // Rotate to OUTPUT
         Matrix.scaleM(transform, 0, 1f, -1f, 1f) // Vertical flip because we'll use glReadPixels
         Matrix.translateM(transform, 0, -0.5f, -0.5f, 0f) // Go back to old position
@@ -201,19 +200,10 @@ open class SnapshotGlPictureRecorder(
             // 2. Then we can apply the transformations
             Matrix.translateM(mOverlayDrawer!!.transform, 0, 0.5f, 0.5f, 0f)
             Matrix.rotateM(
-                mOverlayDrawer!!.transform,
-                0,
-                mResult!!.rotation.toFloat(),
-                0f,
-                0f,
-                1f
+                mOverlayDrawer!!.transform, 0, mResult!!.rotation.toFloat(), 0f, 0f, 1f
             )
             Matrix.scaleM(
-                mOverlayDrawer!!.transform,
-                0,
-                1f,
-                -1f,
-                1f
+                mOverlayDrawer!!.transform, 0, 1f, -1f, 1f
             ) // Vertical flip because we'll use glReadPixels
             Matrix.translateM(mOverlayDrawer!!.transform, 0, -0.5f, -0.5f, 0f)
         }

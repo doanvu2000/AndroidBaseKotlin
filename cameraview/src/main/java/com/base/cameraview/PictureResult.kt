@@ -1,46 +1,22 @@
-package com.base.cameraview;
+package com.base.cameraview
 
-import android.graphics.BitmapFactory;
-import android.location.Location;
+import android.graphics.BitmapFactory
+import android.location.Location
+import com.base.cameraview.CameraUtils.decodeBitmap
+import com.base.cameraview.CameraUtils.writeToFile
+import com.base.cameraview.controls.Facing
+import com.base.cameraview.controls.PictureFormat
+import com.base.cameraview.size.Size
+import java.io.File
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import com.base.cameraview.controls.Facing;
-import com.base.cameraview.controls.PictureFormat;
-import com.base.cameraview.size.Size;
-
-import java.io.File;
-
-@SuppressWarnings("unused")
-public class PictureResult {
-
-    private final boolean isSnapshot;
-    private final Location location;
-    private final int rotation;
-    private final Size size;
-    private final Facing facing;
-    private final byte[] data;
-    private final PictureFormat format;
-
-    PictureResult(@NonNull Stub builder) {
-        isSnapshot = builder.isSnapshot;
-        location = builder.location;
-        rotation = builder.rotation;
-        size = builder.size;
-        facing = builder.facing;
-        data = builder.data;
-        format = builder.format;
-    }
-
+@Suppress("unused")
+class PictureResult internal constructor(builder: Stub) {
     /**
      * Returns whether this result comes from a snapshot.
      *
      * @return whether this is a snapshot
      */
-    public boolean isSnapshot() {
-        return isSnapshot;
-    }
+    val isSnapshot: Boolean = builder.isSnapshot
 
     /**
      * Returns geographic information for this picture, if any.
@@ -48,10 +24,7 @@ public class PictureResult {
      *
      * @return a nullable Location
      */
-    @Nullable
-    public Location getLocation() {
-        return location;
-    }
+    val location: Location? = builder.location
 
     /**
      * Returns the clock-wise rotation that should be applied to the
@@ -60,29 +33,21 @@ public class PictureResult {
      *
      * @return the clock-wise rotation
      */
-    public int getRotation() {
-        return rotation;
-    }
+    val rotation: Int = builder.rotation
 
     /**
      * Returns the size of the picture after the rotation is applied.
      *
      * @return the Size of this picture
      */
-    @NonNull
-    public Size getSize() {
-        return size;
-    }
+    val size: Size = builder.size!!
 
     /**
      * Returns the facing value with which this video was recorded.
      *
      * @return the Facing of this video
      */
-    @NonNull
-    public Facing getFacing() {
-        return facing;
-    }
+    val facing: Facing = builder.facing!!
 
     /**
      * Returns the raw compressed, ready to be saved to file,
@@ -90,20 +55,14 @@ public class PictureResult {
      *
      * @return the compressed data stream
      */
-    @NonNull
-    public byte[] getData() {
-        return data;
-    }
+    val data: ByteArray = builder.data
 
     /**
-     * Returns the format for {@link #getData()}.
+     * Returns the format for [.getData].
      *
      * @return the format
      */
-    @NonNull
-    public PictureFormat getFormat() {
-        return format;
-    }
+    val format: PictureFormat = builder.format!!
 
     /**
      * Decodes this picture on a background thread and posts the result in the UI thread using
@@ -113,58 +72,59 @@ public class PictureResult {
      * @param maxHeight the max. height of final bitmap
      * @param callback  a callback to be notified of image decoding
      */
-    public void toBitmap(int maxWidth, int maxHeight, @NonNull BitmapCallback callback) {
-        if (format == PictureFormat.JPEG) {
-            CameraUtils.decodeBitmap(getData(), maxWidth, maxHeight, new BitmapFactory.Options(),
-                    rotation, callback);
-        } else if (format == PictureFormat.DNG) {
-            // Apparently: BitmapFactory added DNG support in API 24.
-            // https://github.com/aosp-mirror/platform_frameworks_base/blob/nougat-mr1-release/core/jni/android/graphics/BitmapFactory.cpp
-            CameraUtils.decodeBitmap(getData(), maxWidth, maxHeight, new BitmapFactory.Options(),
-                    rotation, callback);
-        } else {
-            throw new UnsupportedOperationException("PictureResult.toBitmap() does not support "
-                    + "this picture format: " + format);
+    fun toBitmap(maxWidth: Int, maxHeight: Int, callback: BitmapCallback) {
+        when (format) {
+            PictureFormat.JPEG -> {
+                decodeBitmap(
+                    this.data, maxWidth, maxHeight, BitmapFactory.Options(),
+                    rotation, callback
+                )
+            }
+
+            PictureFormat.DNG -> {
+                // Apparently: BitmapFactory added DNG support in API 24.
+                // https://github.com/aosp-mirror/platform_frameworks_base/blob/nougat-mr1-release/core/jni/android/graphics/BitmapFactory.cpp
+                decodeBitmap(
+                    this.data, maxWidth, maxHeight, BitmapFactory.Options(),
+                    rotation, callback
+                )
+            }
         }
     }
 
     /**
-     * Shorthand for {@link CameraUtils#decodeBitmap(byte[], BitmapCallback)}.
+     * Shorthand for [CameraUtils.decodeBitmap].
      * Decodes this picture on a background thread and posts the result in the UI thread using
      * the given callback.
      *
      * @param callback a callback to be notified of image decoding
      */
-    public void toBitmap(@NonNull BitmapCallback callback) {
-        toBitmap(-1, -1, callback);
+    fun toBitmap(callback: BitmapCallback) {
+        toBitmap(-1, -1, callback)
     }
 
     /**
-     * Shorthand for {@link CameraUtils#writeToFile(byte[], File, FileCallback)}.
+     * Shorthand for [CameraUtils.writeToFile].
      * This writes this picture to file on a background thread and posts the result in the UI
      * thread using the given callback.
      *
      * @param file     the file to write into
      * @param callback a callback
      */
-    public void toFile(@NonNull File file, @NonNull FileCallback callback) {
-        CameraUtils.writeToFile(getData(), file, callback);
+    fun toFile(file: File, callback: FileCallback) {
+        writeToFile(this.data, file, callback)
     }
 
     /**
      * A result stub, for internal use only.
      */
-    public static class Stub {
-
-        public boolean isSnapshot;
-        public Location location;
-        public int rotation;
-        public Size size;
-        public Facing facing;
-        public byte[] data;
-        public PictureFormat format;
-
-        Stub() {
-        }
+    class Stub internal constructor() {
+        var isSnapshot: Boolean = false
+        var location: Location? = null
+        var rotation: Int = 0
+        var size: Size? = null
+        var facing: Facing? = null
+        var data: ByteArray = ByteArray(0)
+        var format: PictureFormat? = null
     }
 }
