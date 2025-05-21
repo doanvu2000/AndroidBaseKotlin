@@ -1,53 +1,39 @@
-package com.base.cameraview.video;
+package com.base.cameraview.video
 
-import android.hardware.Camera;
-import android.media.CamcorderProfile;
-import android.media.MediaRecorder;
-
-import androidx.annotation.NonNull;
-
-import com.base.cameraview.VideoResult;
-import com.base.cameraview.engine.Camera1Engine;
-import com.base.cameraview.internal.CamcorderProfiles;
-import com.base.cameraview.size.Size;
+import android.hardware.Camera
+import android.media.CamcorderProfile
+import android.media.MediaRecorder
+import com.base.cameraview.VideoResult
+import com.base.cameraview.engine.Camera1Engine
+import com.base.cameraview.internal.CamcorderProfiles.get
 
 /**
- * A {@link VideoRecorder} that uses {@link MediaRecorder} APIs
+ * A [VideoRecorder] that uses [MediaRecorder] APIs
  * for the Camera1 engine.
  */
-public class Full1VideoRecorder extends FullVideoRecorder {
-
-    private final Camera1Engine mEngine;
-    private final Camera mCamera;
-    private final int mCameraId;
-
-    public Full1VideoRecorder(@NonNull Camera1Engine engine,
-                              @NonNull Camera camera, int cameraId) {
-        super(engine);
-        mCamera = camera;
-        mEngine = engine;
-        mCameraId = cameraId;
+class Full1VideoRecorder(
+    private val mEngine: Camera1Engine,
+    private val mCamera: Camera, private val mCameraId: Int
+) : FullVideoRecorder(
+    mEngine
+) {
+    override fun applyVideoSource(
+        stub: VideoResult.Stub,
+        mediaRecorder: MediaRecorder
+    ) {
+        mediaRecorder.setCamera(mCamera)
+        mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA)
     }
 
-    @Override
-    protected void applyVideoSource(@NonNull VideoResult.Stub stub,
-                                    @NonNull MediaRecorder mediaRecorder) {
-        mediaRecorder.setCamera(mCamera);
-        mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-    }
-
-    @NonNull
-    @Override
-    protected CamcorderProfile getCamcorderProfile(@NonNull VideoResult.Stub stub) {
+    override fun getCamcorderProfile(stub: VideoResult.Stub): CamcorderProfile {
         // Get a profile of quality compatible with the chosen size.
-        Size size = stub.rotation % 180 != 0 ? stub.size.flip() : stub.size;
-        return CamcorderProfiles.get(mCameraId, size);
+        val size = if (stub.rotation % 180 != 0) stub.size.flip() else stub.size
+        return get(mCameraId, size)
     }
 
-    @Override
-    protected void onDispatchResult() {
+    override fun onDispatchResult() {
         // Restore frame processing.
-        mCamera.setPreviewCallbackWithBuffer(mEngine);
-        super.onDispatchResult();
+        mCamera.setPreviewCallbackWithBuffer(mEngine)
+        super.onDispatchResult()
     }
 }
