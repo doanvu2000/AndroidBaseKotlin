@@ -1,149 +1,128 @@
-package com.base.cameraview.preview;
+package com.base.cameraview.preview
 
-import android.content.Context;
-import android.graphics.Matrix;
-import android.graphics.SurfaceTexture;
-import android.view.LayoutInflater;
-import android.view.TextureView;
-import android.view.View;
-import android.view.ViewGroup;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import com.base.cameraview.R;
-import com.base.cameraview.size.AspectRatio;
-import com.google.android.gms.tasks.TaskCompletionSource;
-import com.google.android.gms.tasks.Tasks;
-
-import java.util.concurrent.ExecutionException;
+import android.content.Context
+import android.graphics.Matrix
+import android.graphics.SurfaceTexture
+import android.view.LayoutInflater
+import android.view.TextureView
+import android.view.TextureView.SurfaceTextureListener
+import android.view.View
+import android.view.ViewGroup
+import com.base.cameraview.R
+import com.base.cameraview.size.AspectRatio
+import com.google.android.gms.tasks.TaskCompletionSource
+import com.google.android.gms.tasks.Tasks
+import java.util.concurrent.ExecutionException
 
 /**
- * A preview implementation based on {@link TextureView}.
- * Better than {@link SurfaceCameraPreview} but much less powerful than {@link GlCameraPreview}.
+ * A preview implementation based on [TextureView].
+ * Better than [SurfaceCameraPreview] but much less powerful than [GlCameraPreview].
  */
-public class TextureCameraPreview extends CameraPreview<TextureView, SurfaceTexture> {
+class TextureCameraPreview(context: Context, parent: ViewGroup) :
+    CameraPreview<TextureView?, SurfaceTexture?>(context, parent) {
+    private var mRootView: View? = null
 
-    private View mRootView;
-
-    public TextureCameraPreview(@NonNull Context context, @NonNull ViewGroup parent) {
-        super(context, parent);
-    }
-
-    @NonNull
-    @Override
-    protected TextureView onCreateView(@NonNull Context context, @NonNull ViewGroup parent) {
-        View root = LayoutInflater.from(context).inflate(R.layout.cameraview_texture_view, parent,
-                false);
-        parent.addView(root, 0);
-        TextureView texture = root.findViewById(R.id.texture_view);
-        texture.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
-
-            @Override
-            public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-                dispatchOnSurfaceAvailable(width, height);
+    override fun onCreateView(context: Context, parent: ViewGroup): TextureView {
+        val root = LayoutInflater.from(context).inflate(
+            R.layout.cameraview_texture_view, parent,
+            false
+        )
+        parent.addView(root, 0)
+        val texture = root.findViewById<TextureView>(R.id.texture_view)
+        texture.surfaceTextureListener = object : SurfaceTextureListener {
+            override fun onSurfaceTextureAvailable(
+                surface: SurfaceTexture,
+                width: Int,
+                height: Int
+            ) {
+                dispatchOnSurfaceAvailable(width, height)
             }
 
-            @Override
-            public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-                dispatchOnSurfaceSizeChanged(width, height);
+            override fun onSurfaceTextureSizeChanged(p0: SurfaceTexture, width: Int, height: Int) {
+                dispatchOnSurfaceSizeChanged(width, height)
             }
 
-            @Override
-            public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-                dispatchOnSurfaceDestroyed();
-                return true;
+            override fun onSurfaceTextureDestroyed(p0: SurfaceTexture): Boolean {
+                dispatchOnSurfaceDestroyed()
+                return true
             }
 
-            @Override
-            public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+            override fun onSurfaceTextureUpdated(p0: SurfaceTexture) {
             }
-        });
-        mRootView = root;
-        return texture;
+        }
+        mRootView = root
+        return texture
     }
 
-    @NonNull
-    @Override
-    public View getRootView() {
-        return mRootView;
+    override fun getRootView(): View {
+        return mRootView!!
     }
 
-    @NonNull
-    @Override
-    public Class<SurfaceTexture> getOutputClass() {
-        return SurfaceTexture.class;
+    override fun getOutputClass(): Class<SurfaceTexture?> {
+        return SurfaceTexture::class.java as Class<SurfaceTexture?>
     }
 
-    @NonNull
-    @Override
-    public SurfaceTexture getOutput() {
-        return getView().getSurfaceTexture();
+    override fun getOutput(): SurfaceTexture {
+        return view.surfaceTexture!!
     }
 
-    @Override
-    public boolean supportsCropping() {
-        return true;
+    override fun supportsCropping(): Boolean {
+        return true
     }
 
-    @Override
-    protected void crop(@Nullable final CropCallback callback) {
-        getView().post(new Runnable() {
-            @Override
-            public void run() {
-                if (mInputStreamHeight == 0 || mInputStreamWidth == 0 ||
-                        mOutputSurfaceHeight == 0 || mOutputSurfaceWidth == 0) {
-                    if (callback != null) callback.onCrop();
-                    return;
+    override fun crop(callback: CropCallback?) {
+        view.post(object : Runnable {
+            override fun run() {
+                if (mInputStreamHeight == 0 || mInputStreamWidth == 0 || mOutputSurfaceHeight == 0 || mOutputSurfaceWidth == 0) {
+                    callback?.onCrop()
+                    return
                 }
-                float scaleX = 1f, scaleY = 1f;
-                AspectRatio current = AspectRatio.of(mOutputSurfaceWidth, mOutputSurfaceHeight);
-                AspectRatio target = AspectRatio.of(mInputStreamWidth, mInputStreamHeight);
+                var scaleX = 1f
+                var scaleY = 1f
+                val current = AspectRatio.of(mOutputSurfaceWidth, mOutputSurfaceHeight)
+                val target = AspectRatio.of(mInputStreamWidth, mInputStreamHeight)
                 if (current.toFloat() >= target.toFloat()) {
                     // We are too short. Must increase height.
-                    scaleY = current.toFloat() / target.toFloat();
+                    scaleY = current.toFloat() / target.toFloat()
                 } else {
                     // We must increase width.
-                    scaleX = target.toFloat() / current.toFloat();
+                    scaleX = target.toFloat() / current.toFloat()
                 }
 
-                getView().setScaleX(scaleX);
-                getView().setScaleY(scaleY);
+                view.scaleX = scaleX
+                view.scaleY = scaleY
 
-                mCropping = scaleX > 1.02f || scaleY > 1.02f;
-                LOG.i("crop:", "applied scaleX=", scaleX);
-                LOG.i("crop:", "applied scaleY=", scaleY);
-                if (callback != null) callback.onCrop();
+                mCropping = scaleX > 1.02f || scaleY > 1.02f
+                LOG.i("crop:", "applied scaleX=", scaleX)
+                LOG.i("crop:", "applied scaleY=", scaleY)
+                callback?.onCrop()
             }
-        });
+        })
     }
 
-    @Override
-    public void setDrawRotation(final int drawRotation) {
-        super.setDrawRotation(drawRotation);
-        final TaskCompletionSource<Void> task = new TaskCompletionSource<>();
-        getView().post(new Runnable() {
-            @Override
-            public void run() {
-                Matrix matrix = new Matrix();
-                // Output surface coordinates
-                float outputCenterX = mOutputSurfaceWidth / 2F;
-                float outputCenterY = mOutputSurfaceHeight / 2F;
-                boolean flip = drawRotation % 180 != 0;
-                // If dimensions are swapped, we must also do extra work to flip
-                // the two dimensions, using the view width and height (to support cropping).
-                if (flip) {
-                    float scaleX = (float) mOutputSurfaceHeight / mOutputSurfaceWidth;
-                    matrix.postScale(scaleX, 1F / scaleX, outputCenterX, outputCenterY);
-                }
-                matrix.postRotate((float) drawRotation, outputCenterX, outputCenterY);
-                getView().setTransform(matrix);
-                task.setResult(null);
+    override fun setDrawRotation(drawRotation: Int) {
+        super.setDrawRotation(drawRotation)
+        val task = TaskCompletionSource<Void?>()
+        view.post {
+            val matrix = Matrix()
+            // Output surface coordinates
+            val outputCenterX = mOutputSurfaceWidth / 2f
+            val outputCenterY = mOutputSurfaceHeight / 2f
+            val flip = drawRotation % 180 != 0
+            // If dimensions are swapped, we must also do extra work to flip
+            // the two dimensions, using the view width and height (to support cropping).
+            if (flip) {
+                val scaleX = mOutputSurfaceHeight.toFloat() / mOutputSurfaceWidth
+                matrix.postScale(scaleX, 1f / scaleX, outputCenterX, outputCenterY)
             }
-        });
+            matrix.postRotate(drawRotation.toFloat(), outputCenterX, outputCenterY)
+            view.setTransform(matrix)
+            task.setResult(null)
+        }
         try {
-            Tasks.await(task.getTask());
-        } catch (InterruptedException | ExecutionException ignore) {
+            Tasks.await<Void?>(task.getTask())
+        } catch (ignore: InterruptedException) {
+        } catch (ignore: ExecutionException) {
         }
     }
 }

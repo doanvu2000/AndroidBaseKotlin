@@ -1,95 +1,81 @@
-package com.base.cameraview.preview;
+package com.base.cameraview.preview
 
-import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
-import android.view.View;
-import android.view.ViewGroup;
-
-import androidx.annotation.NonNull;
-
-import com.base.cameraview.CameraLogger;
-import com.base.cameraview.R;
+import android.content.Context
+import android.view.LayoutInflater
+import android.view.SurfaceHolder
+import android.view.SurfaceView
+import android.view.View
+import android.view.ViewGroup
+import com.base.cameraview.CameraLogger.Companion.create
+import com.base.cameraview.R
 
 /**
  * This is the fallback preview when hardware acceleration is off, and is the last resort.
  * Currently does not support cropping, which means that
- * <p>
+ *
+ *
  * Do not use.
  */
-public class SurfaceCameraPreview extends CameraPreview<SurfaceView, SurfaceHolder> {
+class SurfaceCameraPreview(context: Context, parent: ViewGroup) :
+    CameraPreview<SurfaceView?, SurfaceHolder?>(context, parent) {
+    private var mDispatched = false
+    private var mRootView: View? = null
 
-    private final static CameraLogger LOG
-            = CameraLogger.create(SurfaceCameraPreview.class.getSimpleName());
-
-    private boolean mDispatched;
-    private View mRootView;
-
-    public SurfaceCameraPreview(@NonNull Context context, @NonNull ViewGroup parent) {
-        super(context, parent);
-    }
-
-    @NonNull
-    @Override
-    protected SurfaceView onCreateView(@NonNull Context context, @NonNull ViewGroup parent) {
-        View root = LayoutInflater.from(context).inflate(R.layout.cameraview_surface_view, parent,
-                false);
-        parent.addView(root, 0);
-        SurfaceView surfaceView = root.findViewById(R.id.surface_view);
-        final SurfaceHolder holder = surfaceView.getHolder();
-        holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-        holder.addCallback(new SurfaceHolder.Callback() {
-
-            @Override
-            public void surfaceCreated(SurfaceHolder holder) {
+    override fun onCreateView(context: Context, parent: ViewGroup): SurfaceView {
+        val root = LayoutInflater.from(context).inflate(
+            R.layout.cameraview_surface_view, parent,
+            false
+        )
+        parent.addView(root, 0)
+        val surfaceView = root.findViewById<SurfaceView>(R.id.surface_view)
+        val holder = surfaceView.holder
+        holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS)
+        holder.addCallback(object : SurfaceHolder.Callback {
+            override fun surfaceCreated(p0: SurfaceHolder) {
                 // This is too early to call anything.
                 // surfaceChanged is guaranteed to be called after, with exact dimensions.
-                LOG.i("callback: surfaceCreated.");
+                LOG.i("callback: surfaceCreated.")
             }
 
-            @Override
-            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-                LOG.i("callback:", "surfaceChanged",
-                        "w:", width,
-                        "h:", height,
-                        "dispatched:", mDispatched);
+            override fun surfaceChanged(p0: SurfaceHolder, format: Int, width: Int, height: Int) {
+                LOG.i(
+                    "callback:", "surfaceChanged",
+                    "w:", width,
+                    "h:", height,
+                    "dispatched:", mDispatched
+                )
                 if (!mDispatched) {
-                    dispatchOnSurfaceAvailable(width, height);
-                    mDispatched = true;
+                    dispatchOnSurfaceAvailable(width, height)
+                    mDispatched = true
                 } else {
-                    dispatchOnSurfaceSizeChanged(width, height);
+                    dispatchOnSurfaceSizeChanged(width, height)
                 }
             }
 
-            @Override
-            public void surfaceDestroyed(SurfaceHolder holder) {
-                LOG.i("callback: surfaceDestroyed");
-                dispatchOnSurfaceDestroyed();
-                mDispatched = false;
+            override fun surfaceDestroyed(p0: SurfaceHolder) {
+                LOG.i("callback: surfaceDestroyed")
+                dispatchOnSurfaceDestroyed()
+                mDispatched = false
             }
-        });
-        mRootView = root;
-        return surfaceView;
+        })
+        mRootView = root
+        return surfaceView
     }
 
-    @NonNull
-    @Override
-    public View getRootView() {
-        return mRootView;
+    override fun getRootView(): View {
+        return mRootView!!
     }
 
-    @NonNull
-    @Override
-    public SurfaceHolder getOutput() {
-        return getView().getHolder();
+    override fun getOutput(): SurfaceHolder {
+        return view.holder
     }
 
-    @NonNull
-    @Override
-    public Class<SurfaceHolder> getOutputClass() {
-        return SurfaceHolder.class;
+    override fun getOutputClass(): Class<SurfaceHolder?> {
+        return SurfaceHolder::class.java as Class<SurfaceHolder?>
     }
 
 
+    companion object {
+        private val LOG = create(SurfaceCameraPreview::class.java.simpleName)
+    }
 }

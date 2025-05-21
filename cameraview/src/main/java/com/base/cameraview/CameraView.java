@@ -77,6 +77,7 @@ import com.base.cameraview.markers.AutoFocusMarker;
 import com.base.cameraview.markers.AutoFocusTrigger;
 import com.base.cameraview.markers.MarkerLayout;
 import com.base.cameraview.markers.MarkerParser;
+import com.base.cameraview.metering.MeteringRegion;
 import com.base.cameraview.metering.MeteringRegions;
 import com.base.cameraview.overlay.OverlayLayout;
 import com.base.cameraview.preview.CameraPreview;
@@ -655,7 +656,7 @@ public class CameraView extends FrameLayout implements DefaultLifecycleObserver 
 
             case AUTO_FOCUS:
                 Size size = new Size(getWidth(), getHeight());
-                MeteringRegions regions = MeteringRegions.fromPoint(size, points[0]);
+                MeteringRegions regions = MeteringRegions.Companion.fromPoint(size, points[0], MeteringRegion.MAX_WEIGHT);
                 mCameraEngine.startAutoFocus(gesture, regions, points[0]);
                 break;
 
@@ -1388,7 +1389,7 @@ public class CameraView extends FrameLayout implements DefaultLifecycleObserver 
         }
         Size size = new Size(getWidth(), getHeight());
         PointF point = new PointF(x, y);
-        MeteringRegions regions = MeteringRegions.fromPoint(size, point);
+        MeteringRegions regions = MeteringRegions.Companion.fromPoint(size, point, MeteringRegion.MAX_WEIGHT);
         mCameraEngine.startAutoFocus(null, regions, point);
     }
 
@@ -1404,7 +1405,7 @@ public class CameraView extends FrameLayout implements DefaultLifecycleObserver 
             throw new IllegalArgumentException("Region is out of view bounds! " + region);
         }
         Size size = new Size(getWidth(), getHeight());
-        MeteringRegions regions = MeteringRegions.fromArea(size, region);
+        MeteringRegions regions = MeteringRegions.Companion.fromArea(size, region, MeteringRegion.MAX_WEIGHT, false);
         mCameraEngine.startAutoFocus(null, regions, new PointF(region.centerX(), region.centerY()));
     }
 

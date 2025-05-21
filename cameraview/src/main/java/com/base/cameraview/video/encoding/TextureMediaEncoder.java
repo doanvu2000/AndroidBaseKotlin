@@ -26,12 +26,7 @@ public class TextureMediaEncoder extends VideoMediaEncoder<TextureConfig> {
     private EglCore mEglCore;
     private EglWindowSurface mWindow;
     private GlTextureDrawer mDrawer;
-    private Pool<Frame> mFramePool = new Pool<>(Integer.MAX_VALUE, new Pool.Factory<Frame>() {
-        @Override
-        public Frame create() {
-            return new Frame();
-        }
-    });
+    private Pool<Frame> mFramePool = new Pool<>(Integer.MAX_VALUE, Frame::new);
 
     private long mFirstTimeUs = Long.MIN_VALUE;
 
@@ -172,10 +167,12 @@ public class TextureMediaEncoder extends VideoMediaEncoder<TextureConfig> {
 
         // 3. Do the same for overlays with their own rotation.
         if (mConfig.hasOverlay()) {
-            mConfig.overlayDrawer.draw(mConfig.overlayTarget);
-            Matrix.translateM(mConfig.overlayDrawer.getTransform(), 0, 0.5F, 0.5F, 0);
-            Matrix.rotateM(mConfig.overlayDrawer.getTransform(), 0, mConfig.overlayRotation, 0, 0, 1);
-            Matrix.translateM(mConfig.overlayDrawer.getTransform(), 0, -0.5F, -0.5F, 0);
+            if (mConfig.overlayDrawer != null && mConfig.overlayTarget != null) {
+                mConfig.overlayDrawer.draw(mConfig.overlayTarget);
+                Matrix.translateM(mConfig.overlayDrawer.getTransform(), 0, 0.5F, 0.5F, 0);
+                Matrix.rotateM(mConfig.overlayDrawer.getTransform(), 0, mConfig.overlayRotation, 0, 0, 1);
+                Matrix.translateM(mConfig.overlayDrawer.getTransform(), 0, -0.5F, -0.5F, 0);
+            }
         }
         LOG.i("onEvent -", "frameNumber:", mFrameNumber, "timestampUs:", frame.timestampUs(), "hasReachedMaxLength:", hasReachedMaxLength(), "thread:", Thread.currentThread(), "- gl rendering.");
         if (mDrawer != null) {
@@ -183,7 +180,9 @@ public class TextureMediaEncoder extends VideoMediaEncoder<TextureConfig> {
             mDrawer.draw(frame.timestampUs());
         }
         if (mConfig.hasOverlay()) {
-            mConfig.overlayDrawer.render(frame.timestampUs());
+            if (mConfig.overlayDrawer != null) {
+                mConfig.overlayDrawer.render(frame.timestampUs());
+            }
         }
         if (mWindow != null) {
             mWindow.setPresentationTime(frame.timestampNanos);
