@@ -10,8 +10,10 @@ fun RecyclerView.setGridManager(
     mContext: Context,
     lin: Int,
     holderAdapter: RecyclerView.Adapter<*>,
-    orientation: Int = RecyclerView.VERTICAL,
+    isHorizontalOrientation: Boolean = false
 ) {
+    val orientation: Int =
+        if (isHorizontalOrientation) RecyclerView.HORIZONTAL else RecyclerView.VERTICAL
     val manager = GridLayoutManager(mContext, lin, orientation, false)
     this.apply {
         layoutManager = manager
@@ -22,12 +24,16 @@ fun RecyclerView.setGridManager(
 fun RecyclerView.setLinearLayoutHorizontal(
     context: Context, holderAdapter: RecyclerView.Adapter<*>
 ) {
-    setLinearLayoutManager(context, holderAdapter, RecyclerView.HORIZONTAL)
+    setLinearLayoutManager(context, holderAdapter, true)
 }
 
 fun RecyclerView.setLinearLayoutManager(
-    context: Context, holderAdapter: RecyclerView.Adapter<*>, orientation: Int = RecyclerView.VERTICAL
+    context: Context,
+    holderAdapter: RecyclerView.Adapter<*>,
+    isHorizontalOrientation: Boolean = false
 ) {
+    val orientation: Int =
+        if (isHorizontalOrientation) RecyclerView.HORIZONTAL else RecyclerView.VERTICAL
     val manager = LinearLayoutManager(context, orientation, false)
     this.apply {
         layoutManager = manager
@@ -36,10 +42,13 @@ fun RecyclerView.setLinearLayoutManager(
 }
 
 fun RecyclerView.setStaggeredGridManager(
-    lin: Int,
-    holderAdapter: RecyclerView.Adapter<*>,
-    orientation: Int = StaggeredGridLayoutManager.VERTICAL,
+    lin: Int, holderAdapter: RecyclerView.Adapter<*>, isHorizontalOrientation: Boolean = false
 ) {
+    val orientation: Int = if (isHorizontalOrientation) {
+        StaggeredGridLayoutManager.HORIZONTAL
+    } else {
+        StaggeredGridLayoutManager.VERTICAL
+    }
     val manager = StaggeredGridLayoutManager(lin, orientation)
     this.apply {
         layoutManager = manager

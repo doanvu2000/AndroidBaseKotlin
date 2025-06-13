@@ -10,11 +10,12 @@ import androidx.viewbinding.ViewBinding
 import com.example.baseproject.base.utils.extension.handleBackPressed
 import com.example.baseproject.base.utils.util.AppLogger
 import com.example.baseproject.base.utils.util.Constants
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 abstract class BaseFragment<VB : ViewBinding> : Fragment() {
     companion object {
@@ -81,58 +82,56 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
         }
     }
 
-    fun launchAction(dispatcher: CoroutineContext, action: () -> Unit) {
-        try {
-            view?.let {
-                viewLifecycleOwner.lifecycleScope.launch(dispatcher) {
-                    action()
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+    //region launch coroutine with lifecycleScope
+
+    protected val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        handleError(throwable)
     }
 
-    private fun launchCoroutine(
-        dispatcher: CoroutineContext, blockCoroutine: suspend CoroutineScope.() -> Unit
+    open fun handleError(throwable: Throwable) {
+        val errorMessage = throwable.message ?: ""
+        logError(errorMessage)
+        throwable.printStackTrace()
+    }
+
+    fun launchCoroutine(
+        dispatcher: CoroutineContext = EmptyCoroutineContext, action: suspend () -> Unit
     ) {
-        try {
-            view?.let {
-                viewLifecycleOwner.lifecycleScope.launch(dispatcher) {
-                    blockCoroutine()
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    fun launchCoroutineMain(blockCoroutine: suspend CoroutineScope.() -> Unit) {
-        launchCoroutine(Dispatchers.Main) {
-            blockCoroutine()
-        }
-    }
-
-    fun launchCoroutineIO(blockCoroutine: suspend CoroutineScope.() -> Unit) {
-        launchCoroutine(Dispatchers.IO) {
-            blockCoroutine()
-        }
-    }
-
-    fun launchCoroutineDefault(blockCoroutine: suspend CoroutineScope.() -> Unit) {
-        launchCoroutine(Dispatchers.Default) {
-            blockCoroutine()
-        }
-    }
-
-    fun delayToAction(delayTime: Long = 200L, action: () -> Unit) {
-        launchCoroutineIO {
-            delay(delayTime)
-            launchCoroutineMain {
+        if (view != null && isAdded) {
+            viewLifecycleOwner.lifecycleScope.launch(dispatcher + coroutineExceptionHandler) {
                 action()
             }
         }
     }
+
+    fun launchCoroutineIO(action: suspend () -> Unit) {
+        launchCoroutine(Dispatchers.IO) {
+            action()
+        }
+    }
+
+    fun launchCoroutineMain(action: suspend () -> Unit) {
+        launchCoroutine(Dispatchers.Main) {
+            action()
+        }
+    }
+
+    fun launchCoroutineDefault(action: suspend () -> Unit) {
+        launchCoroutine(Dispatchers.Default) {
+            action()
+        }
+    }
+
+    fun delayToAction(delayTime: Long = 200L, action: () -> Unit) {
+        launchCoroutine(Dispatchers.IO) {
+            delay(delayTime)
+            launchCoroutine(Dispatchers.Main) {
+                action()
+            }
+
+        }
+    }
+    //endregion
 
     //region logcat
     fun logError(msg: String) {

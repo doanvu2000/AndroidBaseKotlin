@@ -32,15 +32,20 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.baseproject.R
+import com.example.baseproject.base.base_view.screen.BaseActivity
 import com.example.baseproject.base.utils.util.Constants
 import com.example.baseproject.base.utils.util.DownloadUtil
 import com.google.android.gms.ads.AdSize
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -460,6 +465,7 @@ fun Activity.disableScreenOn() {
     window.clearFlags(FLAG_KEEP_SCREEN_ON)
 }
 
+@Suppress("DEPRECATION")
 fun Activity.setLayoutParamFullScreen() {
     window?.let {
         it.decorView.apply {
@@ -467,8 +473,20 @@ fun Activity.setLayoutParamFullScreen() {
                 View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN
         }
         it.setFlags(
-            WindowManager.LayoutParams.FLAG_FULLSCREEN,
-            WindowManager.LayoutParams.FLAG_FULLSCREEN
+            WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN
         )
     }
 }
+
+fun BaseActivity<*>.launchOnStarted(block: suspend CoroutineScope.() -> Unit) {
+    launchCoroutine(Dispatchers.Main) {
+        repeatOnLifecycle(Lifecycle.State.STARTED) {
+            block()
+        }
+    }
+}
+
+fun Activity.checkShowRationale(permission: String) =
+    ActivityCompat.shouldShowRequestPermissionRationale(
+        this, permission
+    )

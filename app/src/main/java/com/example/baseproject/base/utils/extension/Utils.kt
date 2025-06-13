@@ -22,7 +22,6 @@ import android.view.Window
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.FileProvider
 import androidx.core.graphics.createBitmap
-import androidx.core.os.LocaleListCompat
 import com.example.baseproject.BuildConfig
 import com.example.baseproject.base.entity.deviceInfo
 import com.example.baseproject.base.utils.util.AppLogger
@@ -40,7 +39,6 @@ import java.io.FileOutputStream
 import java.io.Serializable
 import java.text.DecimalFormat
 import java.util.Calendar
-import java.util.Locale
 import kotlin.math.ceil
 import kotlin.math.log10
 import kotlin.math.pow
@@ -163,15 +161,6 @@ suspend fun runOnDispatcherMain(action: () -> Unit) {
         action.invoke()
     }
 }
-
-fun setLanguageApp(code: String) {
-    val localeList = LocaleListCompat.forLanguageTags(code)
-    AppCompatDelegate.setApplicationLocales(localeList)
-}
-
-fun getApplicationLocales(): String =
-    AppCompatDelegate.getApplicationLocales().toLanguageTags()
-        .ifEmpty { Locale.getDefault().language }
 
 private fun getByteLengthInDouble(): Double {
     return if (isSdkO()) 1000.0

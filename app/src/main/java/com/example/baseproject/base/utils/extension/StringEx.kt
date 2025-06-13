@@ -277,3 +277,11 @@ fun Any.toPrettyDebugString(indentWidth: Int = 4) = buildString {
         }
     }
 }
+
+fun String.getExtensionFile(default: String): String {
+    return try {
+        this.substring(this.lastIndexOf('.') + 1, this.length)
+    } catch (e: Exception) {
+        default
+    }
+}

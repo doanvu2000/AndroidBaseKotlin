@@ -8,9 +8,14 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import com.example.baseproject.base.base_view.screen.BaseFragment
 import com.example.baseproject.base.utils.util.DownloadUtil
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -93,7 +98,9 @@ fun Fragment.delayBeforeAction(timeDelay: Long = 300, action: () -> Unit) {
     }
 }
 
-fun Fragment.launchWitCoroutine(dispatcher: CoroutineContext = Dispatchers.Main, action: () -> Unit) {
+fun Fragment.launchWitCoroutine(
+    dispatcher: CoroutineContext = Dispatchers.Main, action: () -> Unit
+) {
     lifecycleScope.launch(dispatcher) {
         action()
     }
@@ -104,11 +111,39 @@ fun Fragment.downloadAudio(
 ) {
     val lifecycle = viewLifecycleOwner.lifecycleScope
     DownloadUtil.downloadAudio(
-        lifecycle, requireContext().cacheDir, fileName, src, timeDelay, onDone,
-        onFail
+        lifecycle, requireContext().cacheDir, fileName, src, timeDelay, onDone, onFail
     )
 }
 
 fun Fragment.getAnimation(animationId: Int): Animation? {
     return requireContext().getAnimation(animationId)
 }
+
+fun BaseFragment<*>.launchOnStarted(block: suspend CoroutineScope.() -> Unit) {
+    launchCoroutine {
+        repeatOnLifecycle(Lifecycle.State.STARTED) {
+            block()
+        }
+    }
+}
+
+fun Fragment.safeViewLifecycleOwner(): LifecycleOwner? {
+    if (view == null) {
+        return null
+    }
+    return viewLifecycleOwner
+}
+
+@Suppress("DEPRECATION")
+fun Fragment.getDefaultRotation(): Int {
+    return try {
+        requireActivity().windowManager.defaultDisplay.rotation
+    } catch (e: Exception) {
+        0
+    }
+}
+
+val Fragment.currentState: Lifecycle.State?
+    get() = if (view != null) viewLifecycleOwner.lifecycle.currentState else null
+
+fun Fragment.currentStateIsResume() = currentState == Lifecycle.State.RESUMED
