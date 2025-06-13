@@ -17,6 +17,7 @@ import com.example.baseproject.base.utils.extension.finishWithSlide
 import com.example.baseproject.base.utils.extension.getScreenHeight
 import com.example.baseproject.base.utils.extension.getScreenWidth
 import com.example.baseproject.base.utils.extension.handleBackPressed
+import com.example.baseproject.base.utils.util.AppLogger
 import com.example.baseproject.base.utils.util.Constants
 import com.example.baseproject.base.utils.util.RemoteConfigUtil
 import com.example.baseproject.base.utils.util.SharePrefUtils
@@ -189,4 +190,22 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
         super.onPause()
         isAvailableClick = true
     }
+
+    //region logcat
+    fun logDebug(msg: String) {
+        AppLogger.d(TAG, "${this.javaClass.simpleName}: $msg")
+    }
+
+    fun logWarning(msg: String) {
+        AppLogger.w(TAG, "${this.javaClass.simpleName}: $msg")
+    }
+
+    fun logError(msg: String) {
+        AppLogger.e(TAG, "${this.javaClass.simpleName}: $msg")
+    }
+
+    fun logInfo(msg: String) {
+        AppLogger.i(TAG, "${this.javaClass.simpleName}: $msg")
+    }
+    //endregion
 }

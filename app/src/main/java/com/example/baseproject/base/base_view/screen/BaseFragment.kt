@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.viewbinding.ViewBinding
 import com.example.baseproject.base.utils.extension.handleBackPressed
+import com.example.baseproject.base.utils.util.AppLogger
 import com.example.baseproject.base.utils.util.Constants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -132,4 +133,22 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
             }
         }
     }
+
+    //region logcat
+    fun logError(msg: String) {
+        AppLogger.e(TAG, "Fragment ${this.javaClass.simpleName} - Error: $msg")
+    }
+
+    fun logDebug(msg: String) {
+        AppLogger.d(TAG, "Fragment ${this.javaClass.simpleName}: $msg")
+    }
+
+    fun logInfo(msg: String) {
+        AppLogger.i(TAG, "Fragment ${this.javaClass.simpleName}: $msg")
+    }
+
+    fun logWarning(msg: String) {
+        AppLogger.w(TAG, "Fragment ${this.javaClass.simpleName}: $msg")
+    }
+    //endregion
 }
