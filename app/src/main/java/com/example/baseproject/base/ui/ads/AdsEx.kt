@@ -1,6 +1,7 @@
 package com.example.baseproject.base.ui.ads
 
 import android.util.Log
+import com.example.baseproject.base.utils.extension.now
 import com.example.baseproject.base.utils.util.Constants
 import com.example.baseproject.base.utils.util.RemoteConfigUtil
 
@@ -16,7 +17,7 @@ fun isInterReady(): Boolean {
 }
 
 fun isPassedCappingTime(): Boolean {
-    val diffTime = System.currentTimeMillis() - Constants.lastTimeShowInterOpenAds
+    val diffTime = now() - Constants.lastTimeShowInterOpenAds
     val cappingTime = RemoteConfigUtil.interAdCappingTime * 1000L
     if (diffTime >= cappingTime) {
         Log.d(TAG, "isPassedCappingTime: passed")

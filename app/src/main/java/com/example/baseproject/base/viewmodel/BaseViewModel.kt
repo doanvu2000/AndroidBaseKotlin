@@ -8,6 +8,7 @@ import android.view.View
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.baseproject.base.utils.extension.now
 import com.example.baseproject.base.utils.extension.showToast
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -154,7 +155,7 @@ abstract class BaseViewModel : ViewModel(), DefaultLifecycleObserver {
         val context = view.context
         launchHandler {
             flow {
-                val fileName = "Demo_${System.currentTimeMillis()}.pdf"
+                val fileName = "Demo_${now()}.pdf"
                 val dir = File(context.cacheDir, "shared_files")
                 if (!dir.exists()) {
                     dir.mkdirs()

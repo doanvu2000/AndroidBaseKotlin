@@ -10,6 +10,7 @@ import android.content.Intent
 import com.example.baseproject.R
 import com.example.baseproject.base.utils.extension.getFlagPendingIntent
 import com.example.baseproject.base.utils.extension.isSdk26
+import com.example.baseproject.base.utils.extension.now
 import com.example.baseproject.base.utils.util.Constants
 import java.util.Calendar
 
@@ -52,7 +53,7 @@ object AlarmUtil {
             set(Calendar.HOUR_OF_DAY, Constants.mapAlarmValue[action] ?: 0)
             set(Calendar.MINUTE, 0)
             set(Calendar.SECOND, 0)
-            if (timeInMillis < System.currentTimeMillis()) {
+            if (timeInMillis < now()) {
                 timeInMillis += Constants.MILLISECOND_ONE_DAY
             }
         }

@@ -5,6 +5,7 @@ import android.content.Context
 import android.util.Log
 import com.example.baseproject.BuildConfig
 import com.example.baseproject.base.ui.main.MyApplication
+import com.example.baseproject.base.utils.extension.now
 import com.example.baseproject.base.utils.util.Constants
 import com.example.baseproject.base.utils.util.delayResetFlagPermission
 import com.google.android.gms.ads.AdError
@@ -163,7 +164,7 @@ class AppOpenAdManager {
                     isShowingAd = false
                     MyApplication.CHECK_INTER_SHOW = false
                     Log.d(TAG, "openAds onAdDismissedFullScreenContent.")
-                    Constants.lastTimeShowInterOpenAds = System.currentTimeMillis()
+                    Constants.lastTimeShowInterOpenAds = now()
                     onShowAdCompleteListener.onShowAdComplete()
                     loadAd(activity)
                 }

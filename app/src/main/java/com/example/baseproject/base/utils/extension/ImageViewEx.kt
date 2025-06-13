@@ -272,7 +272,7 @@ fun Context.shareFileImage(file: File, title: String? = "") {
 
 fun Activity.saveImageToPictureDevice(url: String, onDone: (Uri?) -> Unit) {
     glideLoadBitmap(url) { bitmap ->
-        val name = "${System.currentTimeMillis()}"
+        val name = "${now()}"
         bitmap?.let {
             CoroutineScope(Dispatchers.IO).launch {
                 val rs = async { insertImage(contentResolver, bitmap, name) }

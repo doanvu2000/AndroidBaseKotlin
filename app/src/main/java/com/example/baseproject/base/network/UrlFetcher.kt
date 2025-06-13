@@ -2,6 +2,7 @@ package com.example.baseproject.base.network
 
 import android.content.Context
 import androidx.collection.LruCache
+import com.example.baseproject.base.utils.extension.now
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
@@ -138,5 +139,5 @@ class UrlFetcher<T>(
         cache.evictAll()
     }
 
-    private fun timeNow() = System.currentTimeMillis()
+    private fun timeNow() = now()
 }

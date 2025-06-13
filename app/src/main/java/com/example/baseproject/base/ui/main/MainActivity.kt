@@ -24,6 +24,7 @@ import com.example.baseproject.base.ui.week_view_event.WeekViewEventActivity
 import com.example.baseproject.base.utils.extension.clear
 import com.example.baseproject.base.utils.extension.hide
 import com.example.baseproject.base.utils.extension.isEmulator
+import com.example.baseproject.base.utils.extension.now
 import com.example.baseproject.base.utils.extension.openActivity
 import com.example.baseproject.base.utils.extension.removeFragment
 import com.example.baseproject.base.utils.extension.runOnDispatcherIO
@@ -142,20 +143,20 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         binding.tvResult.clear()
         lifecycleScope.launch(coroutineException) {
 
-            timeStart = System.currentTimeMillis()
+            timeStart = now()
             showLoading()
             runOnDispatcherIO {
                 repeat(size) {
                     list.add(Random.nextInt(-10000, 10000))
                 }
             }
-            var rs = "Init list random int: ${System.currentTimeMillis() - timeStart} ms\n"
-            timeStart = System.currentTimeMillis()
+            var rs = "Init list random int: ${now() - timeStart} ms\n"
+            timeStart = now()
             binding.tvResult.text = rs
             runOnDispatcherIO {
                 list.sort()
             }
-            timeEnd = System.currentTimeMillis()
+            timeEnd = now()
             rs += "Sort list: ${timeEnd - timeStart} ms"
             binding.tvResult.text = rs
             hideLoading()

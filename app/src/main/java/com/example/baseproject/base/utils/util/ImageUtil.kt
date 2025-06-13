@@ -10,6 +10,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import com.example.baseproject.base.utils.extension.isSdk30
 import com.example.baseproject.base.utils.extension.isSdkQ
+import com.example.baseproject.base.utils.extension.now
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -59,7 +60,7 @@ object ImageUtil {
     }
 
     fun insertSharingImage(contentResolver: ContentResolver, bitmap: Bitmap): Uri? {
-        val name = "${System.currentTimeMillis()}"
+        val name = "${now()}"
         return insertImage(contentResolver, bitmap, name)
     }
 

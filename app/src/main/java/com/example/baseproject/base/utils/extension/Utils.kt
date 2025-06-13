@@ -335,3 +335,5 @@ fun Float.dpToPx(): Int = TypedValue.applyDimension(
     this,
     Resources.getSystem().displayMetrics
 ).toInt()
+
+fun now() = System.currentTimeMillis()
