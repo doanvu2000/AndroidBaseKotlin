@@ -230,3 +230,15 @@ fun getCurrentYear(): Int {
     return calendar[Calendar.YEAR]
 }
 //endregion
+
+fun Calendar.isWeekend(): Boolean {
+    val today = getDayOfWeek()
+    return today == Calendar.SATURDAY || today == Calendar.SUNDAY
+}
+
+fun Calendar.isInWeek(): Boolean {
+    return !isWeekend()
+}
+
+fun todayIsWeekend() = now().toCalendar().isWeekend()
+fun todayIsInWeek() = now().toCalendar().isInWeek()
