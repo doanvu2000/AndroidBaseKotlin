@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.pdf.PdfDocument
 import android.view.View
+import androidx.core.graphics.createBitmap
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -15,13 +16,18 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
@@ -29,6 +35,8 @@ import java.io.File
 import java.io.FileOutputStream
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 abstract class BaseViewModel : ViewModel(), DefaultLifecycleObserver {
     private val viewModelJob = SupervisorJob()
@@ -40,6 +48,7 @@ abstract class BaseViewModel : ViewModel(), DefaultLifecycleObserver {
         throwable.printStackTrace()
         handlerError(throwable)
         isLoading.value = false
+        setStateIsFailed()
     }
 
     private var onError: ((err: String?) -> Unit)? = null
@@ -55,11 +64,45 @@ abstract class BaseViewModel : ViewModel(), DefaultLifecycleObserver {
     /**observer to show or hide loading*/
     val isLoading by lazy { MutableLiveData<Boolean>() }
 
+    private val _loadingState: MutableStateFlow<LoadingState> = MutableStateFlow(LoadingState.Init)
+    val loadingState: StateFlow<LoadingState> = _loadingState.asStateFlow()
+
+    private val _errorExceptionHandler: MutableStateFlow<Throwable?> = MutableStateFlow(null)
+    val errorExceptionHandler: StateFlow<Throwable?> = _errorExceptionHandler.asStateFlow()
+
+    fun launchSafe(
+        context: CoroutineContext = EmptyCoroutineContext, block: suspend CoroutineScope.() -> Unit
+    ) {
+        viewModelScope.launch(context + exceptionHandler) { block() }
+    }
+
+    fun updateLoadingState(state: LoadingState) {
+        launchSafe {
+            _loadingState.update { state }
+        }
+    }
+
+    fun setStateIsLoading() {
+        updateLoadingState(LoadingState.Loading)
+    }
+
+    fun setStateIsSuccess() {
+        updateLoadingState(LoadingState.Success)
+    }
+
+    fun setStateIsFailed() {
+        updateLoadingState(LoadingState.Failed)
+    }
+
     //TODO: err: ErrorResponse
     private fun handlerError(
         throwable: Throwable? = null,
         errors: ((err: String) -> Unit)? = null
     ) {
+        launchSafe {
+            _errorExceptionHandler.update { throwable }
+        }
+
         throwable?.let {
             println("ddd - ${it.cause}")
             when (it.cause) {
@@ -191,8 +234,7 @@ abstract class BaseViewModel : ViewModel(), DefaultLifecycleObserver {
 
     private fun getBitmapFromView(view: View, totalWidth: Int, totalHeight: Int): Bitmap? {
         return try {
-            val returnedBitmap =
-                Bitmap.createBitmap(totalWidth, totalHeight, Bitmap.Config.ARGB_8888)
+            val returnedBitmap = createBitmap(totalWidth, totalHeight)
             val canvas = Canvas(returnedBitmap)
             val bgDrawable = view.background
             if (bgDrawable != null) bgDrawable.draw(canvas) else canvas.drawColor(Color.WHITE)
@@ -204,4 +246,17 @@ abstract class BaseViewModel : ViewModel(), DefaultLifecycleObserver {
         }
     }
 
+}
+
+sealed class LoadingState {
+    object Init : LoadingState()
+    object Loading : LoadingState()
+    object Success : LoadingState()
+    object Failed : LoadingState()
+}
+
+fun <T> BaseViewModel.sendEvent(channel: Channel<T>, value: T) {
+    launchSafe {
+        channel.send(value)
+    }
 }

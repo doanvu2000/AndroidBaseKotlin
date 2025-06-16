@@ -4,6 +4,9 @@ import com.example.baseproject.base.entity.User
 import com.example.baseproject.base.repositories.UserRepository
 import com.example.baseproject.base.retrofit.ApiService
 import com.example.baseproject.base.retrofit.RetrofitClient
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 
 class UserViewModel : BaseViewModel() {
     private val apiClient by lazy {
@@ -17,6 +20,9 @@ class UserViewModel : BaseViewModel() {
     private val userRepository by lazy {
         UserRepository()
     }
+
+    private val _users = MutableStateFlow<List<User>>(emptyList())
+    val users: Flow<List<User>> = _users
 
     fun getUsers(
         onSuccess: ((data: List<User>) -> Unit)? = null,
@@ -46,6 +52,14 @@ class UserViewModel : BaseViewModel() {
 //
 //            })
 //        }
+    }
+
+    fun getUser() {
+        setStateIsLoading()
+        launchSafe {
+            _users.update { apiClient.getUsers() }
+            setStateIsSuccess()
+        }
     }
 
     fun updateUser(
