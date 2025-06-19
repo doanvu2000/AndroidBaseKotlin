@@ -40,6 +40,14 @@
                 android:text="ViewPager" />
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDemoNavigationComponent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:backgroundTint="@color/good_day"
+                android:text="Navigation Component Demo" />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnDemoLocation"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

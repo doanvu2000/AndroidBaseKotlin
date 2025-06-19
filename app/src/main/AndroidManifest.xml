@@ -16,7 +16,6 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.CAMERA" />
-
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
@@ -37,6 +36,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BaseProject"
         tools:targetApi="31">
+
+        <activity
+            android:name=".base.ui.nav_demo.NavigationComponentActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity" />
         <activity
             android:name=".base.ui.camerademo.CameraViewLibDemoActivity"
             android:exported="false"
@@ -138,12 +143,10 @@
             android:value="true" />
         <meta-data
             android:name="com.google.android.gms.ads.flag.OPTIMIZE_AD_LOADING"
-            android:value="true" />
-
-        <!--        <property-->
-        <!--            android:name="android.adservices.AD_SERVICES_CONFIG"-->
-        <!--            android:resource="@xml/gma_ad_services_config"-->
-        <!--            tools:replace="android:resource" /> -->
+            android:value="true" /> <!-- <property -->
+        <!-- android:name="android.adservices.AD_SERVICES_CONFIG" -->
+        <!-- android:resource="@xml/gma_ad_services_config" -->
+        <!-- tools:replace="android:resource" /> -->
         <!-- Trigger Google Play services to install the backported photo picker module. -->
         <service
             android:name="com.google.android.gms.metadata.ModuleDependencies"

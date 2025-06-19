@@ -26,6 +26,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
     //region variable
@@ -133,7 +134,8 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
     }
 
     fun launchCoroutine(
-        dispatcher: CoroutineContext, blockCoroutine: suspend CoroutineScope.() -> Unit
+        dispatcher: CoroutineContext = EmptyCoroutineContext,
+        blockCoroutine: suspend CoroutineScope.() -> Unit
     ) {
         try {
             lifecycleScope.launch(dispatcher) {

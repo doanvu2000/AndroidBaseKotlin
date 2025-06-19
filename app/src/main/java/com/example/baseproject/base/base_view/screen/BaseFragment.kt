@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.viewbinding.ViewBinding
+import com.example.baseproject.base.utils.extension.clickAnimation
 import com.example.baseproject.base.utils.extension.handleBackPressed
 import com.example.baseproject.base.utils.util.AppLogger
 import com.example.baseproject.base.utils.util.Constants
@@ -73,9 +74,12 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
         }
     }
 
-    fun View.clickSafe(action: () -> Unit) {
+    fun View.clickSafe(isAnimationClick: Boolean = false, action: () -> Unit) {
         this.setOnClickListener {
             if (isAvailableClick) {
+                if (isAnimationClick) {
+                    clickAnimation()
+                }
                 action()
                 delayClick()
             }

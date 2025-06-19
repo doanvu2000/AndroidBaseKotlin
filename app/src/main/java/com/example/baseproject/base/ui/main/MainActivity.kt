@@ -10,12 +10,12 @@ import com.example.baseproject.R
 import com.example.baseproject.base.base_view.screen.BaseActivity
 import com.example.baseproject.base.base_view.screen.HomeFragment
 import com.example.baseproject.base.ui.ads.DemoAdsActivity
-import com.example.baseproject.base.ui.broadcast.DemoBroadcastActivity
 import com.example.baseproject.base.ui.camerademo.CameraViewLibDemoActivity
 import com.example.baseproject.base.ui.demo_viewpager.DemoViewPagerActivity
 import com.example.baseproject.base.ui.flex_box_layout.DemoFlexBoxLayoutActivity
 import com.example.baseproject.base.ui.location.LocationActivity
 import com.example.baseproject.base.ui.lunar_calendar.LunarCalendarActivity
+import com.example.baseproject.base.ui.nav_demo.NavigationComponentActivity
 import com.example.baseproject.base.ui.network_demo.NetWorkDemoActivity
 import com.example.baseproject.base.ui.pick_image.PickImageActivity
 import com.example.baseproject.base.ui.pick_image.TakePictureActivity
@@ -105,7 +105,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         }
 
         binding.btnBroadcastDemo.clickSafe {
-            openActivity(DemoBroadcastActivity::class.java)
+            showToast("Feature is developing")
+//            openActivity(DemoBroadcastActivity::class.java)
         }
 
         binding.btnWeekViewEventDemo.clickSafe {
@@ -114,6 +115,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
         binding.btnCameraViewDemo.clickSafe {
             openActivity(CameraViewLibDemoActivity::class.java)
+        }
+
+        binding.btnDemoNavigationComponent.clickSafe {
+            openActivity(NavigationComponentActivity::class.java)
         }
     }
 
