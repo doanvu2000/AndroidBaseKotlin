@@ -137,6 +137,13 @@ dependencies {
     implementation(libs.flexbox)
 
     implementation(libs.commons.lang3)
+
+    // Views/Fragments integration
+    implementation(libs.androidx.navigation.fragment)
+    implementation(libs.androidx.navigation.ui)
+
+    // Feature module support for Fragments
+    implementation(libs.androidx.navigation.dynamic.features.fragment)
 }
 
 inline fun <reified ValueT> com.android.build.api.dsl.VariantDimension.buildConfigField(
