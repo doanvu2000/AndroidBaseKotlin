@@ -10,7 +10,6 @@ import android.content.pm.ResolveInfo
 import android.graphics.Bitmap
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
@@ -19,10 +18,6 @@ import android.widget.ImageView
 import androidx.core.graphics.drawable.toBitmap
 import coil.Coil
 import coil.request.ImageRequest
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -47,88 +42,6 @@ fun ImageView.clearTint() {
 }
 
 /**
- * Glide lib
- */
-
-fun ImageView.loadSrc(src: Any) {
-    Glide.with(this.context)
-        .load(src)
-        .into(this)
-}
-
-fun ImageView.loadSrc(src: Any, error: Int) {
-    Glide.with(this.context)
-        .load(src)
-        .error(error)
-        .into(this)
-}
-
-fun ImageView.loadSrc(src: Any, placeHolder: Int, error: Int) {
-    Glide.with(this.context)
-        .load(src)
-        .placeholder(placeHolder)
-        .error(error)
-        .into(this)
-}
-
-fun ImageView.loadGif(src: Any) {
-    Glide.with(this.context)
-        .asGif()
-        .load(src)
-        .into(this)
-}
-
-/*
- update: 04/11/2024
- by: doan-vu.dev
- */
-fun ImageView.loadSrcNoCacheRam(src: Any) {
-    Glide.with(this.context)
-        .load(src)
-        .skipMemoryCache(true)
-        .into(this)
-}
-
-fun ImageView.loadSrcNoCacheDisk(src: Any) {
-    Glide.with(this.context)
-        .load(src)
-        .diskCacheStrategy(DiskCacheStrategy.NONE)
-        .into(this)
-}
-
-fun ImageView.loadSrcNoCache(src: Any) {
-    Glide.with(this.context)
-        .load(src)
-        .skipMemoryCache(true)
-        .diskCacheStrategy(DiskCacheStrategy.NONE)
-        .into(this)
-}
-
-fun ImageView.loadSrcCacheData(src: Any) {
-    Glide.with(this.context)
-        .load(src)
-        .skipMemoryCache(true)
-        .diskCacheStrategy(DiskCacheStrategy.DATA)
-        .into(this)
-}
-
-fun ImageView.loadSrcCacheResource(src: Any) {
-    Glide.with(this.context)
-        .load(src)
-        .skipMemoryCache(true)
-        .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-        .into(this)
-}
-
-fun ImageView.loadSrcCacheAllToDisk(src: Any) {
-    Glide.with(this.context)
-        .load(src)
-        .skipMemoryCache(true)
-        .diskCacheStrategy(DiskCacheStrategy.ALL)
-        .into(this)
-}
-
-/**
  * Coil Lib
  * */
 
@@ -149,9 +62,7 @@ suspend fun Context.downloadImageWithCoil(url: String): Bitmap? {
     return withContext(Dispatchers.IO) {
         try {
             Coil.imageLoader(this@downloadImageWithCoil).execute(
-                ImageRequest.Builder(this@downloadImageWithCoil)
-                    .data(url)
-                    .build()
+                ImageRequest.Builder(this@downloadImageWithCoil).data(url).build()
             ).drawable?.toBitmap()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -165,25 +76,6 @@ fun Context.getBitmapUrl(url: String, onDone: (Bitmap?) -> Unit) {
         val bitmap = async { downloadImageWithCoil(url) }
         onDone(bitmap.await())
     }
-}
-
-fun Context.glideLoadBitmap(url: Any, onDone: (Bitmap?) -> Unit) {
-    val target = object : CustomTarget<Bitmap>() {
-        override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-            onDone(resource)
-        }
-
-        override fun onLoadFailed(errorDrawable: Drawable?) {
-            super.onLoadFailed(errorDrawable)
-            onDone(null)
-        }
-
-        override fun onLoadCleared(placeholder: Drawable?) {
-
-        }
-    }
-    Glide.with(this).asBitmap().load(url).skipMemoryCache(false)
-        .diskCacheStrategy(DiskCacheStrategy.NONE).timeout(15000).into(target)
 }
 
 enum class TypeImage {
@@ -255,8 +147,7 @@ fun Context.shareFileImage(file: File, title: String? = "") {
     }
     val chooser = Intent.createChooser(shareIntent, "Share $title")
     val resInfoList: List<ResolveInfo> = packageManager.queryIntentActivities(
-        chooser,
-        PackageManager.MATCH_DEFAULT_ONLY
+        chooser, PackageManager.MATCH_DEFAULT_ONLY
     )
 
     for (resolveInfo in resInfoList) {

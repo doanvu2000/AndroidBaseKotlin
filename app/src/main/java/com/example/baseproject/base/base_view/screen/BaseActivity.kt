@@ -17,10 +17,12 @@ import com.example.baseproject.base.utils.extension.finishWithSlide
 import com.example.baseproject.base.utils.extension.getScreenHeight
 import com.example.baseproject.base.utils.extension.getScreenWidth
 import com.example.baseproject.base.utils.extension.handleBackPressed
+import com.example.baseproject.base.utils.extension.setLayoutParamFullScreen
 import com.example.baseproject.base.utils.util.AppLogger
 import com.example.baseproject.base.utils.util.Constants
 import com.example.baseproject.base.utils.util.RemoteConfigUtil
 import com.example.baseproject.base.utils.util.SharePrefUtils
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -47,25 +49,35 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
     //endregion
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        if (isFullScreenMode()) {
+            setLayoutParamFullScreen()
+        }
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+
         binding = inflateViewBinding(layoutInflater)
         setContentView(binding.root)
+
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
         SharePrefUtils.init(this)
+
         screenWidth = getScreenWidth()
+
         screenHeight = getScreenHeight()
         checkInitRemoteConfig()
-        initView()
-        initData()
-        initListener()
+
         handleBackPressed {
             onBack()
         }
+
+        initView()
+        initData()
+        initListener()
     }
 
     private fun checkInitRemoteConfig() {
@@ -86,6 +98,10 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
         }
     }
 
+    open fun isFullScreenMode(): Boolean {
+        return false
+    }
+
     /**override it and inflate your view binding, demo in MainActivity*/
     abstract fun inflateViewBinding(inflater: LayoutInflater): VB
 
@@ -102,15 +118,6 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
         }
     }
 
-//    fun View.clickSafe(action: () -> Unit) {
-//        this.setOnClickListener {
-//            if (isAvailableClick) {
-//                action()
-//                delayClick()
-//            }
-//        }
-//    }
-
     fun View.clickSafe(isAnimationClick: Boolean = false, action: () -> Unit) {
         this.setOnClickListener {
             if (isAvailableClick) {
@@ -123,14 +130,14 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
         }
     }
 
-    fun launchAction(dispatcher: CoroutineContext, action: () -> Unit) {
-        try {
-            lifecycleScope.launch(dispatcher) {
-                action()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+    protected val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        handleError(throwable)
+    }
+
+    open fun handleError(throwable: Throwable) {
+        val errorMessage = throwable.message ?: ""
+        logError(errorMessage)
+        throwable.printStackTrace()
     }
 
     fun launchCoroutine(
@@ -138,7 +145,7 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
         blockCoroutine: suspend CoroutineScope.() -> Unit
     ) {
         try {
-            lifecycleScope.launch(dispatcher) {
+            lifecycleScope.launch(dispatcher + coroutineExceptionHandler) {
                 blockCoroutine()
             }
         } catch (e: Exception) {
