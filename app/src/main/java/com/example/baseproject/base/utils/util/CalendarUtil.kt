@@ -14,21 +14,30 @@ import java.util.Calendar
 import java.util.Date
 
 object CalendarUtil {
+
+    //region Constants & Data
+
     private var calendar = Calendar.getInstance()
+
     private val listOfMonth = mutableListOf(
-        R.string.month_1,
-        R.string.month_2,
-        R.string.month_3,
-        R.string.month_4,
-        R.string.month_5,
-        R.string.month_6,
-        R.string.month_7,
-        R.string.month_8,
-        R.string.month_9,
-        R.string.month_10,
-        R.string.month_11,
-        R.string.month_12
+        R.string.month_1, R.string.month_2, R.string.month_3, R.string.month_4,
+        R.string.month_5, R.string.month_6, R.string.month_7, R.string.month_8,
+        R.string.month_9, R.string.month_10, R.string.month_11, R.string.month_12
     )
+
+    val listDayOfWeekFull = mutableListOf(
+        R.string.monday_full, R.string.tuesday_full, R.string.wednesday_full,
+        R.string.thursday_full, R.string.friday_full, R.string.saturday_full, R.string.sunday_full
+    )
+
+    private val mapDayCountOfMonth = mutableMapOf(
+        1 to 31, 3 to 31, 4 to 30, 5 to 31, 6 to 30, 7 to 31,
+        8 to 31, 9 to 30, 10 to 31, 11 to 30, 12 to 31
+    )
+
+    //endregion
+
+    //region Day of Week Enum
 
     enum class DayOfWeek(val order: Int, val stringId: Int, val stringShort: Int) {
         SunDay(Calendar.SUNDAY, R.string.sunday_full, R.string.sunday),
@@ -50,191 +59,220 @@ object CalendarUtil {
         }
     }
 
-    val listDayOfWeekFull = mutableListOf(
-        R.string.monday_full,
-        R.string.tuesday_full,
-        R.string.wednesday_full,
-        R.string.thursday_full,
-        R.string.friday_full,
-        R.string.saturday_full,
-        R.string.sunday_full
-    )
-    private val mapDayCountOfMonth = mutableMapOf(
-        1 to 31,
-        3 to 31,
-        4 to 30,
-        5 to 31,
-        6 to 30,
-        7 to 31,
-        8 to 31,
-        9 to 30,
-        10 to 31,
-        11 to 30,
-        12 to 31
-    )
+    //endregion
 
-    fun now() = calendar.timeInMillis
+    //region Basic Time Functions
 
-    fun getListMonthString(context: Context) = listOfMonth.map { context.getString(it) }
-    fun getYearInt() = calendar.getYear()
-    fun getMonthInt() = calendar.getMonth() - 1
-    fun getDayInt() = calendar.getDay()
-    fun getCurrentHour(): Int {
-        return calendar.getHour()
-    }
+    /**
+     * Get current timestamp
+     */
+    fun now(): Long = calendar.timeInMillis
 
-    fun getCurrentMinutes(): Int {
-        return calendar.getMinutes()
-    }
+    /**
+     * Get current year
+     */
+    fun getYearInt(): Int = calendar.getYear()
 
-    fun getMonthString(context: Context, index: Int): String {
-        return context.getString(listOfMonth[index])
-    }
+    /**
+     * Get current month (0-based)
+     */
+    fun getMonthInt(): Int = calendar.getMonth() - 1
 
-    fun getListMonthStrings(context: Context): List<String> {
-        return listOfMonth.map { context.getString(it) }
-    }
+    /**
+     * Get current day
+     */
+    fun getDayInt(): Int = calendar.getDay()
 
-    fun isMonthFuture(context: Context, month: String) =
+    /**
+     * Get current hour
+     */
+    fun getCurrentHour(): Int = calendar.getHour()
+
+    /**
+     * Get current minutes
+     */
+    fun getCurrentMinutes(): Int = calendar.getMinutes()
+
+    /**
+     * Get current day of week
+     */
+    fun getDayOfWeek(): DayOfWeek = DayOfWeek.getDayByIndex(calendar.getDayOfWeek())
+
+    //endregion
+
+    //region Month Management
+
+    /**
+     * Get list of month strings
+     */
+    fun getListMonthString(context: Context): List<String> =
+        listOfMonth.map { context.getString(it) }
+
+    /**
+     * Get month string by index
+     */
+    fun getMonthString(context: Context, index: Int): String = context.getString(listOfMonth[index])
+
+    /**
+     * Get list of month strings (alternative method)
+     */
+    fun getListMonthStrings(context: Context): List<String> =
+        listOfMonth.map { context.getString(it) }
+
+    /**
+     * Check if month is in future
+     */
+    fun isMonthFuture(context: Context, month: String): Boolean =
         getListMonthString(context).indexOf(month) > getMonthInt()
 
-    //1 - sun, 2 - mon, 3 - tus, 4 - wed, 5 - thu, 6 - fri, 7 - sat
+    //endregion
+
+    //region Day of Week Calculations
+
+    /**
+     * Get first day of week of current month
+     * 1 - sun, 2 - mon, 3 - tus, 4 - wed, 5 - thu, 6 - fri, 7 - sat
+     */
     fun getFirstDayOfWeekOfMonth(): Int {
-        val calendar = Calendar.getInstance()
-        calendar[Calendar.DAY_OF_MONTH] = 1
-        //
-        return calendar.getDayOfWeek()
+        val cal = Calendar.getInstance()
+        cal[Calendar.DAY_OF_MONTH] = 1
+        return cal.getDayOfWeek()
     }
 
-    /**
-     * get number day of the month != 2
-     * */
-    private fun getDayCountOfMonth(monthNumber: Int) = mutableMapOf(
-        1 to 31,
-        3 to 31,
-        4 to 30,
-        5 to 31,
-        6 to 30,
-        7 to 31,
-        8 to 31,
-        9 to 30,
-        10 to 31,
-        11 to 30,
-        12 to 31
-    )[monthNumber]
+    //endregion
+
+    //region Date Validation
 
     /**
-     * return true if day-month-year is today
-     * */
+     * Check if given date is today
+     */
     fun checkToday(day: Int, month: Int, year: Int): Boolean {
-        val calendar = Calendar.getInstance()
-        val currentDay = calendar.getDay()
-        if (day != currentDay) {
-            return false
-        }
-        val currentMonth = calendar.getMonth()
-        if (month != currentMonth) {
-            return false
-        }
-        val currentYear = calendar.getYear()
-        if (year != currentYear) {
-            return false
-        }
-        return true
+        val cal = Calendar.getInstance()
+        return day == cal.getDay() && month == cal.getMonth() && year == cal.getYear()
     }
 
     /**
-     * return true if day-month-year is the feature
-     * */
+     * Check if given date is in the future
+     */
     fun checkFeatures(day: Int, month: Int, year: Int): Boolean {
-        val calendar = Calendar.getInstance()
-        val currentYear = calendar.getYear()
-        if (year > currentYear) {
-            return true
+        val cal = Calendar.getInstance()
+        val currentYear = cal.getYear()
+
+        when {
+            year > currentYear -> return true
+            year < currentYear -> return false
         }
-        if (year < currentYear) {
-            return false
+
+        val currentMonth = cal.getMonth()
+        when {
+            month > currentMonth -> return true
+            month < currentMonth -> return false
         }
-        val currentMonth = calendar.getMonth()
-        if (month > currentMonth) {
-            return true
-        }
-        if (month < currentMonth) {
-            return false
-        }
-        if (day <= calendar.getDay()) {
-            return false
-        }
-        return true
+
+        return day > cal.getDay()
     }
 
+    //endregion
+
+    //region Time Formatting
+
     /**
-     * format hour-minutes, example: 09:23
-     * */
+     * Format time to HH:MM format
+     * @param hour hour value
+     * @param minutes minutes value
+     */
     fun formatTime(hour: Int, minutes: Int): String {
-        var result = ""
-        result += if (hour >= 10) {
-            "$hour:"
-        } else {
-            "0$hour:"
-        }
-        result += if (minutes >= 10) {
-            "$minutes"
-        } else {
-            "0$minutes"
-        }
-        return result
+        val hourStr = if (hour >= 10) "$hour" else "0$hour"
+        val minuteStr = if (minutes >= 10) "$minutes" else "0$minutes"
+        return "$hourStr:$minuteStr"
     }
 
     /**
-     * format hour-minutes, example: 09:23
-     * */
+     * Format minutes to HH:MM format
+     * @param min total minutes
+     */
     fun formatTime(min: Int): String {
-        var result = ""
         val hour = min / 60
         val minutes = min - hour * 60
-        result += if (hour >= 10) {
-            "$hour:"
-        } else {
-            "0$hour:"
-        }
-        result += if (minutes >= 10) {
-            "$minutes"
-        } else {
-            "0$minutes"
-        }
-        return result
+        return formatTime(hour, minutes)
     }
 
     /**
-     *  return true if (hour1 : minute1) > (hour2 : minute2)
-     * */
+     * Compare two times
+     * @return true if (hour1:minute1) > (hour2:minute2)
+     */
     fun compareTwoHour(hour1: Int, minute1: Int, hour2: Int, minute2: Int): Boolean {
-        if (hour1 > hour2) {
-            return true
+        return when {
+            hour1 > hour2 -> true
+            hour1 < hour2 -> false
+            else -> minute1 > minute2
         }
-        if (hour1 < hour2) {
-            return false
-        }
-        return minute1 > minute2
     }
 
-    fun getDayOfWeek(): DayOfWeek {
-        return DayOfWeek.getDayByIndex(calendar.getDayOfWeek())
-    }
+    //endregion
 
+    //region Date Formatting
+
+    /**
+     * Get formatted day string
+     */
     fun getTimeFormatDay(context: Context, day: Int, month: Int, year: Int): String {
-        val calendar = Calendar.getInstance().apply {
+        val cal = Calendar.getInstance().apply {
             set(Calendar.DAY_OF_MONTH, day)
             set(Calendar.MONTH, month)
             set(Calendar.YEAR, year)
         }
         val dayString = context.getString(getDayOfWeek().stringId)
-        val monthString = getMonthString(context, calendar[Calendar.MONTH])
+        val monthString = getMonthString(context, cal[Calendar.MONTH])
 
         return "$dayString, $monthString $day"
     }
 
+    /**
+     * Get name of day with date
+     */
+    fun getNameOfDay(context: Context, day: Int, month: Int, year: Int): String {
+        val cal = initCalendar(day = day, month = month, year = year)
+        val dayIndex = cal.getDayOfWeek()
+        val dayName = context.getString(DayOfWeek.getDayShortByIndex(dayIndex))
+        return if (day < 10) "0$day $dayName" else "$day $dayName"
+    }
+
+    /**
+     * Get title for month and year
+     */
+    fun getTimeTitleMonthYear(context: Context, month: Int, year: Int): String =
+        "${getMonthString(context, month)} $year"
+
+    //endregion
+
+    //region Calendar Utilities
+
+    /**
+     * Get number of days in month
+     */
+    fun getNumberDayOfMonth(month: Int, year: Int): Int {
+        return when {
+            month == 2 && isLeapYear(year) -> 29
+            month == 2 -> 28
+            else -> getDayCountOfMonth(month) ?: 30
+        }
+    }
+
+    /**
+     * Check if year is leap year
+     */
+    private fun isLeapYear(year: Int): Boolean =
+        year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)
+
+    /**
+     * Get day count of month (excluding February)
+     */
+    private fun getDayCountOfMonth(monthNumber: Int): Int? = mapDayCountOfMonth[monthNumber]
+
+    /**
+     * Initialize calendar with specific values
+     */
     private fun initCalendar(
         second: Int? = null,
         minutes: Int? = null,
@@ -243,8 +281,7 @@ object CalendarUtil {
         month: Int? = null,
         year: Int? = null
     ): Calendar {
-        val calendar = Calendar.getInstance()
-        calendar.apply {
+        return Calendar.getInstance().apply {
             second?.let { set(Calendar.SECOND, it) }
             minutes?.let { set(Calendar.MINUTE, it) }
             hour?.let { set(Calendar.HOUR_OF_DAY, it) }
@@ -252,57 +289,41 @@ object CalendarUtil {
             month?.let { set(Calendar.MONTH, it) }
             year?.let { set(Calendar.YEAR, it) }
         }
-        return calendar
     }
 
-    fun getNameOfDay(context: Context, day: Int, month: Int, year: Int): String {
-        val calendar = initCalendar(day = day, month = month, year = year)
-        val dayIndex = calendar.getDayOfWeek()
-        val dayName = context.getString(DayOfWeek.getDayShortByIndex(dayIndex))
-        return if (day < 10) {
-            "0$day $dayName"
-        } else {
-            "$day $dayName"
-        }
-    }
+    //endregion
 
-    fun getTimeTitleMonthYear(context: Context, month: Int, year: Int) =
-        getMonthString(context, month) + " " + year
+    //region Date Conversion
 
-    fun getNumberDayOfMonth(month: Int, year: Int): Int {
-        return when {
-            month == 2 && year % 4 == 0 && year % 100 != 0 || year % 400 == 0 -> 29
-            month == 2 -> 28
-            else -> getDayCountOfMonth(month) ?: 30
-        }
-    }
-
+    /**
+     * Convert date string to timestamp
+     */
     @SuppressLint("SimpleDateFormat")
     fun convertDateToLong(date: String, pattern: String): Long {
         val df = SimpleDateFormat(pattern)
         return df.parse(date)?.time ?: 0
     }
 
+    /**
+     * Calculate time difference between two timestamps
+     */
     fun diffTime(startTime: Long, endTime: Long): String {
         val diff: Long = Date(endTime).time - Date(startTime).time
         val numDay = 1000 * 60 * 60 * 24
         val numHour = 1000 * 60 * 60
         val numMinutes = 1000 * 60
-        val numSecond = 1000
+
         val days = diff / numDay
         val hours = (diff - days * numDay) / numHour
         val minutes = (diff - days * numDay - hours * numHour) / numMinutes
-        var rs = ""
-        if (days > 0) {
-            rs += "$days ngày "
-        }
-        if (hours > 0) {
-            rs += "$hours giờ "
-        }
-        if (minutes > 0) {
-            rs += "$minutes phút "
-        }
-        return rs
+
+        var result = ""
+        if (days > 0) result += "$days ngày "
+        if (hours > 0) result += "$hours giờ "
+        if (minutes > 0) result += "$minutes phút "
+
+        return result
     }
 
+    //endregion
 }

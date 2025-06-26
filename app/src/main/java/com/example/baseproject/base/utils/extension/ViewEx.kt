@@ -35,18 +35,29 @@ import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.ShapeAppearanceModel
 import com.google.android.material.tabs.TabLayout
 
+//region Keyboard Management
+
+/**
+ * Ẩn bàn phím
+ */
 fun View.hideKeyboard() {
     val inputMethodManager =
         context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     inputMethodManager.hideSoftInputFromWindow(windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
 }
 
+/**
+ * Hiển thị bàn phím
+ */
 fun View.showKeyboard() {
     val inputMethodManager =
         context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     inputMethodManager.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
 }
 
+/**
+ * Focus và hiển thị bàn phím
+ */
 fun View.focusAndShowKeyboard() {
     /**
      * This is to be called when the window already has focus.
@@ -76,7 +87,7 @@ fun View.focusAndShowKeyboard() {
                 // This notification will arrive just before the InputMethodManager gets set up.
                 if (hasFocus) {
                     this@focusAndShowKeyboard.showTheKeyboardNow()
-                    // It’s very important to remove this listener once we are done.
+                    // It's very important to remove this listener once we are done.
                     viewTreeObserver.removeOnWindowFocusChangeListener(this)
                 }
             }
@@ -85,11 +96,98 @@ fun View.focusAndShowKeyboard() {
     }
 }
 
+/**
+ * Kiểm tra soft keyboard có visible không
+ */
+fun View.isSoftKeyboardVisible(): Boolean {
+    val rect = Rect()
+    rootView.getWindowVisibleDisplayFrame(rect)
+    val screenHeight = rootView.height
+    val keyboardHeight = screenHeight - rect.bottom
+    val threshold = screenHeight * 0.15 // Adjust this value as per your requirements
+    return keyboardHeight > threshold
+}
+
+//endregion
+
+//region View Visibility & State Management
+
+/**
+ * Ẩn view (INVISIBLE)
+ */
+fun View.hide() {
+    if (!isHide) {
+        this.visibility = View.INVISIBLE
+    }
+}
+
+/**
+ * Hiển thị view (VISIBLE)
+ */
+fun View.show() {
+    if (!isShow) {
+        this.visibility = View.VISIBLE
+    }
+}
+
+/**
+ * Ẩn view hoàn toàn (GONE)
+ */
+fun View.gone() {
+    if (!isGone) {
+        this.visibility = View.GONE
+    }
+}
+
+/**
+ * Show hoặc Gone view
+ */
+fun View.showOrGone(isShow: Boolean) {
+    if (isShow) {
+        show()
+    } else {
+        gone()
+    }
+}
+
+/**
+ * Show hoặc Hide view
+ */
+fun View.showOrHide(isShow: Boolean) {
+    if (isShow) {
+        show()
+    } else {
+        hide()
+    }
+}
+
+/**
+ * Các extension properties để check visibility
+ */
+val View.isShow: Boolean
+    get() = this.isVisible
+
+val View.isHide: Boolean
+    get() = this.isInvisible
+
+val View.isGone: Boolean
+    get() = this.visibility == View.GONE
+
+//endregion
+
+//region Click Management
+
+/**
+ * Disable view temporarily
+ */
 fun View.disableView() {
     this.isClickable = false
     this.postDelayed({ this.isClickable = true }, 500)
 }
 
+/**
+ * Safe click listener để prevent double click
+ */
 class SafeClickListener(val onSafeClickListener: (View) -> Unit) : View.OnClickListener {
     override fun onClick(v: View) {
         v.disableView()
@@ -97,6 +195,9 @@ class SafeClickListener(val onSafeClickListener: (View) -> Unit) : View.OnClickL
     }
 }
 
+/**
+ * Set safe click để tránh double click
+ */
 fun View.setOnSafeClick(onSafeClickListener: (View) -> Unit) {
     val safeClick = SafeClickListener {
         onSafeClickListener(it)
@@ -104,32 +205,23 @@ fun View.setOnSafeClick(onSafeClickListener: (View) -> Unit) {
     setOnClickListener(safeClick)
 }
 
-fun View.hide() {
-    if (!isHide) {
-        this.visibility = View.INVISIBLE
-    }
-}
+//endregion
 
-fun View.show() {
-    if (!isShow) {
-        this.visibility = View.VISIBLE
-    }
-}
+//region Animation & Effects
 
-fun View.gone() {
-    if (!isGone) {
-        this.visibility = View.GONE
-    }
-}
-
+/**
+ * Click animation
+ */
 fun clickAnimation(mContext: Context?, view: View) {
-    //  return new AlphaAnimation(1F, 0.4F); // Change "0.4F" as per your recruitment.
     if (mContext != null) {
         val myAnim = AnimationUtils.loadAnimation(mContext, R.anim.bounce)
         view.startAnimation(myAnim)
     }
 }
 
+/**
+ * Click animation cho view
+ */
 fun View.clickAnimation() {
     try {
         if (!isAttachedToWindow) {
@@ -142,6 +234,9 @@ fun View.clickAnimation() {
     }
 }
 
+/**
+ * Click với animation
+ */
 fun View.clickWithAnimation(action: (View) -> Unit) {
     setOnClickListener {
         clickAnimation()
@@ -149,30 +244,53 @@ fun View.clickWithAnimation(action: (View) -> Unit) {
     }
 }
 
-val View.isShow: Boolean
-    get() = this.isVisible
-
-val View.isHide: Boolean
-    get() = this.isInvisible
-val View.isGone: Boolean
-    get() = this.visibility == View.GONE
-
-fun View.showOrGone(isShow: Boolean) {
-    if (isShow) {
-        show()
-    } else {
-        gone()
-    }
+/**
+ * Show với animation
+ */
+fun View.showWithAnimation() {
+    this.visibility = View.VISIBLE
+    this.startAnimation(AnimationUtils.loadAnimation(this.context, R.anim.slide_in_bottom))
 }
 
-fun View.showOrHide(isShow: Boolean) {
-    if (isShow) {
-        show()
-    } else {
-        hide()
-    }
+/**
+ * Gone với animation
+ */
+fun View.goneWithAnimation() {
+    this.visibility = View.GONE
+    this.startAnimation(AnimationUtils.loadAnimation(this.context, R.anim.slide_out_bottom))
 }
 
+//endregion
+
+//region Size & Layout Management
+
+/**
+ * Set size cho view
+ */
+fun View.setSize(width: Int, height: Int) {
+    val rootParam = this.layoutParams
+    rootParam.width = width
+    rootParam.height = height
+    layoutParams = rootParam
+    requestLayout()
+}
+
+/**
+ * Remove view khỏi parent
+ */
+fun View?.removeSelf() {
+    this ?: return
+    val parentView = parent as? ViewGroup ?: return
+    parentView.removeView(this)
+}
+
+//endregion
+
+//region Bitmap & Canvas
+
+/**
+ * Lấy bitmap từ view
+ */
 fun View.getBitmapFromView(done: (Bitmap) -> Unit) {
     post {
         val b = createBitmap(width, height)
@@ -183,94 +301,13 @@ fun View.getBitmapFromView(done: (Bitmap) -> Unit) {
     }
 }
 
-fun View.setSize(width: Int, height: Int) {
-    val rootParam = this.layoutParams
-    rootParam.width = width
-    rootParam.height = height
-    layoutParams = rootParam
-    requestLayout()
-}
+//endregion
 
-fun View.showWithAnimation() {
-    this.visibility = View.VISIBLE
-    this.startAnimation(AnimationUtils.loadAnimation(this.context, R.anim.slide_in_bottom))
-}
-
-fun View.goneWithAnimation() {
-    this.visibility = View.GONE
-    this.startAnimation(AnimationUtils.loadAnimation(this.context, R.anim.slide_out_bottom))
-}
-
-fun View.isSoftKeyboardVisible(): Boolean {
-    val rect = Rect()
-    rootView.getWindowVisibleDisplayFrame(rect)
-    val screenHeight = rootView.height
-    val keyboardHeight = screenHeight - rect.bottom
-    val threshold = screenHeight * 0.15 // Adjust this value as per your requirements
-    return keyboardHeight > threshold
-}
-
-fun TabLayout.createTab(tabName: String): TabLayout.Tab {
-    return newTab().setText(tabName)
-}
+//region Touch & Gesture Handling
 
 /**
- * make view is free to add in another view group
- * */
-fun View?.removeSelf() {
-    this ?: return
-    val parentView = parent as? ViewGroup ?: return
-    parentView.removeView(this)
-}
-
-fun SeekBar.setOnProgressChange(
-    action: (
-        seekBar: SeekBar?, progress: Int, fromUser: Boolean
-    ) -> Unit
-) {
-    this.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-        override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-            action.invoke(seekBar, progress, fromUser)
-        }
-
-        override fun onStartTrackingTouch(seekBar: SeekBar?) {
-
-        }
-
-        override fun onStopTrackingTouch(seekBar: SeekBar?) {
-
-        }
-    })
-}
-
-fun SeekBar.setListener(
-    onProgressChanged: ((seekBar: SeekBar?, progress: Int, fromUser: Boolean) -> Unit)? = null,
-    onStartTrackingTouch: ((seekBar: SeekBar?) -> Unit)? = null,
-    onStopTrackingTouch: ((seekBar: SeekBar?) -> Unit)? = null
-) {
-    setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-        override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-            onProgressChanged?.invoke(seekBar, progress, fromUser)
-        }
-
-        override fun onStartTrackingTouch(seekBar: SeekBar?) {
-            onStartTrackingTouch?.invoke(seekBar)
-        }
-
-        override fun onStopTrackingTouch(seekBar: SeekBar?) {
-            onStopTrackingTouch?.invoke(seekBar)
-        }
-    })
-}
-
-fun MaterialCardView.removeShadow() {
-    this.cardElevation = 0f
-}
-
-fun MaterialCardView.addShadow(elevation: Float) {
-    this.cardElevation = elevation.dpf
-}
-
+ * Set touch listener với các action
+ */
 @SuppressLint("ClickableViewAccessibility")
 fun View.setTouchListener(
     consumeEvent: Boolean = false,
@@ -301,16 +338,9 @@ fun View.setTouchListener(
     }
 }
 
-fun SeekBar.setTrackSrc(@DrawableRes drawable: Int) {
-    val layerDrawable = ResourcesCompat.getDrawable(resources, drawable, null) as LayerDrawable
-    progressDrawable = layerDrawable
-}
-
-fun SeekBar.setThumbSrc(@DrawableRes drawable: Int) {
-    val thumbDrawable = ResourcesCompat.getDrawable(resources, drawable, null)
-    thumb = thumbDrawable
-}
-
+/**
+ * Set touch action với options
+ */
 @SuppressLint("ClickableViewAccessibility")
 fun View.setOnTouchAction(
     isDisableClick: Boolean = false,
@@ -336,14 +366,112 @@ fun View.setOnTouchAction(
     }
 }
 
+//endregion
+
+//region SeekBar Extensions
+
+/**
+ * Set progress change listener cho SeekBar
+ */
+fun SeekBar.setOnProgressChange(
+    action: (
+        seekBar: SeekBar?, progress: Int, fromUser: Boolean
+    ) -> Unit
+) {
+    this.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+            action.invoke(seekBar, progress, fromUser)
+        }
+
+        override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+        override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+    })
+}
+
+/**
+ * Set full listener cho SeekBar
+ */
+fun SeekBar.setListener(
+    onProgressChanged: ((seekBar: SeekBar?, progress: Int, fromUser: Boolean) -> Unit)? = null,
+    onStartTrackingTouch: ((seekBar: SeekBar?) -> Unit)? = null,
+    onStopTrackingTouch: ((seekBar: SeekBar?) -> Unit)? = null
+) {
+    setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+            onProgressChanged?.invoke(seekBar, progress, fromUser)
+        }
+
+        override fun onStartTrackingTouch(seekBar: SeekBar?) {
+            onStartTrackingTouch?.invoke(seekBar)
+        }
+
+        override fun onStopTrackingTouch(seekBar: SeekBar?) {
+            onStopTrackingTouch?.invoke(seekBar)
+        }
+    })
+}
+
+/**
+ * Set track source cho SeekBar
+ */
+fun SeekBar.setTrackSrc(@DrawableRes drawable: Int) {
+    val layerDrawable = ResourcesCompat.getDrawable(resources, drawable, null) as LayerDrawable
+    progressDrawable = layerDrawable
+}
+
+/**
+ * Set thumb source cho SeekBar
+ */
+fun SeekBar.setThumbSrc(@DrawableRes drawable: Int) {
+    val thumbDrawable = ResourcesCompat.getDrawable(resources, drawable, null)
+    thumb = thumbDrawable
+}
+
+//endregion
+
+//region Material Components
+
+/**
+ * Remove shadow cho MaterialCardView
+ */
+fun MaterialCardView.removeShadow() {
+    this.cardElevation = 0f
+}
+
+/**
+ * Add shadow cho MaterialCardView
+ */
+fun MaterialCardView.addShadow(elevation: Float) {
+    this.cardElevation = elevation.dpf
+}
+
+/**
+ * Create tab cho TabLayout
+ */
+fun TabLayout.createTab(tabName: String): TabLayout.Tab {
+    return newTab().setText(tabName)
+}
+
+//endregion
+
+//region Sticker View
+
+/**
+ * Load source cho StickerImageView
+ */
 fun StickerImageView.loadSrc(src: Any) {
     ivMain?.loadSrc(src)
 }
 
+//endregion
+
+//region Rounded Corners
+
 /**
- * This function to set rounded corner for view(all 4 position: topLeft - top Right, bottomLeft - bottomRight)
+ * Set rounded corner cho view (tất cả 4 góc)
  * @param roundedCorner: pass int number, it will convert to px
- * */
+ */
 fun View.setRoundedCornerView(roundedCorner: Int) {
     try {
         outlineProvider = object : ViewOutlineProvider() {
@@ -423,15 +551,14 @@ fun View.setRoundedCorners(
  * @param strokeWidth Độ rộng đường viền (dp, tùy chọn).
  * @param strokeColor Màu đường viền (tùy chọn).
  * @sample: myView.setRoundedCornersMaterial(topLeft = 16, topRight = 8, backgroundColor = Color.RED)
- * @see View
  */
 fun View.setRoundedCornersMaterial(
     topLeft: Int = 0,
     topRight: Int = 0,
     bottomLeft: Int = 0,
     bottomRight: Int = 0,
-    backgroundColor: Int? = null, // ví dụ: ContextCompat.getColor(context, R.color.your_color)
-    strokeWidth: Int = 0, // dp
+    backgroundColor: Int? = null,
+    strokeWidth: Int = 0,
     strokeColor: Int? = null
 ) {
     val tl = topLeft.dpToPx().toFloat()
@@ -453,7 +580,6 @@ fun View.setRoundedCornersMaterial(
             fillColor = android.content.res.ColorStateList.valueOf(color)
         } ?: run {
             // Nếu không có màu nền, đặt màu fill mặc định là trong suốt
-            // hoặc màu mặc định nào đó nếu cần
             fillColor =
                 android.content.res.ColorStateList.valueOf(android.graphics.Color.TRANSPARENT)
         }
@@ -467,7 +593,9 @@ fun View.setRoundedCornersMaterial(
     // Đặt làm background
     background = shapeDrawable
 
-    // MaterialShapeDrawable thường xử lý clipping tốt hơn, đặc biệt khi dùng với các component Material khác
+    // MaterialShapeDrawable thường xử lý clipping tốt hơn
     outlineProvider = ViewOutlineProvider.BACKGROUND
     clipToOutline = true
 }
+
+//endregion

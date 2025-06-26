@@ -3,6 +3,11 @@ package com.example.baseproject.base.utils.extension
 import com.example.baseproject.base.utils.util.CalendarUtil
 import java.util.Calendar
 
+//region Constants và Mappings
+
+/**
+ * Map các ngày trong tuần với tên tiếng Việt
+ */
 val dayTitles = mapOf(
     Calendar.MONDAY to "Thứ Hai",
     Calendar.TUESDAY to "Thứ Ba",
@@ -13,58 +18,107 @@ val dayTitles = mapOf(
     Calendar.SUNDAY to "Chủ Nhật"
 )
 
-//region milliseconds
-fun Calendar.getMilliSeconds() = this[Calendar.MILLISECOND]
 //endregion
 
-//region second
-fun Calendar.getSeconds() = this[Calendar.SECOND]
+//region Time Components - Milliseconds
+
+/**
+ * Lấy millisecond từ Calendar
+ */
+fun Calendar.getMilliSeconds(): Int = this[Calendar.MILLISECOND]
+
 //endregion
 
-//region minutes
-fun Calendar.getMinutes() = this[Calendar.MINUTE]
+//region Time Components - Seconds
 
+/**
+ * Lấy giây từ Calendar
+ */
+fun Calendar.getSeconds(): Int = this[Calendar.SECOND]
+
+//endregion
+
+//region Time Components - Minutes
+
+/**
+ * Lấy phút từ Calendar
+ */
+fun Calendar.getMinutes(): Int = this[Calendar.MINUTE]
+
+/**
+ * Lấy phút dưới dạng Float (bao gồm cả giây)
+ */
 fun Calendar.getMinutesFloat(): Float {
     val seconds = getSeconds()
     val minutes = getMinutes()
     return minutes + seconds / 60f
 }
+
 //endregion
 
-//region hour
-fun Calendar.getHour() = this[Calendar.HOUR_OF_DAY]
+//region Time Components - Hours
 
+/**
+ * Lấy giờ từ Calendar (24h format)
+ */
+fun Calendar.getHour(): Int = this[Calendar.HOUR_OF_DAY]
+
+/**
+ * Lấy giờ dưới dạng Float (bao gồm cả phút)
+ */
 fun Calendar.getHourFloat(): Float {
     val hour = getHour()
     val minutes = getMinutes()
     return hour + minutes / 60f
 }
+
 //endregion
 
-//region day
-//current day
-fun Calendar.getDay() = this[Calendar.DAY_OF_MONTH]
-fun Calendar.getDayOfWeek() = this[Calendar.DAY_OF_WEEK]
+//region Date Components - Days
 
-//get title of current day
-fun Calendar.getDayTitle() = dayTitles[getDayOfWeek()].toString()
+/**
+ * Lấy ngày trong tháng
+ */
+fun Calendar.getDay(): Int = this[Calendar.DAY_OF_MONTH]
 
-//get day title of first day in month
-fun Calendar.getFirstDayTitleInMonth() = this.apply {
+/**
+ * Lấy thứ trong tuần
+ */
+fun Calendar.getDayOfWeek(): Int = this[Calendar.DAY_OF_WEEK]
+
+/**
+ * Lấy tên thứ hiện tại
+ */
+fun Calendar.getDayTitle(): String = dayTitles[getDayOfWeek()] ?: "Unknown"
+
+/**
+ * Lấy tên thứ của ngày đầu tiên trong tháng
+ */
+fun Calendar.getFirstDayTitleInMonth(): String = this.apply {
     set(Calendar.DAY_OF_MONTH, 1)
 }.getDayTitle()
 
-//get day title of first day in year
-fun Calendar.getFirstDayTitleInYear() = this.apply {
+/**
+ * Lấy tên thứ của ngày đầu tiên trong năm
+ */
+fun Calendar.getFirstDayTitleInYear(): String = this.apply {
     set(Calendar.DAY_OF_YEAR, 1)
 }.getDayTitle()
 
-//get day title of first day in week
-fun Calendar.getFirstDayTitleInWeek() = this.apply {
+/**
+ * Lấy tên thứ của ngày đầu tiên trong tuần
+ */
+fun Calendar.getFirstDayTitleInWeek(): String = this.apply {
     set(Calendar.DAY_OF_WEEK, 1)
 }.getDayTitle()
 
-/*-----------------get first (day in week) of month-----------------*/
+//endregion
+
+//region First Day of Week in Month Utilities
+
+/**
+ * Lấy ngày đầu tiên của thứ cụ thể trong tháng
+ */
 fun getFirstDayWeekInMonth(
     dayOfWeek: Int = Calendar.MONDAY,
     month: Int = Calendar.getInstance().getMonth(),
@@ -89,63 +143,69 @@ fun getFirstDayWeekInMonth(
     return calendar.getDay()
 }
 
-//get first monday of month
+/**
+ * Lấy thứ Hai đầu tiên trong tháng
+ */
 fun getFirstMondayInMonth(
     month: Int = Calendar.getInstance().getMonth(),
     year: Int = Calendar.getInstance().getYear()
-): Int {
-    return getFirstDayWeekInMonth(Calendar.MONDAY, month, year)
-}
+): Int = getFirstDayWeekInMonth(Calendar.MONDAY, month, year)
 
-//get first tuesday of month
+/**
+ * Lấy thứ Ba đầu tiên trong tháng
+ */
 fun getFirstTuesdayInMonth(
     month: Int = Calendar.getInstance().getMonth(),
     year: Int = Calendar.getInstance().getYear()
-): Int {
-    return getFirstDayWeekInMonth(Calendar.TUESDAY, month, year)
-}
+): Int = getFirstDayWeekInMonth(Calendar.TUESDAY, month, year)
 
-//get first wednesday of month
+/**
+ * Lấy thứ Tư đầu tiên trong tháng
+ */
 fun getFirstWednesdayInMonth(
     month: Int = Calendar.getInstance().getMonth(),
     year: Int = Calendar.getInstance().getYear()
-): Int {
-    return getFirstDayWeekInMonth(Calendar.WEDNESDAY, month, year)
-}
+): Int = getFirstDayWeekInMonth(Calendar.WEDNESDAY, month, year)
 
-//get first thursday of month
+/**
+ * Lấy thứ Năm đầu tiên trong tháng
+ */
 fun getFirstThursdayInMonth(
     month: Int = Calendar.getInstance().getMonth(),
     year: Int = Calendar.getInstance().getYear()
-): Int {
-    return getFirstDayWeekInMonth(Calendar.THURSDAY, month, year)
-}
+): Int = getFirstDayWeekInMonth(Calendar.THURSDAY, month, year)
 
-//get first friday of month
+/**
+ * Lấy thứ Sáu đầu tiên trong tháng
+ */
 fun getFirstFridayInMonth(
     month: Int = Calendar.getInstance().getMonth(),
     year: Int = Calendar.getInstance().getYear()
-): Int {
-    return getFirstDayWeekInMonth(Calendar.FRIDAY, month, year)
-}
+): Int = getFirstDayWeekInMonth(Calendar.FRIDAY, month, year)
 
-//get first saturday of month
+/**
+ * Lấy thứ Bảy đầu tiên trong tháng
+ */
 fun getFirstSaturdayInMonth(
     month: Int = Calendar.getInstance().getMonth(),
     year: Int = Calendar.getInstance().getYear()
-): Int {
-    return getFirstDayWeekInMonth(Calendar.SATURDAY, month, year)
-}
+): Int = getFirstDayWeekInMonth(Calendar.SATURDAY, month, year)
 
-//get first sunday of month
+/**
+ * Lấy Chủ Nhật đầu tiên trong tháng
+ */
 fun getFirstSundayInMonth(
     month: Int = Calendar.getInstance().getMonth(),
     year: Int = Calendar.getInstance().getYear()
-): Int {
-    return getFirstDayWeekInMonth(Calendar.SUNDAY, month, year)
-}
+): Int = getFirstDayWeekInMonth(Calendar.SUNDAY, month, year)
 
-/*-----------------get last (day in week) of month-----------------*/
+//endregion
+
+//region Last Day of Week in Month Utilities
+
+/**
+ * Lấy ngày cuối cùng của thứ cụ thể trong tháng
+ */
 fun getLastDayWeekInMonth(
     dayOfWeek: Int = Calendar.MONDAY,
     month: Int = Calendar.getInstance().getMonth(),
@@ -159,86 +219,110 @@ fun getLastDayWeekInMonth(
     return firstDayOfMonth - 7
 }
 
-//get last monday of month
+/**
+ * Lấy thứ Hai cuối cùng trong tháng
+ */
 fun getLastMondayInMonth(
     month: Int = Calendar.getInstance().getMonth(),
     year: Int = Calendar.getInstance().getYear()
-): Int {
-    return getLastDayWeekInMonth(Calendar.MONDAY, month, year)
-}
+): Int = getLastDayWeekInMonth(Calendar.MONDAY, month, year)
 
-//get last tuesday of month
+/**
+ * Lấy thứ Ba cuối cùng trong tháng
+ */
 fun getLastTuesdayInMonth(
     month: Int = Calendar.getInstance().getMonth(),
     year: Int = Calendar.getInstance().getYear()
-): Int {
-    return getLastDayWeekInMonth(Calendar.TUESDAY, month, year)
-}
+): Int = getLastDayWeekInMonth(Calendar.TUESDAY, month, year)
 
-//get last wednesday of month
+/**
+ * Lấy thứ Tư cuối cùng trong tháng
+ */
 fun getLastWednesdayInMonth(
     month: Int = Calendar.getInstance().getMonth(),
     year: Int = Calendar.getInstance().getYear()
-): Int {
-    return getLastDayWeekInMonth(Calendar.WEDNESDAY, month, year)
-}
+): Int = getLastDayWeekInMonth(Calendar.WEDNESDAY, month, year)
 
-//get last thursday of month
+/**
+ * Lấy thứ Năm cuối cùng trong tháng
+ */
 fun getLastThursdayInMonth(
     month: Int = Calendar.getInstance().getMonth(),
     year: Int = Calendar.getInstance().getYear()
-): Int {
-    return getLastDayWeekInMonth(Calendar.THURSDAY, month, year)
-}
+): Int = getLastDayWeekInMonth(Calendar.THURSDAY, month, year)
 
-//get last friday of month
+/**
+ * Lấy thứ Sáu cuối cùng trong tháng
+ */
 fun getLastFridayInMonth(
     month: Int = Calendar.getInstance().getMonth(),
     year: Int = Calendar.getInstance().getYear()
-): Int {
-    return getLastDayWeekInMonth(Calendar.FRIDAY, month, year)
-}
+): Int = getLastDayWeekInMonth(Calendar.FRIDAY, month, year)
 
-//get last saturday of month
+/**
+ * Lấy thứ Bảy cuối cùng trong tháng
+ */
 fun getLastSaturdayInMonth(
     month: Int = Calendar.getInstance().getMonth(),
     year: Int = Calendar.getInstance().getYear()
-): Int {
-    return getLastDayWeekInMonth(Calendar.SATURDAY, month, year)
-}
+): Int = getLastDayWeekInMonth(Calendar.SATURDAY, month, year)
 
-//get last sunday of month
+/**
+ * Lấy Chủ Nhật cuối cùng trong tháng
+ */
 fun getLastSundayInMonth(
     month: Int = Calendar.getInstance().getMonth(),
     year: Int = Calendar.getInstance().getYear()
-): Int {
-    return getLastDayWeekInMonth(Calendar.SUNDAY, month, year)
-}
+): Int = getLastDayWeekInMonth(Calendar.SUNDAY, month, year)
 
-//todo: get lunar day
 //endregion
 
-//region month
-fun Calendar.getMonth() = this[Calendar.MONTH] + 1
+//region Date Components - Months
+
+/**
+ * Lấy tháng từ Calendar (1-12)
+ */
+fun Calendar.getMonth(): Int = this[Calendar.MONTH] + 1
+
 //endregion
 
-//region year
-fun Calendar.getYear() = this[Calendar.YEAR]
+//region Date Components - Years
 
-fun getCurrentYear(): Int {
-    val calendar = Calendar.getInstance()
-    return calendar[Calendar.YEAR]
-}
+/**
+ * Lấy năm từ Calendar
+ */
+fun Calendar.getYear(): Int = this[Calendar.YEAR]
+
+/**
+ * Lấy năm hiện tại
+ */
+fun getCurrentYear(): Int = Calendar.getInstance()[Calendar.YEAR]
+
 //endregion
 
+//region Weekend and Weekday Utilities
+
+/**
+ * Kiểm tra xem có phải cuối tuần không
+ */
 fun Calendar.isWeekend(): Boolean {
     val today = getDayOfWeek()
     return today == Calendar.SATURDAY || today == Calendar.SUNDAY
 }
 
-fun Calendar.isInWeek(): Boolean {
-    return !isWeekend()
-}
+/**
+ * Kiểm tra xem có phải ngày trong tuần không (không phải cuối tuần)
+ */
+fun Calendar.isInWeek(): Boolean = !isWeekend()
 
-fun todayIsWeekend() = now().toCalendar().isWeekend()
-fun todayIsInWeek() = now().toCalendar().isInWeek()
+/**
+ * Kiểm tra hôm nay có phải cuối tuần không
+ */
+fun todayIsWeekend(): Boolean = now().toCalendar().isWeekend()
+
+/**
+ * Kiểm tra hôm nay có phải ngày trong tuần không
+ */
+fun todayIsInWeek(): Boolean = now().toCalendar().isInWeek()
+
+//endregion

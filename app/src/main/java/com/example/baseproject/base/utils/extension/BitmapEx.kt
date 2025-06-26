@@ -6,9 +6,15 @@ import android.graphics.Matrix
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.scale
 
+//region Constants
+
 // Constants for bitmap flipping
 private const val FLIP_ORIENTATION = -1.0f
 private const val DEFAULT_ORIENTATION = 1.0f
+
+//endregion
+
+//region Bitmap Append & Overlay
 
 /**
  * Append bitmap2 to bottom of bitmap_root vertically
@@ -23,6 +29,10 @@ fun Bitmap.appendVertical(bitmap2: Bitmap): Bitmap {
 fun Bitmap.overlay(bitmap2: Bitmap): Bitmap {
     return overlayBitMap(this, bitmap2)
 }
+
+//endregion
+
+//region Bitmap Flip Operations
 
 /**
  * Flip bitmap horizontally (X-axis) or vertically (Y-axis)
@@ -50,6 +60,10 @@ fun Bitmap.flipVerticalY(): Bitmap {
     })
 }
 
+//endregion
+
+//region Bitmap Rotation
+
 /**
  * Rotate bitmap by specified angle in degrees
  * @param angle rotation angle in degrees
@@ -60,12 +74,20 @@ fun Bitmap.rotate(angle: Float): Bitmap {
     })
 }
 
+//endregion
+
+//region Matrix Transformation
+
 /**
  * Create a new bitmap with applied matrix transformation
  * @param matrix transformation matrix to apply
  */
 fun Bitmap.createWithMatrix(matrix: Matrix): Bitmap =
     Bitmap.createBitmap(this, 0, 0, width, height, matrix, true)
+
+//endregion
+
+//region Bitmap Merging
 
 /**
  * Merge two bitmaps vertically (bitmap2 placed below bitmap1)
@@ -77,7 +99,7 @@ fun mergeBitmapsVertical(bitmap1: Bitmap, bitmap2: Bitmap): Bitmap {
     val width = bitmap1.width.coerceAtLeast(bitmap2.width)
     val height = bitmap1.height + bitmap2.height
 
-    val mergedBitmap = createBitmap(width, height)
+    val mergedBitmap = createBitmap(width, height, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(mergedBitmap)
 
     canvas.drawBitmap(bitmap1, 0f, 0f, null)
@@ -93,7 +115,7 @@ fun mergeBitmapsVertical(bitmap1: Bitmap, bitmap2: Bitmap): Bitmap {
  * @return composite bitmap with bmp2 overlaid on bmp1
  */
 fun overlayBitMap(bmp1: Bitmap, bmp2: Bitmap): Bitmap {
-    val bmOverlay = createBitmap(bmp1.width, bmp1.height)
+    val bmOverlay = createBitmap(bmp1.width, bmp1.height, Bitmap.Config.ARGB_8888)
     val bitmap2Scaled = bmp2.scale(bmOverlay.width, bmOverlay.height, false)
     val canvas = Canvas(bmOverlay)
 
@@ -107,3 +129,5 @@ fun overlayBitMap(bmp1: Bitmap, bmp2: Bitmap): Bitmap {
 
     return bmOverlay
 }
+
+//endregion

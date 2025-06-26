@@ -40,6 +40,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import androidx.exifinterface.media.ExifInterface
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
@@ -63,27 +64,43 @@ import java.util.Date
 import java.util.Locale
 import java.util.UUID
 
+//region Permission Management
 
+/**
+ * Kiểm tra permission
+ */
 fun Context.checkPermission(permission: String): Boolean {
     return ContextCompat.checkSelfPermission(this, permission) == PERMISSION_GRANTED
 }
 
-fun Context.hasWritePermission() = if (isSdkR()) {
+/**
+ * Kiểm tra quyền write storage
+ */
+fun Context.hasWritePermission(): Boolean = if (isSdkR()) {
     true
 } else {
     this.checkPermission(WRITE_EXTERNAL_STORAGE)
 }
 
-fun Context.hasReadStoragePermission() = if (isSdk33()) {
+/**
+ * Kiểm tra quyền read storage
+ */
+fun Context.hasReadStoragePermission(): Boolean = if (isSdk33()) {
     checkPermission(READ_MEDIA_IMAGE)
 } else {
     checkPermission(READ_EXTERNAL_STORAGE)
 }
 
+/**
+ * Kiểm tra quyền location
+ */
 fun Context.hasLocationPermission(): Boolean {
     return checkPermission(ACCESS_COARSE_LOCATION) && checkPermission(ACCESS_FINE_LOCATION)
 }
 
+/**
+ * Kiểm tra quyền notification
+ */
 fun Context.hasNotificationPermission(): Boolean {
     return if (!isSdk33()) {
         true
@@ -92,10 +109,37 @@ fun Context.hasNotificationPermission(): Boolean {
     }
 }
 
-/** Demo: if api 33, permission READ_MEDIA_IMAGE*/
+/**
+ * Kiểm tra quyền write settings
+ */
+fun Context.hasWriteSettingPermission(): Boolean = Settings.System.canWrite(this)
+
+/**
+ * Kiểm tra quyền overlay
+ */
+fun Context.hasOverlaySettingPermission(): Boolean = Settings.canDrawOverlays(this)
+
+/**
+ * Kiểm tra quyền answer call
+ */
+fun Context.hasAnswerCallComing(): Boolean {
+    return if (isSdk26()) {
+        checkPermission(Manifest.permission.ANSWER_PHONE_CALLS)
+    } else {
+        false
+    }
+}
+
+/**
+ * Kiểm tra quyền read contacts
+ */
+fun Context.hasReadContact(): Boolean = checkPermission(Manifest.permission.READ_CONTACTS)
+
+/**
+ * Request permission read storage
+ */
 fun Context.requestPermissionReadStorage(permissionLauncher: ActivityResultLauncher<Array<String>>) {
     val isReadPermissionGranted = hasReadStoragePermission()
-
     val permissionRequest = mutableListOf<String>()
     val permission = if (isSdk33()) {
         READ_MEDIA_IMAGE
@@ -110,6 +154,13 @@ fun Context.requestPermissionReadStorage(permissionLauncher: ActivityResultLaunc
     }
 }
 
+//endregion
+
+//region Activity Navigation
+
+/**
+ * Mở Activity với Bundle
+ */
 fun Context.openActivity(pClass: Class<out Activity>, bundle: Bundle?) {
     val intent = Intent(this, pClass)
     if (bundle != null) {
@@ -118,6 +169,9 @@ fun Context.openActivity(pClass: Class<out Activity>, bundle: Bundle?) {
     startActivity(intent)
 }
 
+/**
+ * Mở Activity với finish option
+ */
 fun Context.openActivity(pClass: Class<out Activity>, isFinish: Boolean = false) {
     openActivity(pClass, null)
     if (isFinish) {
@@ -125,6 +179,9 @@ fun Context.openActivity(pClass: Class<out Activity>, isFinish: Boolean = false)
     }
 }
 
+/**
+ * Mở Activity với finish và bundle
+ */
 fun Context.openActivity(pClass: Class<out Activity>, isFinish: Boolean = false, bundle: Bundle?) {
     openActivity(pClass, bundle)
     if (isFinish) {
@@ -132,6 +189,9 @@ fun Context.openActivity(pClass: Class<out Activity>, isFinish: Boolean = false,
     }
 }
 
+/**
+ * Mở Activity với animation
+ */
 fun Context.openActivity(
     pClass: Class<out Activity>,
     isFinish: Boolean = false,
@@ -147,29 +207,133 @@ fun Context.openActivity(
     }
 }
 
+//endregion
+
+//region Image Loading
+
+/**
+ * Load image từ URL
+ */
 fun Context.loadImage(
-    imageView: ImageView, url: String, error: Int = R.drawable.ic_launcher_background
+    imageView: ImageView,
+    url: String,
+    error: Int = R.drawable.ic_launcher_background
 ) {
     Glide.with(this).load(url).fitCenter().placeholder(error).into(imageView)
-
 }
 
+/**
+ * Load image từ resource
+ */
 fun Context.loadImage(
-    imageView: ImageView, url: Int, error: Int = R.drawable.ic_launcher_background
+    imageView: ImageView,
+    url: Int,
+    error: Int = R.drawable.ic_launcher_background
 ) {
     Glide.with(this).load(url).fitCenter().placeholder(error).into(imageView)
-
 }
 
+/**
+ * Download bitmap từ URL
+ */
+fun Context.downloadBitmapByUrl(
+    url: String,
+    onProgressLoading: () -> Unit,
+    onLoadedBitmap: (Bitmap) -> Unit,
+    onLoadFailed: () -> Unit
+) {
+    val target = object : CustomTarget<Bitmap>() {
+        override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+            onLoadedBitmap.invoke(resource)
+        }
+
+        override fun onLoadCleared(placeholder: Drawable?) {}
+
+        override fun onLoadFailed(errorDrawable: Drawable?) {
+            super.onLoadFailed(errorDrawable)
+            onLoadFailed.invoke()
+        }
+
+        override fun onLoadStarted(placeholder: Drawable?) {
+            super.onLoadStarted(placeholder)
+            onProgressLoading.invoke()
+        }
+    }
+    Glide.with(this).asBitmap().load(url).into(target)
+}
+
+//endregion
+
+//region Resource Management
+
+/**
+ * Lấy drawable ID theo tên
+ */
 @SuppressLint("DiscouragedApi")
 fun Context.getDrawableIdByName(name: String): Int {
     return resources.getIdentifier(name, "drawable", packageName)
 }
 
+/**
+ * Inflate layout
+ */
 fun Context.inflateLayout(layoutResource: Int, parent: ViewGroup): View {
     return LayoutInflater.from(this).inflate(layoutResource, parent, false)
 }
 
+/**
+ * Lấy color theo ID
+ */
+fun Context.getColorById(colorSource: Int): Int = ContextCompat.getColor(this, colorSource)
+
+/**
+ * Lấy color theo theme attribute
+ */
+fun Context.getColorByIdWithTheme(colorAttr: Int): Int {
+    val typedValue = TypedValue()
+    theme.resolveAttribute(colorAttr, typedValue, true)
+    return typedValue.data
+}
+
+/**
+ * Lấy drawable theo ID
+ */
+fun Context.getDrawableById(drawableId: Int): Drawable? =
+    ContextCompat.getDrawable(this, drawableId)
+
+/**
+ * Lấy animation theo ID
+ */
+fun Context.getAnimation(animationId: Int): Animation? =
+    AnimationUtils.loadAnimation(this, animationId)
+
+//endregion
+
+//region UI Utilities
+
+/**
+ * Hiển thị Toast
+ */
+fun Context.showToast(msg: String, isShowDurationLong: Boolean = false) {
+    val duration = if (isShowDurationLong) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
+    Toast.makeText(this, msg, duration).show()
+}
+
+/**
+ * Ẩn bàn phím
+ */
+fun Context.hideKeyboard(view: View) {
+    val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+    inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
+}
+
+//endregion
+
+//region App Sharing & Rating
+
+/**
+ * Share app
+ */
 fun Context.shareApp() {
     val subject = "Let go to record your emoji today!!"
     val sharingIntent = Intent(Intent.ACTION_SEND)
@@ -180,28 +344,24 @@ fun Context.shareApp() {
     this.startActivity(Intent.createChooser(sharingIntent, "Share to"))
 }
 
+/**
+ * Navigate to market
+ */
 fun Context.navigateToMarket(publishNameStore: String) {
     val market = "market://details?id="
     val webPlayStore = "https://play.google.com/store/apps/details?id="
     try {
-        startActivity(
-            Intent(
-                Intent.ACTION_VIEW, Uri.parse(market + publishNameStore)
-                //market://details?id=<package_name>
-            )
-        )
+        startActivity(Intent(Intent.ACTION_VIEW, (market + publishNameStore).toUri()))
     } catch (e: ActivityNotFoundException) {
-        startActivity(
-            Intent(
-                Intent.ACTION_VIEW, Uri.parse(webPlayStore + publishNameStore)
-                //https://play.google.com/store/apps/details?id=<package_name>
-            )
-        )
+        startActivity(Intent(Intent.ACTION_VIEW, (webPlayStore + publishNameStore).toUri()))
     }
 }
 
+/**
+ * Rate app
+ */
 fun Context.rateApp() {
-    val uri = Uri.parse("market://details?id=$packageName")
+    val uri = "market://details?id=$packageName".toUri()
     val goToMarket = Intent(Intent.ACTION_VIEW, uri)
     goToMarket.flags = Intent.FLAG_ACTIVITY_NEW_TASK
     goToMarket.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY or Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
@@ -217,11 +377,34 @@ fun Context.rateApp() {
     }
 }
 
+/**
+ * Share text
+ */
+fun Context.shareText(value: String) {
+    val sendIntent: Intent = Intent().apply {
+        action = Intent.ACTION_SEND
+        putExtra(Intent.EXTRA_TEXT, value)
+        type = "text/plain"
+    }
+    val shareIntent = Intent.createChooser(sendIntent, null)
+    startActivity(shareIntent)
+}
+
+/**
+ * Lấy link app
+ */
+fun Context.getLinkApp(): String = "https://play.google.com/store/apps/details?id=$packageName"
+
+//endregion
+
+//region Email & Communication
+
+/**
+ * Gửi email
+ */
 fun Context.sendEmail(toEmail: String, feedBackString: String) {
     val intent = Intent(Intent.ACTION_VIEW)
-    val data = Uri.parse(
-        "mailto:$toEmail?subject=$feedBackString&body="
-    )
+    val data = "mailto:$toEmail?subject=$feedBackString&body=".toUri()
     intent.data = data
     try {
         startActivity(intent)
@@ -231,24 +414,35 @@ fun Context.sendEmail(toEmail: String, feedBackString: String) {
     }
 }
 
+/**
+ * Lấy ringtone
+ */
 fun Context.getRingTone(): Ringtone {
     val defaultRingtoneUri: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
     return RingtoneManager.getRingtone(this, defaultRingtoneUri)
 }
 
+//endregion
+
+//region Network & Connectivity
+
+/**
+ * Kiểm tra network có available không
+ */
 fun Context.isNetworkAvailable(): Boolean {
     val manager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val capabilities = manager.getNetworkCapabilities(manager.activeNetwork)
     return if (capabilities != null) {
-        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) || capabilities.hasTransport(
-            NetworkCapabilities.TRANSPORT_WIFI
-        ) || capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
     } else false
 }
 
 /**
- * require declare permission ACCESS_NETWORK_STATE in Manifest
- * */
+ * Kiểm tra internet có available không
+ * Require declare permission ACCESS_NETWORK_STATE in Manifest
+ */
 fun Context.isInternetAvailable(): Boolean {
     val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val networkCapabilities = connectivityManager.activeNetwork ?: return false
@@ -261,22 +455,42 @@ fun Context.isInternetAvailable(): Boolean {
     }
 }
 
-fun Context.showToast(msg: String, isShowDurationLong: Boolean = false) {
-    val duration = if (isShowDurationLong) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
-    Toast.makeText(this, msg, duration).show()
-}
+//endregion
 
+//region Service Management
+
+/**
+ * Kết nối service
+ */
 fun Context.connectService(pClass: Class<out Service>) {
     startService(Intent(this, pClass))
 }
 
+/**
+ * Kết thúc service
+ */
 fun Context.endService(pClass: Class<out Service>) {
     stopService(Intent(this, pClass))
 }
 
 /**
- * required permission WRITE_EXTERNAL_STORAGE ( if sdk <= 29)
- * */
+ * Kiểm tra service có đang chạy không
+ */
+fun Context.serviceIsRunning(serviceClass: Class<*>): Boolean {
+    @Suppress("DEPRECATION")
+    return (getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager)
+        .getRunningServices(Int.MAX_VALUE)
+        .any { serviceClass.name == it.service.className }
+}
+
+//endregion
+
+//region Image & File Management
+
+/**
+ * Share image
+ * Required permission WRITE_EXTERNAL_STORAGE (if sdk <= 29)
+ */
 fun Context.shareImage(bitmap: Bitmap) {
     if (!hasWritePermission()) {
         showToast("No have permission to write file")
@@ -291,31 +505,65 @@ fun Context.shareImage(bitmap: Bitmap) {
 }
 
 /**
- * required permission WRITE_EXTERNAL_STORAGE ( if sdk <= 29)
- * */
+ * Save image to local
+ * Required permission WRITE_EXTERNAL_STORAGE (if sdk <= 29)
+ */
 fun Context.saveImageToLocal(bitmap: Bitmap, result: (Boolean) -> Unit) {
     if (!hasWritePermission()) {
         showToast("No have permission to write file")
         return
     }
-    val resultSaveImage =
-        ImageUtil.savePhotoToExternalStorage(contentResolver, UUID.randomUUID().toString(), bitmap)
+    val resultSaveImage = ImageUtil.savePhotoToExternalStorage(
+        contentResolver,
+        UUID.randomUUID().toString(),
+        bitmap
+    )
     result.invoke(resultSaveImage)
 }
 
-fun getPromptInfo(title: String, subtitle: String, negativeButtonText: String) =
-    BiometricPrompt.PromptInfo.Builder().setTitle(title).setSubtitle(subtitle)
-        .setNegativeButtonText(negativeButtonText).build()
-
-val biometricCall = object : BiometricPrompt.AuthenticationCallback() {
-
+/**
+ * Lấy URI từ FileProvider
+ */
+fun Context.getUriByFileProvider(file: File): Uri {
+    return FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
 }
 
 /**
- * ex:
- *  - assets/data.json => path = data.json
- *  - assets/db/data.json => path = db/data.json
- * */
+ * Share file GIF
+ */
+fun Context.shareFileGif(file: File) {
+    val fileUri = getUriByFileProvider(file)
+    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+        type = "image/gif"
+        putExtra(Intent.EXTRA_STREAM, fileUri)
+    }
+    startActivity(Intent.createChooser(shareIntent, "Share File"))
+}
+
+/**
+ * Lấy bitmap từ assets
+ */
+fun Context.getBitmapFromAsset(path: String): Bitmap =
+    assets.open(path).use { BitmapFactory.decodeStream(it) }
+
+/**
+ * Tạo image file
+ */
+fun Context.createImageFile(): File {
+    val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+    val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+    return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
+}
+
+//endregion
+
+//region Assets & JSON
+
+/**
+ * Load JSON from assets
+ * Ex: assets/data.json => path = data.json
+ *     assets/db/data.json => path = db/data.json
+ */
 fun Context.loadJsonFromAsset(path: String): String? {
     var json: String? = null
     try {
@@ -331,22 +579,13 @@ fun Context.loadJsonFromAsset(path: String): String? {
     return json
 }
 
-fun Context.getColorById(colorSource: Int): Int {
-    return ContextCompat.getColor(this, colorSource)
-}
+//endregion
 
-fun Context.getColorByIdWithTheme(colorAttr: Int): Int {
-    val typedValue = TypedValue()
-    theme.resolveAttribute(colorAttr, typedValue, true)
-    return typedValue.data
-}
+//region Device Information
 
-fun Context.serviceIsRunning(serviceClass: Class<*>): Boolean {
-    @Suppress("DEPRECATION") return (getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).getRunningServices(
-        Int.MAX_VALUE
-    ).any { serviceClass.name == it.service.className }
-}
-
+/**
+ * Lấy version name
+ */
 fun Context.getVersionName(): String {
     return try {
         val packageInfo: PackageInfo = packageManager.getPackageInfo(packageName, 0)
@@ -356,108 +595,56 @@ fun Context.getVersionName(): String {
     }
 }
 
-fun Context.getDrawableById(drawableId: Int): Drawable? {
-    return ContextCompat.getDrawable(this, drawableId)
-}
-
-fun Context.shareText(value: String) {
-    val sendIntent: Intent = Intent().apply {
-        action = Intent.ACTION_SEND
-        putExtra(Intent.EXTRA_TEXT, value)
-        type = "text/plain"
-    }
-    val shareIntent = Intent.createChooser(sendIntent, null)
-    startActivity(shareIntent)
-}
-
-fun Context.getLinkApp() = "https://play.google.com/store/apps/details?id=$packageName"
-
-fun Context.hideKeyboard(view: View) {
-    val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
-    inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
-}
-
+/**
+ * Lấy device ID
+ */
 @SuppressLint("HardwareIds")
 fun Context.getDeviceId(): String {
     return Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
 }
 
 /**
- * @author doanvv
- * @contributor HuanND
- * */
-fun Activity.showInAppReview() {
-    val reviewManager = ReviewManagerFactory.create(this)
-    reviewManager.requestReviewFlow().addOnCompleteListener { task ->
-        if (task.isSuccessful) {
-            val reviewInfo = task.result
-            val flow = reviewManager.launchReviewFlow(this, reviewInfo)
-            flow.addOnCompleteListener {
-                // The flow has finished. The API does not indicate whether the user
-                // reviewed or not, or even whether the review dialog was shown. Thus, no
-                // matter the result, we continue our app flow.
-            }
-
-        } else {
-            @ReviewErrorCode val reviewErrorCode = (task.exception as ReviewException).errorCode
-        }
-    }
-}
-
-fun Context.getUriByFileProvider(file: File): Uri {
-    return FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
-}
-
-fun Context.shareFileGif(file: File) {
-    val fileUri = getUriByFileProvider(file)
-    val shareIntent = Intent(Intent.ACTION_SEND).apply {
-        type = "image/gif"
-        putExtra(Intent.EXTRA_STREAM, fileUri)
-    }
-    startActivity(Intent.createChooser(shareIntent, "Share File"))
+ * Lấy battery level
+ */
+fun Context.getBatteryLevel(): Int {
+    val batteryManager = getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+    return batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
 }
 
 /**
- * get bitmap online by glide
- * update: 04/11/2024
- * by: doan-vu.dev
- * */
-fun Context.downloadBitmapByUrl(
-    url: String,
-    onProgressLoading: () -> Unit,
-    onLoadedBitmap: (Bitmap) -> Unit,
-    onLoadFailed: () -> Unit
-) {
-    val target = object : CustomTarget<Bitmap>() {
-        override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-            onLoadedBitmap.invoke(resource)
-        }
-
-        override fun onLoadCleared(placeholder: Drawable?) {
-
-        }
-
-        override fun onLoadFailed(errorDrawable: Drawable?) {
-            super.onLoadFailed(errorDrawable)
-            onLoadFailed.invoke()
-        }
-
-        override fun onLoadStarted(placeholder: Drawable?) {
-            super.onLoadStarted(placeholder)
-            onProgressLoading.invoke()
-        }
-    }
-    Glide.with(this).asBitmap().load(url).into(target)
-}
-
+ * Kiểm tra GPS có enable không
+ */
 fun Context.isGpsEnable(): Boolean {
-    //todo: flag to open setting location source
-//    Settings.ACTION_LOCATION_SOURCE_SETTINGS
     val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
     return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-//            && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 }
 
+/**
+ * Kiểm tra notification listener service có enable không
+ */
+fun Context.isNotificationListenerServiceEnabled(): Boolean {
+    val flat = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
+    return flat?.contains(packageName) ?: false
+}
+
+/**
+ * Kiểm tra kilobyte base trên 1000 hay 1024
+ */
+fun Context.isKilobyteBasedOn1000(): Boolean {
+    val formatter = MeasureFormat.getInstance(
+        resources.configuration.locales[0], MeasureFormat.FormatWidth.SHORT
+    )
+    val oneKilobyte = Measure(1, MeasureUnit.KILOBYTE)
+    return formatter.format(oneKilobyte).contains("1000")
+}
+
+//endregion
+
+//region Location Services
+
+/**
+ * Lấy location của user
+ */
 @SuppressLint("MissingPermission")
 fun Context.getLocationUser(
     onGetLocationComplete: ((location: Location) -> Unit)? = null,
@@ -465,74 +652,36 @@ fun Context.getLocationUser(
     onFail: (() -> Unit)? = null
 ) {
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-    if (!checkPermission(Manifest.permission.ACCESS_FINE_LOCATION) && !checkPermission(Manifest.permission.ACCESS_COARSE_LOCATION)) {
+    if (!checkPermission(Manifest.permission.ACCESS_FINE_LOCATION) &&
+        !checkPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+    ) {
         showToast("Missing location permission")
         onMissingPermission.invoke()
         return
     }
-    //check permission before get
+
     fusedLocationClient.getCurrentLocation(
         Priority.PRIORITY_HIGH_ACCURACY, CancellationTokenSource().token
     ).addOnSuccessListener { location: Location? ->
         location?.let {
             onGetLocationComplete?.invoke(it)
-        } ?: kotlin.run {
+        } ?: run {
             onFail?.invoke()
         }
     }
 }
 
-fun Context.hasWriteSettingPermission(): Boolean {
-    return Settings.System.canWrite(this)
-}
+//endregion
 
-fun Context.hasOverlaySettingPermission(): Boolean {
-    return Settings.canDrawOverlays(this)
-}
-
-fun Context.hasAnswerCallComing(): Boolean {
-    return if (isSdk26()) {
-        checkPermission(Manifest.permission.ANSWER_PHONE_CALLS)
-    } else {
-        false
-    }
-}
-
-fun Context.hasReadContact(): Boolean {
-    return checkPermission(Manifest.permission.READ_CONTACTS)
-}
-
-fun Context.isNotificationListenerServiceEnabled(): Boolean {
-    val flat = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
-    return flat?.contains(packageName) ?: false
-}
-
-fun Context.getBatteryLevel(): Int {
-    val batteryManager = getSystemService(Context.BATTERY_SERVICE) as BatteryManager
-    return batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
-}
-
-fun Context.getAnimation(animationId: Int): Animation? {
-    return AnimationUtils.loadAnimation(this, animationId)
-}
+//region Image Orientation
 
 /**
- * determine the conversion convention for kilobytes (1000 or 1024) by locale
- * */
-fun Context.isKilobyteBasedOn1000(): Boolean {
-    val formatter = MeasureFormat.getInstance(
-        resources.configuration.locales[0], MeasureFormat.FormatWidth.SHORT
-    )
-    val oneKilobyte = Measure(1, MeasureUnit.KILOBYTE)
-    return formatter.format(oneKilobyte)
-        .contains("1000") // Check if the formatted output contains "1000"
-}
-
+ * Lấy orientation của image
+ */
 fun Context.getOrientationImage(uri: Uri): Int? {
     try {
-        val inputStream: InputStream?
-        try {
-            inputStream = contentResolver.openInputStream(Uri.parse(uri.toString()))
+        val inputStream: InputStream? = try {
+            contentResolver.openInputStream(Uri.parse(uri.toString()))
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
             return null
@@ -541,7 +690,8 @@ fun Context.getOrientationImage(uri: Uri): Int? {
         inputStream?.let {
             val ei = ExifInterface(inputStream)
             return ei.getAttributeInt(
-                ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_NORMAL
             )
         }
     } catch (e: Exception) {
@@ -552,6 +702,9 @@ fun Context.getOrientationImage(uri: Uri): Int? {
     return null
 }
 
+/**
+ * Kiểm tra có cần rotate hoặc flip image không
+ */
 fun Int?.isNeedRotateOrFlipImage(): Boolean {
     val exifList = listOf(
         ExifInterface.ORIENTATION_ROTATE_90,
@@ -560,10 +713,12 @@ fun Int?.isNeedRotateOrFlipImage(): Boolean {
         ExifInterface.ORIENTATION_FLIP_HORIZONTAL,
         ExifInterface.ORIENTATION_FLIP_VERTICAL
     )
-
     return exifList.contains(this)
 }
 
+/**
+ * Modify orientation
+ */
 fun modifyOrientation(bitmap: Bitmap, inputStream: InputStream): Bitmap {
     try {
         val ei = ExifInterface(inputStream)
@@ -577,19 +732,17 @@ fun modifyOrientation(bitmap: Bitmap, inputStream: InputStream): Bitmap {
     }
 }
 
+/**
+ * Modify orientation for Bitmap
+ */
 fun Bitmap.modifyOrientation(orientation: Int?): Bitmap {
     try {
         return when (orientation) {
             ExifInterface.ORIENTATION_ROTATE_90 -> this.rotate(90f)
-
             ExifInterface.ORIENTATION_ROTATE_180 -> this.rotate(180f)
-
             ExifInterface.ORIENTATION_ROTATE_270 -> this.rotate(270f)
-
             ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> this.flip(true)
-
             ExifInterface.ORIENTATION_FLIP_VERTICAL -> this.flip(false)
-
             else -> this
         }
     } catch (e: Exception) {
@@ -599,15 +752,51 @@ fun Bitmap.modifyOrientation(orientation: Int?): Bitmap {
     }
 }
 
-fun Context.getBitmapFromAsset(path: String): Bitmap =
-    assets.open(path).use { BitmapFactory.decodeStream(it) }
+//endregion
 
-fun Context.createImageFile(): File {
-    val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-    val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-    return File.createTempFile(
-        "JPEG_${timeStamp}_",
-        ".jpg",
-        storageDir
-    )
+//region In-App Review
+
+/**
+ * Hiển thị in-app review
+ * @author doanvv
+ * @contributor HuanND
+ */
+fun Activity.showInAppReview() {
+    val reviewManager = ReviewManagerFactory.create(this)
+    reviewManager.requestReviewFlow().addOnCompleteListener { task ->
+        if (task.isSuccessful) {
+            val reviewInfo = task.result
+            val flow = reviewManager.launchReviewFlow(this, reviewInfo)
+            flow.addOnCompleteListener {
+                // The flow has finished. The API does not indicate whether the user
+                // reviewed or not, or even whether the review dialog was shown. Thus, no
+                // matter the result, we continue our app flow.
+            }
+        } else {
+            @ReviewErrorCode val reviewErrorCode = (task.exception as ReviewException).errorCode
+        }
+    }
 }
+
+//endregion
+
+//region Biometric
+
+/**
+ * Tạo PromptInfo cho biometric
+ */
+fun getPromptInfo(title: String, subtitle: String, negativeButtonText: String) =
+    BiometricPrompt.PromptInfo.Builder()
+        .setTitle(title)
+        .setSubtitle(subtitle)
+        .setNegativeButtonText(negativeButtonText)
+        .build()
+
+/**
+ * Biometric callback
+ */
+val biometricCall = object : BiometricPrompt.AuthenticationCallback() {
+    // Implement callbacks as needed
+}
+
+//endregion

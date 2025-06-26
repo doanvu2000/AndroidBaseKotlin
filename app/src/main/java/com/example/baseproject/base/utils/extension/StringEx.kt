@@ -7,57 +7,94 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+//region String Formatting
 
+/**
+ * Uppercase chữ cái đầu tiên của string
+ */
 fun String.upperFirstCase(): String {
-    if (this.isEmpty()) {
-        return this
-    }
-    if (this.length == 1) {
-        return this.uppercase()
-    }
-    val firstCase = this.first().toString().uppercase()
-    return firstCase + this.substring(1)
+    if (this.isEmpty()) return this
+    if (this.length == 1) return this.uppercase()
+    return this.first().toString().uppercase() + this.substring(1)
 }
 
-fun String?.containsIgnoreCase(regex: String): Boolean {
-    return this?.contains(regex, true) == true
-}
-
-fun String.encryptStringToLong(): Long {
-    val digest = MessageDigest.getInstance("SHA-256")
-    val hashBytes = digest.digest(this.toByteArray(StandardCharsets.UTF_8))
-
-    // Convert the hash bytes to a long value
-    var result: Long = 0
-    for (i in 0 until 8) {
-        result = (result shl 8) or (hashBytes[i].toLong() and 0xff)
-    }
-
-    return result
-}
-
-//"JIN VU di hOC" => "Jin Vu Di Hoc"
+/**
+ * Capitalize từng từ trong string
+ * "JIN VU di hOC" => "Jin Vu Di Hoc"
+ */
 fun String.capitalizeWord(): String {
-    if (this.isEmpty()) {
-        return this
-    }
+    if (this.isEmpty()) return this
     return this.lowercase().split(" ")
-        .joinToString(separator = " ", transform = { str ->
-            return@joinToString str.replaceFirstChar { char ->
-                char.titlecase()
-            }
-        })
+        .joinToString(separator = " ") { str ->
+            str.replaceFirstChar { char -> char.titlecase() }
+        }
 }
 
+/**
+ * Capitalize từng từ trong string (version 2)
+ */
 fun String.capitalizeWordV2(): String {
-    if (this.isEmpty()) {
-        return this
-    }
+    if (this.isEmpty()) return this
     return this.lowercase().split(" ")
         .joinToString(separator = " ", transform = String::upperFirstCase)
 }
 
-//convert Japanese string half-width to full-width
+//endregion
+
+//region String Validation
+
+/**
+ * Contains ignore case
+ */
+fun String?.containsIgnoreCase(regex: String): Boolean {
+    return this?.contains(regex, true) == true
+}
+
+/**
+ * Kiểm tra string chỉ chứa số
+ */
+fun String.isDigitOnly(): Boolean = matches(Regex("^\\d*\$"))
+
+/**
+ * Kiểm tra string chỉ chứa chữ cái
+ */
+fun String.isAlphabeticOnly(): Boolean = matches(Regex("^[a-zA-Z]*\$"))
+
+/**
+ * Kiểm tra string chỉ chứa chữ cái và số
+ */
+fun String.isAlphanumericOnly(): Boolean = matches(Regex("^[a-zA-Z\\d]*\$"))
+
+/**
+ * Kiểm tra có phải link GIF không
+ */
+fun String.isLinkGif(): Boolean = this.takeLast(4).contains(".gif")
+
+//endregion
+
+//region Security & Encryption
+
+/**
+ * Encrypt string thành Long bằng SHA-256
+ */
+fun String.encryptStringToLong(): Long {
+    val digest = MessageDigest.getInstance("SHA-256")
+    val hashBytes = digest.digest(this.toByteArray(StandardCharsets.UTF_8))
+
+    var result: Long = 0
+    for (i in 0 until 8) {
+        result = (result shl 8) or (hashBytes[i].toLong() and 0xff)
+    }
+    return result
+}
+
+//endregion
+
+//region Character Width Conversion
+
+/**
+ * Convert Japanese string half-width to full-width
+ */
 fun String.toFullWidth(): String {
     val builder = StringBuilder()
     for (c in this.toCharArray()) {
@@ -66,6 +103,9 @@ fun String.toFullWidth(): String {
     return builder.toString()
 }
 
+/**
+ * Convert Japanese string full-width to half-width
+ */
 fun String.toHalfWidth(): String {
     val builder = StringBuilder()
     for (c in this.toCharArray()) {
@@ -74,63 +114,86 @@ fun String.toHalfWidth(): String {
     return builder.toString()
 }
 
+/**
+ * Convert to full-width với Transliterator (API Q+)
+ */
 fun String.convertToFullWidth(): String {
-    if (isSdkQ()) {
-        return Transliterator.getInstance("Fullwidth-Halfwidth").transliterate(this)
+    return if (isSdkQ()) {
+        Transliterator.getInstance("Fullwidth-Halfwidth").transliterate(this)
+    } else {
+        toFullWidth()
     }
-    return toFullWidth()
 }
 
+/**
+ * Convert to half-width với Transliterator (API Q+)
+ */
 fun String.convertToHalfWidth(): String {
-    if (isSdkQ()) {
-        return Transliterator.getInstance("Halfwidth-Fullwidth").transliterate(this)
+    return if (isSdkQ()) {
+        Transliterator.getInstance("Halfwidth-Fullwidth").transliterate(this)
+    } else {
+        toHalfWidth()
     }
-    return toHalfWidth()
 }
 
-fun String.isLinkGif(): Boolean = this.takeLast(4).contains(".gif")
-fun String.isDigitOnly(): Boolean = matches(Regex("^\\d*\$"))
+//endregion
 
-fun String.isAlphabeticOnly(): Boolean = matches(Regex("^[a-zA-Z]*\$"))
+//region Date Conversion
 
-fun String.isAlphanumericOnly(): Boolean = matches(Regex("^[a-zA-Z\\d]*\$"))
-
-val isValidNumber = "1234".isDigitOnly() // Return true
-val isValid = "1234abc".isDigitOnly() // Return false
-val isOnlyAlphabetic = "abcABC".isAlphabeticOnly() // Return true
-val isOnlyAlphabetic2 = "abcABC123".isAlphabeticOnly() // Return false
-val isOnlyAlphanumeric = "abcABC123".isAlphanumericOnly() // Return true
-val isOnlyAlphanumeric2 = "abcABC@123.".isAlphanumericOnly() // Return false
-
-
+/**
+ * Convert string to Date với format tùy chỉnh
+ */
 fun String.toDate(format: String = "yyyy-MM-dd HH:mm:ss"): Date? {
     val dateFormatter = SimpleDateFormat(format, Locale.getDefault())
     return dateFormatter.parse(this)
 }
 
+/**
+ * Format Date thành string
+ */
 fun Date.toStringFormat(format: String = "yyyy-MM-dd HH:mm:ss"): String {
     val dateFormatter = SimpleDateFormat(format, Locale.getDefault())
     return dateFormatter.format(this)
 }
+
+//endregion
+
+//region String Utilities
+
+/**
+ * Substring an toàn với default value
+ */
 fun String.subStringSafety(startIndex: Int, endIndex: Int, default: String): String {
-    if (startIndex > endIndex) {
-        return default
-    }
-    if (length < startIndex || length < endIndex) {
-        return default
-    }
+    if (startIndex > endIndex) return default
+    if (length < startIndex || length < endIndex) return default
     return substring(startIndex, endIndex)
 }
 
-fun Any.prettyPrint(): String {
+/**
+ * Lấy extension của file
+ */
+fun String.getExtensionFile(default: String): String {
+    return try {
+        this.substring(this.lastIndexOf('.') + 1, this.length)
+    } catch (e: Exception) {
+        default
+    }
+}
 
+//endregion
+
+//region Pretty Print & Debug
+
+/**
+ * Pretty print object với format đẹp
+ */
+fun Any.prettyPrint(): String {
     var indentLevel = 0
     val indentWidth = 4
 
     fun padding() = "".padStart(indentLevel * indentWidth)
 
     val toString = toString()
-
     val stringBuilder = StringBuilder(toString.length)
 
     var i = 0
@@ -148,7 +211,6 @@ fun Any.prettyPrint(): String {
 
             ',' -> {
                 stringBuilder.appendLine(char).append(padding())
-                // ignore space after comma as we have added a newline
                 val nextChar = toString.getOrElse(i + 1) { char }
                 if (nextChar == ' ') i++
             }
@@ -159,10 +221,12 @@ fun Any.prettyPrint(): String {
         }
         i++
     }
-
     return stringBuilder.toString()
 }
 
+/**
+ * Pretty print với Kotlin-style format
+ */
 fun Any?.toPrettyString2(): String {
     if (this == null) return "(null)"
 
@@ -177,7 +241,6 @@ fun Any?.toPrettyString2(): String {
     var nestingContext: Char? = null
     var i = 0
 
-    // Replace standard '[' and '{' characters with Kotlin specific functions
     while (i < toString.length) {
         when (val char = toString[i]) {
             '(', '[', '{' -> {
@@ -188,7 +251,7 @@ fun Any?.toPrettyString2(): String {
                         '[' -> "listOf("
                         '{' -> "mapOf("
                         else -> '('
-                    },
+                    }
                 ).append(padding())
             }
 
@@ -200,7 +263,6 @@ fun Any?.toPrettyString2(): String {
 
             ',' -> {
                 stringBuilder.appendLine(char).append(padding())
-                // ignore space after comma as we have added a newline
                 val nextChar = toString.getOrElse(i + 1) { char }
                 if (nextChar == ' ') i++
             }
@@ -216,14 +278,14 @@ fun Any?.toPrettyString2(): String {
                 stringBuilder.append(char)
             }
         }
-
         i++
     }
-
     return stringBuilder.toString()
 }
 
-//same prettyPrint
+/**
+ * Pretty print function (same as prettyPrint)
+ */
 fun Any.pretty() = toString().let { toString ->
     var indentLevel = 0
     val indentWidth = 4
@@ -262,6 +324,9 @@ fun Any.pretty() = toString().let { toString ->
     }
 }
 
+/**
+ * Debug string với indent tùy chỉnh
+ */
 fun Any.toPrettyDebugString(indentWidth: Int = 4) = buildString {
     fun StringBuilder.indent(level: Int) = append("".padStart(level * indentWidth))
     var ignoreSpace = false
@@ -278,10 +343,4 @@ fun Any.toPrettyDebugString(indentWidth: Int = 4) = buildString {
     }
 }
 
-fun String.getExtensionFile(default: String): String {
-    return try {
-        this.substring(this.lastIndexOf('.') + 1, this.length)
-    } catch (e: Exception) {
-        default
-    }
-}
+//endregion

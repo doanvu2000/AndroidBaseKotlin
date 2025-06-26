@@ -12,119 +12,178 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.example.baseproject.base.utils.util.AppLogger
 
-/**
- * Glide lib
- */
+//region Basic Image Loading
+private const val TAG = "GlideEx"
 
+/**
+ * Load image từ source (URL, resource, file, etc.)
+ */
 fun ImageView.loadSrc(src: Any) {
     tryCatch(tryBlock = {
         Glide.with(this.context).load(src).into(this)
     }, catchBlock = { e ->
-        AppLogger.e("ImageViewEx", "loadSrc_error: ${e.message}")
+        AppLogger.e(TAG, "loadSrc_error: ${e.message}")
     })
 }
 
+/**
+ * Load image với error fallback
+ */
 fun ImageView.loadSrc(src: Any, error: Int) {
     tryCatch(tryBlock = {
         Glide.with(this.context).load(src).error(error).into(this)
     }, catchBlock = { e ->
-        AppLogger.e("ImageViewEx", "loadSrc_error: ${e.message}")
+        AppLogger.e(TAG, "loadSrc_error: ${e.message}")
     })
 }
 
+/**
+ * Load image với placeholder và error fallback
+ */
 fun ImageView.loadSrc(src: Any, placeHolder: Int, error: Int) {
     tryCatch(tryBlock = {
         Glide.with(this.context).load(src).placeholder(placeHolder).error(error).into(this)
     }, catchBlock = { e ->
-        AppLogger.e("ImageViewEx", "loadSrc_error: ${e.message}")
+        AppLogger.e(TAG, "loadSrc_error: ${e.message}")
     })
 }
 
+/**
+ * Load GIF animation
+ */
 fun ImageView.loadGif(src: Any) {
     tryCatch(tryBlock = {
         Glide.with(this.context).asGif().load(src).into(this)
     }, catchBlock = { e ->
-        AppLogger.e("ImageViewEx", "loadGif_error: ${e.message}")
+        AppLogger.e(TAG, "loadGif_error: ${e.message}")
     })
 }
 
-/*
- update: 04/11/2024
- by: doan-vu.dev
+//endregion
+
+//region Cache Management
+
+/**
+ * Load image và skip RAM cache
+ * Update: 04/11/2024 by: doan-vu.dev
  */
 fun ImageView.loadSrcNoCacheRam(src: Any) {
     tryCatch(tryBlock = {
         Glide.with(this.context).load(src).skipMemoryCache(true).into(this)
     }, catchBlock = { e ->
-        AppLogger.e("ImageViewEx", "loadSrcNoCacheRam_error: ${e.message}")
+        AppLogger.e(TAG, "loadSrcNoCacheRam_error: ${e.message}")
     })
 }
 
+/**
+ * Load image và skip disk cache
+ */
 fun ImageView.loadSrcNoCacheDisk(src: Any) {
     tryCatch(tryBlock = {
         Glide.with(this.context).load(src).diskCacheStrategy(DiskCacheStrategy.NONE).into(this)
     }, catchBlock = { e ->
-        AppLogger.e("ImageViewEx", "loadSrcNoCacheDisk_error: ${e.message}")
+        AppLogger.e(TAG, "loadSrcNoCacheDisk_error: ${e.message}")
     })
 }
 
+/**
+ * Load image không cache (cả RAM và Disk)
+ */
 fun ImageView.loadSrcNoCache(src: Any) {
     tryCatch(tryBlock = {
-        Glide.with(this.context).load(src).skipMemoryCache(true)
-            .diskCacheStrategy(DiskCacheStrategy.NONE).into(this)
+        Glide.with(this.context).load(src)
+            .skipMemoryCache(true)
+            .diskCacheStrategy(DiskCacheStrategy.NONE)
+            .into(this)
     }, catchBlock = { e ->
-        AppLogger.e("ImageViewEx", "loadSrcNoCache_error: ${e.message}")
+        AppLogger.e(TAG, "loadSrcNoCache_error: ${e.message}")
     })
 }
 
+/**
+ * Load image với cache strategy DATA
+ */
 fun ImageView.loadSrcCacheData(src: Any) {
     tryCatch(tryBlock = {
-        Glide.with(this.context).load(src).skipMemoryCache(true)
-            .diskCacheStrategy(DiskCacheStrategy.DATA).into(this)
+        Glide.with(this.context).load(src)
+            .skipMemoryCache(true)
+            .diskCacheStrategy(DiskCacheStrategy.DATA)
+            .into(this)
     }, catchBlock = { e ->
-        AppLogger.e("ImageViewEx", "loadSrcCacheData_error: ${e.message}")
+        AppLogger.e(TAG, "loadSrcCacheData_error: ${e.message}")
     })
 }
 
+/**
+ * Load image với cache strategy RESOURCE
+ */
 fun ImageView.loadSrcCacheResource(src: Any) {
     tryCatch(tryBlock = {
-        Glide.with(this.context).load(src).skipMemoryCache(true)
-            .diskCacheStrategy(DiskCacheStrategy.RESOURCE).into(this)
+        Glide.with(this.context).load(src)
+            .skipMemoryCache(true)
+            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+            .into(this)
     }, catchBlock = { e ->
-        AppLogger.e("ImageViewEx", "loadSrcCacheResource_error: ${e.message}")
+        AppLogger.e(TAG, "loadSrcCacheResource_error: ${e.message}")
     })
 }
 
+/**
+ * Load image với cache strategy ALL
+ */
 fun ImageView.loadSrcCacheAllToDisk(src: Any) {
     tryCatch(tryBlock = {
-        Glide.with(this.context).load(src).skipMemoryCache(true)
-            .diskCacheStrategy(DiskCacheStrategy.ALL).into(this)
+        Glide.with(this.context).load(src)
+            .skipMemoryCache(true)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .into(this)
     }, catchBlock = { e ->
-        AppLogger.e("ImageViewEx", "loadSrcCacheAllToDisk_error: ${e.message}")
+        AppLogger.e(TAG, "loadSrcCacheAllToDisk_error: ${e.message}")
     })
 }
 
+//endregion
+
+//region Rounded Corners
+
+/**
+ * Load image với rounded corners và cache ALL
+ */
 fun ImageView.loadSrcRoundedCacheAll(url: Any, radius: Int) {
     tryCatch(tryBlock = {
         Glide.with(context).load(url)
             .apply(RequestOptions.bitmapTransform(RoundedCorners(radius.dpToPx())))
-            .skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.ALL).into(this)
+            .skipMemoryCache(true)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .into(this)
     }, catchBlock = { e ->
-        AppLogger.e("ImageViewEx", "loadSrcRoundedCacheAll_error: ${e.message}")
+        AppLogger.e(TAG, "loadSrcRoundedCacheAll_error: ${e.message}")
     })
 }
 
+/**
+ * Load image với rounded corners và no cache
+ */
 fun ImageView.loadSrcRoundedNoCache(url: Any, radius: Int) {
     tryCatch(tryBlock = {
         context ?: return@tryCatch
         Glide.with(context).load(url)
             .apply(RequestOptions.bitmapTransform(RoundedCorners(radius.dpToPx())))
-            .skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).into(this)
+            .skipMemoryCache(true)
+            .diskCacheStrategy(DiskCacheStrategy.NONE)
+            .into(this)
     }, catchBlock = { e ->
-        AppLogger.e("ImageViewEx", "loadSrcRoundedNoCache_error: ${e.message}")
+        AppLogger.e(TAG, "loadSrcRoundedNoCache_error: ${e.message}")
     })
 }
 
+//endregion
+
+//region Bitmap Loading
+
+/**
+ * Load bitmap từ URL với callback
+ */
 fun Context.glideLoadBitmap(url: Any, onDone: (Bitmap?) -> Unit) {
     val target = object : CustomTarget<Bitmap>() {
         override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
@@ -137,9 +196,17 @@ fun Context.glideLoadBitmap(url: Any, onDone: (Bitmap?) -> Unit) {
         }
 
         override fun onLoadCleared(placeholder: Drawable?) {
-
+            // No implementation needed
         }
     }
-    Glide.with(this).asBitmap().load(url).skipMemoryCache(false)
-        .diskCacheStrategy(DiskCacheStrategy.NONE).timeout(15000).into(target)
+
+    Glide.with(this)
+        .asBitmap()
+        .load(url)
+        .skipMemoryCache(false)
+        .diskCacheStrategy(DiskCacheStrategy.NONE)
+        .timeout(15000)
+        .into(target)
 }
+
+//endregion

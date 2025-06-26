@@ -12,6 +12,19 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 object DownloadUtil {
+
+    //region Audio Download
+
+    /**
+     * Download audio file from URL
+     * @param lifecycle LifecycleCoroutineScope for coroutine management
+     * @param cacheDir cache directory to save file
+     * @param fileName name of the output file
+     * @param src source URL to download from
+     * @param timeDelay delay before calling onDone callback
+     * @param onDone callback when download is successful
+     * @param onFail callback when download fails
+     */
     fun downloadAudio(
         lifecycle: LifecycleCoroutineScope,
         cacheDir: File,
@@ -22,27 +35,30 @@ object DownloadUtil {
         onFail: () -> Unit
     ) {
         lifecycle.launch(Dispatchers.IO) {
-            val outputStream: FileOutputStream
-            val outputFile: File
             try {
-                outputFile = File(cacheDir, fileName)
-                outputStream = FileOutputStream(outputFile)
+                val outputFile = File(cacheDir, fileName)
+                val outputStream = FileOutputStream(outputFile)
                 val url = URL(src)
                 val connection = url.openConnection() as HttpURLConnection
                 connection.requestMethod = "GET"
+
                 val inputStream: InputStream = connection.inputStream
                 val fileLength = connection.contentLength
                 val buffer = ByteArray(1024)
-                var total: Int = 0
+                var total = 0
                 var bytesRead: Int
+
                 while (inputStream.read(buffer).also { bytesRead = it } != -1) {
                     outputStream.write(buffer, 0, bytesRead)
                     total += bytesRead
-                    //updateUIDownload(total * 100 / fileLength)
+                    // Optional: Update UI with download progress
+                    // updateUIDownload(total * 100 / fileLength)
                 }
+
                 outputStream.close()
                 inputStream.close()
                 connection.disconnect()
+
                 delay(timeDelay)
                 onDone.invoke(outputFile)
             } catch (e: IOException) {
@@ -51,4 +67,6 @@ object DownloadUtil {
             }
         }
     }
+
+    //endregion
 }

@@ -24,45 +24,108 @@ import java.io.File
 import java.util.concurrent.Executor
 import kotlin.coroutines.CoroutineContext
 
+//region Permission Management
+
+/**
+ * Kiểm tra permission từ Fragment
+ */
 fun Fragment.checkPermission(permission: String): Boolean {
     return requireContext().checkPermission(permission)
 }
 
-fun Fragment.hasReadStoragePermission() = requireContext().hasReadStoragePermission()
+/**
+ * Kiểm tra quyền read storage
+ */
+fun Fragment.hasReadStoragePermission(): Boolean = requireContext().hasReadStoragePermission()
+
+/**
+ * Đăng ký ActivityResultLauncher cho multiple permissions
+ */
 fun Fragment.getActivityResultLauncher(callBack: (Map<String, Boolean>) -> Unit): ActivityResultLauncher<Array<String>> {
     return registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
         callBack.invoke(permissions)
     }
 }
 
+/**
+ * Request permission read storage
+ */
 fun Fragment.requestPermissionReadStorage(permissionLauncher: ActivityResultLauncher<Array<String>>) {
     requireContext().requestPermissionReadStorage(permissionLauncher)
 }
 
+//endregion
+
+//region Fragment Management
+
+/**
+ * Tìm child fragment theo tag
+ */
 fun Fragment.findChildFragment(TAG: String): Fragment? {
     return childFragmentManager.findFragmentByTag(TAG)
 }
 
+//endregion
+
+//region UI Utilities
+
+/**
+ * Hiển thị Toast từ Fragment
+ */
 fun Fragment.showToast(msg: String, isShowDurationLong: Boolean = false) {
     requireContext().showToast(msg, isShowDurationLong)
 }
 
-//using finger to authentication in fragment
-fun Fragment.showAuthenticatorWithFinger(
-    title: String = "Title", subtitle: String = "Subtitle", negativeButtonText: String = "Cancel"
-) {
-    val biometricPrompt: BiometricPrompt
-    val executor: Executor = ContextCompat.getMainExecutor(requireContext())
-    biometricPrompt = BiometricPrompt(this, executor, biometricCall)
+/**
+ * Hiển thị SnackBar từ Fragment
+ */
+fun Fragment.showSnackBar(msg: String, duration: Int = 500) {
+    view?.let {
+        val snackBar = Snackbar.make(it, msg, duration)
+        // Có thể customize color ở đây
+        // .setTextColor(getColorById(R.color.text_selected))
+        val snackView = snackBar.view
+        // snackView.setBackgroundColor(getColorById(R.color.color_app))
+        snackBar.show()
+    }
+}
 
+//endregion
+
+//region Biometric Authentication
+
+/**
+ * Hiển thị xác thực vân tay từ Fragment
+ */
+fun Fragment.showAuthenticatorWithFinger(
+    title: String = "Title",
+    subtitle: String = "Subtitle",
+    negativeButtonText: String = "Cancel"
+) {
+    val executor: Executor = ContextCompat.getMainExecutor(requireContext())
+    val biometricPrompt = BiometricPrompt(this, executor, biometricCall)
     val promptInfo: BiometricPrompt.PromptInfo = getPromptInfo(title, subtitle, negativeButtonText)
     biometricPrompt.authenticate(promptInfo)
 }
 
+//endregion
+
+//region App Information
+
+/**
+ * Lấy version name của app
+ */
 fun Fragment.getVersionName(): String {
     return requireContext().getVersionName()
 }
 
+//endregion
+
+//region Audio & Media
+
+/**
+ * Mở cài đặt Equalizer
+ */
 fun Fragment.openEqualizerSetting(audioSessionId: Int) {
     try {
         val equalizerIntent = Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL)
@@ -75,20 +138,51 @@ fun Fragment.openEqualizerSetting(audioSessionId: Int) {
     }
 }
 
+/**
+ * Download audio file
+ */
+fun Fragment.downloadAudio(
+    fileName: String,
+    src: String,
+    timeDelay: Long = 300,
+    onDone: (File) -> Unit,
+    onFail: () -> Unit
+) {
+    val lifecycle = viewLifecycleOwner.lifecycleScope
+    DownloadUtil.downloadAudio(
+        lifecycle, requireContext().cacheDir, fileName, src, timeDelay, onDone, onFail
+    )
+}
+
+//endregion
+
+//region Keyboard Management
+
+/**
+ * Ẩn bàn phím từ Fragment
+ */
 fun Fragment.hideKeyboard() {
     view?.let { activity?.hideKeyboard(it) }
 }
 
-fun Fragment.showSnackBar(msg: String, duration: Int = 500) {
-    view?.let {
-        val snackBar = Snackbar.make(it, msg, duration)
-//            .setTextColor(getColorById(R.color.text_selected))
-        val snackView = snackBar.view
-//        snackView.setBackgroundColor(getColorById(R.color.color_app))
-        snackBar.show()
-    }
+//endregion
+
+//region Animation Utilities
+
+/**
+ * Lấy animation resource
+ */
+fun Fragment.getAnimation(animationId: Int): Animation? {
+    return requireContext().getAnimation(animationId)
 }
 
+//endregion
+
+//region Coroutine Utilities
+
+/**
+ * Delay trước khi thực hiện action
+ */
 fun Fragment.delayBeforeAction(timeDelay: Long = 300, action: () -> Unit) {
     lifecycleScope.launch(Dispatchers.Main) {
         withContext(Dispatchers.IO) {
@@ -98,27 +192,21 @@ fun Fragment.delayBeforeAction(timeDelay: Long = 300, action: () -> Unit) {
     }
 }
 
+/**
+ * Launch coroutine với dispatcher
+ */
 fun Fragment.launchWitCoroutine(
-    dispatcher: CoroutineContext = Dispatchers.Main, action: () -> Unit
+    dispatcher: CoroutineContext = Dispatchers.Main,
+    action: () -> Unit
 ) {
     lifecycleScope.launch(dispatcher) {
         action()
     }
 }
 
-fun Fragment.downloadAudio(
-    fileName: String, src: String, timeDelay: Long = 300, onDone: (File) -> Unit, onFail: () -> Unit
-) {
-    val lifecycle = viewLifecycleOwner.lifecycleScope
-    DownloadUtil.downloadAudio(
-        lifecycle, requireContext().cacheDir, fileName, src, timeDelay, onDone, onFail
-    )
-}
-
-fun Fragment.getAnimation(animationId: Int): Animation? {
-    return requireContext().getAnimation(animationId)
-}
-
+/**
+ * Launch coroutine khi Fragment ở trạng thái STARTED
+ */
 fun BaseFragment<*>.launchOnStarted(block: suspend CoroutineScope.() -> Unit) {
     launchCoroutine {
         repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -127,6 +215,13 @@ fun BaseFragment<*>.launchOnStarted(block: suspend CoroutineScope.() -> Unit) {
     }
 }
 
+//endregion
+
+//region Lifecycle Utilities
+
+/**
+ * Lấy safe ViewLifecycleOwner
+ */
 fun Fragment.safeViewLifecycleOwner(): LifecycleOwner? {
     if (view == null) {
         return null
@@ -134,6 +229,24 @@ fun Fragment.safeViewLifecycleOwner(): LifecycleOwner? {
     return viewLifecycleOwner
 }
 
+/**
+ * Lấy current state của Fragment
+ */
+val Fragment.currentState: Lifecycle.State?
+    get() = if (view != null) viewLifecycleOwner.lifecycle.currentState else null
+
+/**
+ * Kiểm tra Fragment có đang ở trạng thái RESUMED không
+ */
+fun Fragment.currentStateIsResume(): Boolean = currentState == Lifecycle.State.RESUMED
+
+//endregion
+
+//region Device Utilities
+
+/**
+ * Lấy default rotation của màn hình
+ */
 @Suppress("DEPRECATION")
 fun Fragment.getDefaultRotation(): Int {
     return try {
@@ -143,7 +256,4 @@ fun Fragment.getDefaultRotation(): Int {
     }
 }
 
-val Fragment.currentState: Lifecycle.State?
-    get() = if (view != null) viewLifecycleOwner.lifecycle.currentState else null
-
-fun Fragment.currentStateIsResume() = currentState == Lifecycle.State.RESUMED
+//endregion
