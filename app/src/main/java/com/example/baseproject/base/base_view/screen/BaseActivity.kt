@@ -30,66 +30,96 @@ import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
+/**
+ * Base Activity cho tất cả các Activity trong app
+ * Cung cấp các utility methods và setup cơ bản
+ */
 abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
-    //region variable
+
     companion object {
         const val TAG = Constants.TAG
         const val TIME_DELAY_CLICK = 200L
     }
 
+    // View binding instance
     lateinit var binding: VB
+
+    // Click prevention
     private var isAvailableClick = true
 
+    // Screen dimensions
     var screenWidth = 0
     var screenHeight = 0
 
-    val myApplication by lazy {
-        application as MyApplication
-    }
-    //endregion
+    // Application instance
+    val myApplication by lazy { application as MyApplication }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (isFullScreenMode()) {
-            setLayoutParamFullScreen()
-        }
+        // Setup fullscreen if needed
+        if (isFullScreenMode()) setLayoutParamFullScreen()
+
+        // Enable edge-to-edge display
         enableEdgeToEdge()
+
         super.onCreate(savedInstanceState)
 
+        // Initialize view binding
         binding = inflateViewBinding(layoutInflater)
         setContentView(binding.root)
 
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
+        // Setup window insets
+        setupWindowInsets()
 
-        SharePrefUtils.init(this)
+        // Initialize utilities
+        initializeUtilities()
 
-        screenWidth = getScreenWidth()
+        // Setup back press handling
+        handleBackPressed { onBack() }
 
-        screenHeight = getScreenHeight()
-        checkInitRemoteConfig()
-
-        handleBackPressed {
-            onBack()
-        }
-
+        // Initialize views and data
         initView()
         initData()
         initListener()
     }
 
+    /**
+     * Setup window insets for edge-to-edge display
+     */
+    private fun setupWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+    }
+
+    /**
+     * Initialize various utilities and services
+     */
+    private fun initializeUtilities() {
+        SharePrefUtils.init(this)
+        screenWidth = getScreenWidth()
+        screenHeight = getScreenHeight()
+        checkInitRemoteConfig()
+    }
+
+    /**
+     * Initialize RemoteConfig if not already initialized
+     */
     private fun checkInitRemoteConfig() {
         try {
             if (!RemoteConfigUtil.isInitialize(this)) {
                 RemoteConfigUtil.init(this)
             }
         } catch (e: Exception) {
-            Log.e(TAG, "checkInitRemoteConfig: error when try init RemoteConfig")
+            Log.e(TAG, "checkInitRemoteConfig: error when try init RemoteConfig", e)
         }
     }
 
+    /**
+     * Handle back press action
+     * Override this method to customize back press behavior
+     */
     open fun onBack() {
         if (supportFragmentManager.backStackEntryCount > 0) {
             onBackPressedDispatcher.onBackPressed()
@@ -98,18 +128,35 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
         }
     }
 
-    open fun isFullScreenMode(): Boolean {
-        return false
-    }
+    /**
+     * Determine if activity should run in fullscreen mode
+     * Override this method to enable fullscreen
+     */
+    open fun isFullScreenMode(): Boolean = false
 
-    /**override it and inflate your view binding, demo in MainActivity*/
+    /**
+     * Inflate view binding - must be implemented by subclasses
+     */
     abstract fun inflateViewBinding(inflater: LayoutInflater): VB
 
+    /**
+     * Initialize views - must be implemented by subclasses
+     */
     abstract fun initView()
+
+    /**
+     * Initialize data - must be implemented by subclasses
+     */
     abstract fun initData()
+
+    /**
+     * Initialize listeners - must be implemented by subclasses
+     */
     abstract fun initListener()
 
-
+    /**
+     * Delay click to prevent multiple rapid clicks
+     */
     private fun delayClick() {
         launchCoroutineIO {
             isAvailableClick = false
@@ -118,28 +165,45 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
         }
     }
 
+    /**
+     * Safe click extension to prevent multiple rapid clicks
+     * @param isAnimationClick enable click animation
+     * @param action action to perform on click
+     */
     fun View.clickSafe(isAnimationClick: Boolean = false, action: () -> Unit) {
-        this.setOnClickListener {
+        setOnClickListener {
             if (isAvailableClick) {
-                if (isAnimationClick) {
-                    clickAnimation()
-                }
+                if (isAnimationClick) clickAnimation()
                 action()
                 delayClick()
             }
         }
     }
 
+    //region Coroutine Management
+
+    /**
+     * Global exception handler for coroutines
+     */
     protected val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
         handleError(throwable)
     }
 
+    /**
+     * Handle coroutine errors
+     * Override this method to customize error handling
+     */
     open fun handleError(throwable: Throwable) {
-        val errorMessage = throwable.message ?: ""
+        val errorMessage = throwable.message ?: "Unknown error"
         logError(errorMessage)
         throwable.printStackTrace()
     }
 
+    /**
+     * Launch coroutine with error handling
+     * @param dispatcher coroutine dispatcher (default: EmptyCoroutineContext)
+     * @param blockCoroutine coroutine block to execute
+     */
     fun launchCoroutine(
         dispatcher: CoroutineContext = EmptyCoroutineContext,
         blockCoroutine: suspend CoroutineScope.() -> Unit
@@ -153,30 +217,37 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
         }
     }
 
-    fun launchCoroutineMain(blockCoroutine: suspend CoroutineScope.() -> Unit) {
-        launchCoroutine(Dispatchers.Main) {
-            blockCoroutine()
-        }
-    }
+    /**
+     * Launch coroutine on Main dispatcher
+     */
+    fun launchCoroutineMain(blockCoroutine: suspend CoroutineScope.() -> Unit) =
+        launchCoroutine(Dispatchers.Main, blockCoroutine)
 
-    fun launchCoroutineIO(blockCoroutine: suspend CoroutineScope.() -> Unit) {
-        launchCoroutine(Dispatchers.IO) {
-            blockCoroutine()
-        }
-    }
+    /**
+     * Launch coroutine on IO dispatcher
+     */
+    fun launchCoroutineIO(blockCoroutine: suspend CoroutineScope.() -> Unit) =
+        launchCoroutine(Dispatchers.IO, blockCoroutine)
 
+    /**
+     * Execute action after delay
+     * @param delayTime delay in milliseconds (default: 200ms)
+     * @param action action to perform after delay
+     */
     fun delayToAction(delayTime: Long = 200L, action: () -> Unit) {
         launchCoroutineIO {
             delay(delayTime)
-            launchCoroutineMain {
-                action()
-            }
+            launchCoroutineMain { action() }
         }
     }
 
+    //endregion
+
     /**
-     * Ignore margin bottom when action compat of system, such as: share
-     * */
+     * Adjust view insets for bottom navigation compatibility
+     * Useful when system actions like sharing might interfere
+     * @param viewBottom view to adjust margins for
+     */
     protected fun adjustInsetsForBottomNavigation(viewBottom: View) {
         ViewCompat.setOnApplyWindowInsetsListener(viewBottom) { view, insets ->
             try {
@@ -197,24 +268,31 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
+        // Reset click availability when activity is paused
         isAvailableClick = true
     }
 
-    //region logcat
-    fun logDebug(msg: String) {
-        AppLogger.d(TAG, "${this.javaClass.simpleName}: $msg")
-    }
+    //region Logging Utilities
 
-    fun logWarning(msg: String) {
-        AppLogger.w(TAG, "${this.javaClass.simpleName}: $msg")
-    }
+    /**
+     * Log debug message
+     */
+    fun logDebug(msg: String) = AppLogger.d(TAG, "${this.javaClass.simpleName}: $msg")
 
-    fun logError(msg: String) {
-        AppLogger.e(TAG, "${this.javaClass.simpleName}: $msg")
-    }
+    /**
+     * Log warning message
+     */
+    fun logWarning(msg: String) = AppLogger.w(TAG, "${this.javaClass.simpleName}: $msg")
 
-    fun logInfo(msg: String) {
-        AppLogger.i(TAG, "${this.javaClass.simpleName}: $msg")
-    }
+    /**
+     * Log error message
+     */
+    fun logError(msg: String) = AppLogger.e(TAG, "${this.javaClass.simpleName}: $msg")
+
+    /**
+     * Log info message
+     */
+    fun logInfo(msg: String) = AppLogger.i(TAG, "${this.javaClass.simpleName}: $msg")
+
     //endregion
 }
