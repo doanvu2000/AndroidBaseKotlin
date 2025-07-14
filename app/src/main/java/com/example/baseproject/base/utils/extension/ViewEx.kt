@@ -17,6 +17,7 @@ import android.view.ViewGroup
 import android.view.ViewOutlineProvider
 import android.view.ViewTreeObserver
 import android.view.animation.AnimationUtils
+import android.view.animation.ScaleAnimation
 import android.view.inputmethod.InputMethodManager
 import android.widget.SeekBar
 import androidx.annotation.DrawableRes
@@ -214,8 +215,16 @@ fun View.setOnSafeClick(onSafeClickListener: (View) -> Unit) {
  */
 fun clickAnimation(mContext: Context?, view: View) {
     if (mContext != null) {
-        val myAnim = AnimationUtils.loadAnimation(mContext, R.anim.bounce)
-        view.startAnimation(myAnim)
+        val scaleAnimation = ScaleAnimation(
+            0.97f, 1f, 0.97f, 1f,
+            0.5f, 0.5f
+        ).apply {
+            duration = 100
+        }
+
+        view.startAnimation(scaleAnimation)
+//        val myAnim = AnimationUtils.loadAnimation(mContext, R.anim.bounce)
+//        view.startAnimation(myAnim)
     }
 }
 

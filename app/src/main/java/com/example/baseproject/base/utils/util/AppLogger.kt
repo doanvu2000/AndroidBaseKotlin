@@ -23,7 +23,7 @@ object AppLogger {
      * @param msg message to log
      */
     fun i(tag: String, msg: String) {
-        if (checkBeforeLog(tag)) return
+        if (isDisableLog(tag)) return
         Log.i(tag, msg)
     }
 
@@ -33,7 +33,7 @@ object AppLogger {
      * @param msg message to log
      */
     fun d(tag: String, msg: String) {
-        if (checkBeforeLog(tag)) return
+        if (isDisableLog(tag)) return
         Log.d(tag, msg)
     }
 
@@ -43,7 +43,7 @@ object AppLogger {
      * @param msg message to log
      */
     fun w(tag: String, msg: String) {
-        if (checkBeforeLog(tag)) return
+        if (isDisableLog(tag)) return
         Log.w(tag, msg)
     }
 
@@ -53,7 +53,7 @@ object AppLogger {
      * @param msg message to log
      */
     fun e(tag: String, msg: String) {
-        if (checkBeforeLog(tag)) return
+        if (isDisableLog(tag)) return
         Log.e(tag, msg)
     }
 
@@ -66,7 +66,7 @@ object AppLogger {
      * @param tag log tag to validate
      * @return true if logging should be skipped, false otherwise
      */
-    private fun checkBeforeLog(tag: String): Boolean {
+    private fun isDisableLog(tag: String): Boolean {
         // Không log khi không phải debug mode
         if (!isDebugMode()) {
             return true
