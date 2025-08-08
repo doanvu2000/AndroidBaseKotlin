@@ -39,6 +39,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.NavHostFragment
 import com.example.baseproject.R
 import com.example.baseproject.base.base_view.screen.BaseActivity
 import com.example.baseproject.base.utils.util.Constants
@@ -587,4 +588,28 @@ fun BaseActivity<*>.launchOnStarted(block: suspend CoroutineScope.() -> Unit) {
             block()
         }
     }
+}
+
+/**
+ * ```kotlin
+ * setStartDestination(
+ *      navHostFragmentId = R.id.nav_host_fragment,
+ *      navGraphId = R.navigation.nav_graph,
+ *      startDestination = R.id.homeFragment
+ *  )
+ * ```
+ * */
+fun BaseActivity<*>.setStartDestination(
+    navHostFragmentId: Int, navGraphId: Int, startDestination: Int
+) {
+    tryCatch(tryBlock = {
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(navHostFragmentId) as NavHostFragment
+        val navController = navHostFragment.navController
+        val navGraph = navController.navInflater.inflate(navGraphId)
+        navGraph.setStartDestination(startDestination)
+        navController.graph = navGraph
+    }, catchBlock = { e ->
+        logError(e.stackTraceToString())
+    })
 }

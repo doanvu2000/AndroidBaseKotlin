@@ -1,5 +1,6 @@
 package com.example.baseproject.base.utils.extension
 
+import android.animation.Animator
 import android.app.PendingIntent
 import android.content.ContentResolver
 import android.content.Context
@@ -467,3 +468,12 @@ fun tryCatch(tryBlock: () -> Unit, catchBlock: ((e: Exception) -> Unit)? = null)
 }
 
 //endregion
+
+/**
+ * Extension function to stop an Animator.
+ * It removes all listeners and cancels the animation.
+ */
+fun Animator?.stopAll() {
+    this?.removeAllListeners()
+    this?.cancel()
+}

@@ -6,7 +6,6 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Outline
 import android.graphics.Path
-import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.drawable.LayerDrawable
 import android.os.Build
@@ -24,6 +23,8 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.createBitmap
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import com.base.stickerview.StickerImageView
@@ -98,15 +99,19 @@ fun View.focusAndShowKeyboard() {
 }
 
 /**
- * Kiểm tra soft keyboard có visible không
+ * Call in Activity/Fragment, param is rootView.
  */
-fun View.isSoftKeyboardVisible(): Boolean {
-    val rect = Rect()
-    rootView.getWindowVisibleDisplayFrame(rect)
-    val screenHeight = rootView.height
-    val keyboardHeight = screenHeight - rect.bottom
-    val threshold = screenHeight * 0.15 // Adjust this value as per your requirements
-    return keyboardHeight > threshold
+fun View.detectSoftKeyboardVisibleState(keyboardState: (isShow: Boolean, keyboardHeight: Int) -> Unit) {
+    ViewCompat.setOnApplyWindowInsetsListener(rootView) { view, insets ->
+        val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+        val imeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+
+        AppLogger.d(Constants.TAG, "isShowKeyboard: $imeVisible")
+        AppLogger.d(Constants.TAG, "keyboardHeight: $imeHeight")
+
+        keyboardState.invoke(imeVisible, imeHeight)
+        insets
+    }
 }
 
 //endregion
