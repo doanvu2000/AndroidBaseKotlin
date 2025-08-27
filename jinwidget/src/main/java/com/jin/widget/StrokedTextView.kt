@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
 import android.util.AttributeSet
@@ -67,16 +66,16 @@ class StrokedTextView @JvmOverloads constructor(
 
         // Calculate text layout
         val width = measuredWidth
-        val alignment = Layout.Alignment.ALIGN_CENTER
+//        val alignment = Layout.Alignment.ALIGN_CENTER
 
         val strokeLayout =
             StaticLayout.Builder.obtain(textToDraw, 0, textToDraw.length, strokePaint, width)
-                .setAlignment(alignment)
+//                .setAlignment(alignment)
                 .build()
 
         val fillLayout =
             StaticLayout.Builder.obtain(textToDraw, 0, textToDraw.length, fillPaint, width)
-                .setAlignment(alignment)
+//                .setAlignment(alignment)
                 .build()
 
         // Draw stroke first
