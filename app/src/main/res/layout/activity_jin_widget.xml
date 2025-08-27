@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <ImageView
+        android:id="@+id/btnBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:src="@drawable/ic_back"
+        tools:ignore="MissingConstraints" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/edtLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnBack">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edtInput"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:hint="Enter text"
+            android:textColor="#000000"
+            android:textColorHint="#4D000000" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.jin.widget.MagicTextView
+        android:id="@+id/magicTextView"
+        style="@style/fontRoboto600"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="12dp"
+        android:layout_marginTop="16dp"
+        android:paddingVertical="4dp"
+        android:text="Magic TextView"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        app:innerShadowColor="#FFC107"
+        app:innerShadowDx="2dp"
+        app:innerShadowDy="2dp"
+        app:innerShadowRadius="2dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/edtLayout" />
+
+    <com.jin.widget.StrokedTextView
+        android:id="@+id/strokedTextView"
+        style="@style/fontRoboto600"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="12dp"
+        android:layout_marginTop="16dp"
+        android:paddingVertical="4dp"
+        android:text="Stroked TextView"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/magicTextView"
+        app:stroke_color="#000000"
+        app:stroke_textHasShadow="true"
+        app:stroke_width="2dp" />
+</androidx.constraintlayout.widget.ConstraintLayout>

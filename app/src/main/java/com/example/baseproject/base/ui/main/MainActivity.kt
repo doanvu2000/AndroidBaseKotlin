@@ -13,6 +13,7 @@ import com.example.baseproject.base.ui.ads.DemoAdsActivity
 import com.example.baseproject.base.ui.camerademo.CameraViewLibDemoActivity
 import com.example.baseproject.base.ui.demo_viewpager.DemoViewPagerActivity
 import com.example.baseproject.base.ui.flex_box_layout.DemoFlexBoxLayoutActivity
+import com.example.baseproject.base.ui.jinwidget.JinWidgetActivity
 import com.example.baseproject.base.ui.location.LocationActivity
 import com.example.baseproject.base.ui.lunar_calendar.LunarCalendarActivity
 import com.example.baseproject.base.ui.nav_demo.NavigationComponentActivity
@@ -119,6 +120,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
         binding.btnDemoNavigationComponent.clickSafe {
             openActivity(NavigationComponentActivity::class.java)
+        }
+
+        binding.jinWidgetDemo.clickSafe {
+            openActivity(JinWidgetActivity::class.java)
         }
     }
 

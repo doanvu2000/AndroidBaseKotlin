@@ -36,7 +36,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BaseProject"
         tools:targetApi="31">
-
+        <activity
+            android:name=".base.ui.jinwidget.JinWidgetActivity"
+            android:exported="false" />
         <activity
             android:name=".base.ui.nav_demo.NavigationComponentActivity"
             android:exported="false"
