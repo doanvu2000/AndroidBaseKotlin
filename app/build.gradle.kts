@@ -72,6 +72,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":jinwidget"))
     implementation(project(":skeleton"))
     implementation(project(":sliderview"))
     implementation(project(":stickerview"))

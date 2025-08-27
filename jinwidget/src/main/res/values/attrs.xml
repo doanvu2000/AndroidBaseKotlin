@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="StrokedTextView">
+        <attr name="stroke_width" format="dimension" />
+        <attr name="stroke_color" format="color" />
+        <attr name="stroke_textAllCaps" format="boolean" />
+        <attr name="stroke_textHasShadow" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="MagicTextView">
+        <attr name="innerShadowColor" format="color" />
+        <attr name="innerShadowRadius" format="dimension" />
+        <attr name="innerShadowDx" format="dimension" />
+        <attr name="innerShadowDy" format="dimension" />
+
+        <attr name="outerShadowColor" format="color" />
+        <attr name="outerShadowRadius" format="dimension" />
+        <attr name="outerShadowDx" format="dimension" />
+        <attr name="outerShadowDy" format="dimension" />
+
+        <attr name="typeface_mg" format="reference" />
+
+        <!--        <attr name="foreground" format="reference|color"/>-->
+        <!--        <attr name="background" format="reference|color"/>-->
+
+        <attr name="strokeWidthMg" format="dimension" />
+        <attr name="strokeMiterMg" format="dimension" />
+        <attr name="strokeColorMg" format="color" />
+        <attr name="strokeJoinStyle">
+            <enum name="miter" value="0" />
+            <enum name="bevel" value="1" />
+            <enum name="round" value="2" />
+        </attr>
+    </declare-styleable>
+</resources>

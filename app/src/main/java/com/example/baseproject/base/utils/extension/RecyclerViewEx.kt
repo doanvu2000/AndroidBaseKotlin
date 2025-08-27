@@ -134,16 +134,16 @@ fun RecyclerView.onScrollListener(action: () -> Unit) {
     })
 }
 
-/**
- * Tự động ẩn keyboard khi scroll RecyclerView
- */
-fun RecyclerView.hideKeyboardWhenScroll() {
-    onScrollListener {
-        if (isSoftKeyboardVisible()) {
-            hideKeyboard()
-        }
-    }
-}
+///**
+// * Tự động ẩn keyboard khi scroll RecyclerView
+// */
+//fun RecyclerView.hideKeyboardWhenScroll() {
+//    onScrollListener {
+//        if (isSoftKeyboardVisible()) {
+//            hideKeyboard()
+//        }
+//    }
+//}
 
 //endregion
 
