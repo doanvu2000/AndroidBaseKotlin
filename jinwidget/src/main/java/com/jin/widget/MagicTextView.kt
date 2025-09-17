@@ -57,8 +57,8 @@ class MagicTextView : AppCompatTextView {
     }
 
     fun init(attrs: AttributeSet?) {
-        outerShadows = ArrayList<Shadow>()
-        innerShadows = ArrayList<Shadow>()
+        outerShadows = ArrayList()
+        innerShadows = ArrayList()
         if (canvasStore == null) {
             canvasStore = WeakHashMap<String?, Pair<Canvas, Bitmap>?>()
         }
@@ -66,7 +66,7 @@ class MagicTextView : AppCompatTextView {
         if (attrs != null) {
             var a: TypedArray? = null
             try {
-                a = getContext().obtainStyledAttributes(attrs, R.styleable.MagicTextView)
+                a = context.obtainStyledAttributes(attrs, R.styleable.MagicTextView)
 
                 //                int typefaceResId = a.getResourceId(R.styleable.MagicTextView_typeface_mg, R.font.font_bold); // Lấy ID của font
 //                if (typefaceResId != 0) {

@@ -229,4 +229,16 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
         AppLogger.w(TAG, "Fragment ${this.javaClass.simpleName}: $msg")
 
     //endregion
+
+    fun main(action: () -> Unit) {
+        launchCoroutineMain {
+            action()
+        }
+    }
+
+    fun io(action: () -> Unit) {
+        launchCoroutineIO {
+            action()
+        }
+    }
 }
