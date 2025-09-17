@@ -1,4 +1,4 @@
-package com.jin.widget
+package com.jin.widget.utils
 
 import android.content.Context
 import android.content.res.Resources

@@ -1,4 +1,4 @@
-package com.jin.widget
+package com.jin.widget.textview
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -14,6 +14,8 @@ import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.graphics.toColorInt
 import androidx.core.graphics.withTranslation
+import com.jin.widget.R
+import com.jin.widget.utils.dpToPx
 
 class StrokedTextView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0

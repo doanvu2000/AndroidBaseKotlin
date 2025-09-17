@@ -1,4 +1,4 @@
-package com.jin.widget
+package com.jin.widget.textview
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -18,6 +18,7 @@ import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.util.Pair
 import androidx.appcompat.widget.AppCompatTextView
+import com.jin.widget.R
 import java.util.Locale
 import java.util.WeakHashMap
 
