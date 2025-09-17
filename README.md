@@ -1,5 +1,7 @@
 # Android Base Kotlin
 
+English | [Tiếng Việt](README_vi.md)
+
 A modern, Kotlin-first, multi-module Android starter that bundles common UI widgets, utilities, and
 a demo app. It targets Android 14 (SDK 34/36 toolchain) with Java/Kotlin 17, and ships ready-to-use
 integrations for Navigation, Retrofit/OkHttp, Coil/Glide, Firebase (Crashlytics/Analytics/Remote
@@ -128,5 +130,5 @@ repository root and reference it in this section.
 
 ## Author
 
-Base: doanvu2000
-Support: [hoicham](https://github.com/PNThanggg), [vandatgsts](https://github.com/vandatgsts)
+- Base: doanvu2000
+- Support: [hoicham](https://github.com/PNThanggg), [vandatgsts](https://github.com/vandatgsts)
