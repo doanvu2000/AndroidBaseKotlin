@@ -17,6 +17,26 @@ import androidx.core.graphics.withTranslation
 import com.jin.widget.R
 import com.jin.widget.utils.dpToPx
 
+/**
+ * A custom [AppCompatTextView] that adds a stroke effect around the text.
+ *
+ * This view allows for customization of the stroke's width and color. It also supports
+ * applying a linear gradient to the text fill color and can force the text to be uppercase.
+ *
+ * Custom attributes can be set via XML:
+ * - `stroke_width`: The width of the stroke in pixels.
+ * - `stroke_color`: The color of the stroke.
+ * - `stroke_textAllCaps`: A boolean to indicate if the text should be rendered in uppercase.
+ * - `is_gradient_text_color`: A boolean to enable or disable the gradient text color.
+ * - `start_color_gradient`: The starting color of the text gradient.
+ * - `end_color_gradient`: The ending color of the text gradient.
+ * - `is_alignment_center`: A boolean to force the text alignment to be centered, especially useful for multi-line text.
+ *
+ * @param context The Context the view is running in, through which it can access the current theme, resources, etc.
+ * @param attrs The attributes of the XML tag that is inflating the view.
+ * @param defStyleAttr An attribute in the current theme that contains a reference to a style resource
+ * that supplies default values for the view. Can be 0 to not look for defaults.
+ */
 class StrokedTextView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : AppCompatTextView(context, attrs, defStyleAttr) {

@@ -22,6 +22,36 @@ import com.jin.widget.R
 import java.util.Locale
 import java.util.WeakHashMap
 
+/**
+ * A custom [AppCompatTextView] that provides advanced text styling capabilities,
+ * including multiple outer and inner shadows, text stroke (outline), and gradient/bitmap fills.
+ *
+ * These effects can be configured programmatically or via XML attributes.
+ *
+ * XML Attributes:
+ * - `app:innerShadowColor`: Color of the inner shadow.
+ * - `app:innerShadowRadius`: Radius of the inner shadow.
+ * - `app:innerShadowDx`: Horizontal offset of the inner shadow.
+ * - `app:innerShadowDy`: Vertical offset of the inner shadow.
+ * - `app:outerShadowColor`: Color of the outer shadow.
+ * - `app:outerShadowRadius`: Radius of the outer shadow.
+ * - `app:outerShadowDx`: Horizontal offset of the outer shadow.
+ * - `app:outerShadowDy`: Vertical offset of the outer shadow.
+ * - `app:strokeColorMg`: Color of the text stroke (outline).
+ * - `app:strokeWidthMg`: Width of the text stroke.
+ * - `app:strokeMiterMg`: Miter limit for the text stroke.
+ * - `app:strokeJoinStyle`: Join style for the text stroke (`miter`, `bevel`, `round`).
+ *
+ * Example usage in XML:
+ * ```xml
+ * <com.jin.widget.textview.MagicTextView
+ *     android:layout_width="wrap_content"
+ *     android:layout_height="wrap_content"
+ *     android:text="Magic Text"
+ *     android:textSize="48sp"
+ *     app:strokeColorMg="#000000"
+ *     app:strokeWidthMg="2dp"
+ */
 class MagicTextView : AppCompatTextView {
     private var outerShadows: ArrayList<Shadow>? = null
     private var innerShadows: ArrayList<Shadow>? = null
