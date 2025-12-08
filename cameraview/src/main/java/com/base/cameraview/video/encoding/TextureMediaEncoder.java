@@ -161,8 +161,16 @@ public class TextureMediaEncoder extends VideoMediaEncoder<TextureConfig> {
         float scaleY = mConfig.scaleY;
         float scaleTranslX = (1F - scaleX) / 2F;
         float scaleTranslY = (1F - scaleY) / 2F;
+
+
         Matrix.translateM(transform, 0, scaleTranslX, scaleTranslY, 0);
         Matrix.scaleM(transform, 0, scaleX, scaleY, 1);
+
+        if (mHasCustomFilter) {
+            Matrix.translateM(transform, 0, 0.5F, 0.5F, 0);
+            Matrix.scaleM(transform, 0, -1F, -1F, 1F);  // scaleY = -1 để flip
+            Matrix.translateM(transform, 0, -0.5F, -0.5F, 0);
+        }
 
         // 2. We also must rotate this matrix. In GlCameraPreview it is not needed because it is
         // a live stream, but the output video, must be correctly rotated based on the device
@@ -170,13 +178,16 @@ public class TextureMediaEncoder extends VideoMediaEncoder<TextureConfig> {
         // (the Z axis), so we must translate to origin, rotate, then back to where we were.
         // Fix: When custom filters are applied, we need to compensate rotation by 180 degrees
         // to fix the upside-down video issue that occurs with certain filters
+
         Matrix.translateM(transform, 0, 0.5F, 0.5F, 0);
-        Log.d(TAG, "onFrame: " + mTransformRotation);
+
         if (mHasCustomFilter) {
-            Matrix.rotateM(transform, 0, (mTransformRotation - 180) % 360, 0, 1, 0);
+            Matrix.rotateM(transform, 0, (mTransformRotation + 180) % 360, 0, 0, 1);
         } else {
             Matrix.rotateM(transform, 0, mTransformRotation, 0, 0, 1);
         }
+
+        Matrix.translateM(transform, 0, -0.5F, -0.5F, 0);
 
         // 3. Do the same for overlays with their own rotation.
         if (mConfig.hasOverlay()) {
