@@ -28,6 +28,7 @@ public class TextureMediaEncoder extends VideoMediaEncoder<TextureConfig> {
     private EglWindowSurface mWindow;
     private GlTextureDrawer mDrawer;
     private Pool<Frame> mFramePool = new Pool<>(Integer.MAX_VALUE, Frame::new);
+    private boolean mHasCustomFilter = false;
 
     private long mFirstTimeUs = Long.MIN_VALUE;
 
@@ -118,6 +119,9 @@ public class TextureMediaEncoder extends VideoMediaEncoder<TextureConfig> {
     private void onFilter(@NonNull Filter filter) {
         if (mDrawer != null) {
             mDrawer.setFilter(filter);
+            // Check if this is a custom filter (not NoFilter)
+            String filterClassName = filter.getClass().getSimpleName();
+            mHasCustomFilter = !"NoFilter".equals(filterClassName);
         }
     }
 
@@ -164,9 +168,15 @@ public class TextureMediaEncoder extends VideoMediaEncoder<TextureConfig> {
         // a live stream, but the output video, must be correctly rotated based on the device
         // rotation at the moment. Rotation also takes place with respect to the origin
         // (the Z axis), so we must translate to origin, rotate, then back to where we were.
+        // Fix: When custom filters are applied, we need to compensate rotation by 180 degrees
+        // to fix the upside-down video issue that occurs with certain filters
         Matrix.translateM(transform, 0, 0.5F, 0.5F, 0);
-        Matrix.rotateM(transform, 0, mTransformRotation, 0, 0, 1);
-        Matrix.translateM(transform, 0, -0.5F, -0.5F, 0);
+        Log.d(TAG, "onFrame: " + mTransformRotation);
+        if (mHasCustomFilter) {
+            Matrix.rotateM(transform, 0, (mTransformRotation - 180) % 360, 0, 1, 0);
+        } else {
+            Matrix.rotateM(transform, 0, mTransformRotation, 0, 0, 1);
+        }
 
         // 3. Do the same for overlays with their own rotation.
         if (mConfig.hasOverlay()) {

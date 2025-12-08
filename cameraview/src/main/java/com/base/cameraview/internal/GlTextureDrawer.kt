@@ -24,6 +24,10 @@ class GlTextureDrawer(val texture: GlTexture) {
     @Suppress("unused")
     constructor(textureId: Int) : this(GlTexture(TEXTURE_UNIT, TEXTURE_TARGET, textureId))
 
+    fun getFilter(): Filter {
+        return mFilter
+    }
+
     fun setFilter(filter: Filter) {
         mPendingFilter = filter
     }

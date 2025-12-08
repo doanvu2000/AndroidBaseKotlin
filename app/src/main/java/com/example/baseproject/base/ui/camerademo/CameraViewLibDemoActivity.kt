@@ -13,6 +13,7 @@ import com.base.cameraview.CameraOptions
 import com.base.cameraview.PictureResult
 import com.base.cameraview.VideoResult
 import com.base.cameraview.controls.Mode
+import com.base.cameraview.filter.Filters
 import com.base.cameraview.frame.Frame
 import com.base.cameraview.frame.FrameProcessor
 import com.example.baseproject.base.base_view.screen.BaseActivity
@@ -79,6 +80,7 @@ class CameraViewLibDemoActivity : BaseActivity<ActivityCameraViewLibDemoBinding>
             addCameraListener(cameraListener)
             mode = Mode.PICTURE
             addFrameProcessor(frameProcessor)
+            filter = Filters.WHIRL_POOL.newInstance()
         }
     }
 

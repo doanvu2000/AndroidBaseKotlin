@@ -21,6 +21,7 @@ import com.base.cameraview.filters.SharpnessFilter
 import com.base.cameraview.filters.TemperatureFilter
 import com.base.cameraview.filters.TintFilter
 import com.base.cameraview.filters.VignetteFilter
+import com.base.cameraview.filters.WhirlPoolFilter
 
 /**
  * Contains commonly used [Filter]s.
@@ -137,7 +138,12 @@ enum class Filters(private val filterClass: Class<out Filter>) {
     /**
      * @see VignetteFilter
      */
-    VIGNETTE(VignetteFilter::class.java);
+    VIGNETTE(VignetteFilter::class.java),
+
+    /**
+     * @see WhirlPoolFilter
+     */
+    WHIRL_POOL(WhirlPoolFilter::class.java);
 
     /**
      * Returns a new instance of the given filter.
