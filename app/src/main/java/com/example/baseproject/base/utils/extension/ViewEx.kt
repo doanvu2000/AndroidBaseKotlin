@@ -38,7 +38,6 @@ import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.ShapeAppearanceModel
 import com.google.android.material.tabs.TabLayout
-import com.jin.widget.utils.pxToSpF
 
 //region Keyboard Management
 
@@ -622,5 +621,5 @@ fun TextView.changeTextSize(size: Int) {
 }
 
 fun TextView.changeTextSize(size: Float) {
-    setTextSize(TypedValue.COMPLEX_UNIT_SP, size.pxToSpF)
+    setTextSize(TypedValue.COMPLEX_UNIT_SP, size)
 }
