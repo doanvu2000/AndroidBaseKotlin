@@ -10,6 +10,7 @@ import android.graphics.RectF
 import android.graphics.drawable.LayerDrawable
 import android.os.Build
 import android.util.Log
+import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -19,6 +20,7 @@ import android.view.animation.AnimationUtils
 import android.view.animation.ScaleAnimation
 import android.view.inputmethod.InputMethodManager
 import android.widget.SeekBar
+import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
 import androidx.core.content.res.ResourcesCompat
@@ -613,3 +615,11 @@ fun View.setRoundedCornersMaterial(
 }
 
 //endregion
+
+fun TextView.changeTextSize(size: Int) {
+    changeTextSize(size.toFloat())
+}
+
+fun TextView.changeTextSize(size: Float) {
+    setTextSize(TypedValue.COMPLEX_UNIT_SP, size)
+}
