@@ -9,7 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.baseproject.R
 import com.example.baseproject.base.base_view.screen.BaseActivity
 import com.example.baseproject.base.base_view.screen.HomeFragment
-import com.example.baseproject.base.ui.ads.DemoAdsActivity
+import com.example.baseproject.base.ui.ads.DemoNativeAdsInListActivity
 import com.example.baseproject.base.ui.camerademo.CameraViewLibDemoActivity
 import com.example.baseproject.base.ui.demo_viewpager.DemoViewPagerActivity
 import com.example.baseproject.base.ui.flex_box_layout.DemoFlexBoxLayoutActivity
@@ -66,6 +66,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 .commit()
 //            randomAndSortList()
         }
+
         binding.btnRemoveFragment.setOnClickListener {
             val oldFragment: Fragment? =
                 supportFragmentManager.findFragmentById(R.id.frameContainer)
@@ -81,7 +82,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             openActivity(LocationActivity::class.java)
         }
         binding.btnDemoAds.clickSafe {
-            openActivity(DemoAdsActivity::class.java)
+//            openActivity(DemoAdsActivity::class.java)
+            openActivity(DemoNativeAdsInListActivity::class.java)
         }
         binding.btnTestCoilLib.clickSafe {
             openActivity(CoilActivity::class.java)

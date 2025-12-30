@@ -7,7 +7,11 @@ import com.example.baseproject.base.entity.User
 import com.example.baseproject.databinding.LayoutItemUserBinding
 
 class UserAdapter : BaseAdapterRecyclerView<User, LayoutItemUserBinding>() {
-    override fun inflateBinding(inflater: LayoutInflater, parent: ViewGroup): LayoutItemUserBinding {
+    override fun inflateBinding(
+        inflater: LayoutInflater,
+        parent: ViewGroup,
+        viewType: Int
+    ): LayoutItemUserBinding {
         return LayoutItemUserBinding.inflate(inflater, parent, false)
     }
 

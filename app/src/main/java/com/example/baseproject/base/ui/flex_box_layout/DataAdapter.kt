@@ -1,14 +1,16 @@
 package com.example.baseproject.base.ui.flex_box_layout
 
-import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.res.ResourcesCompat
 import com.example.baseproject.R
 import com.example.baseproject.base.base_view.screen.BaseAdapterRecyclerView
 import com.example.baseproject.databinding.LayoutItemFlexBoxBinding
 
 class DataAdapter : BaseAdapterRecyclerView<DataEntity, LayoutItemFlexBoxBinding>() {
-    override fun inflateBinding(inflater: LayoutInflater, parent: ViewGroup): LayoutItemFlexBoxBinding {
+    override fun inflateBinding(
+        inflater: LayoutInflater, parent: ViewGroup, viewType: Int
+    ): LayoutItemFlexBoxBinding {
         return LayoutItemFlexBoxBinding.inflate(inflater, parent, false)
     }
 
@@ -18,7 +20,9 @@ class DataAdapter : BaseAdapterRecyclerView<DataEntity, LayoutItemFlexBoxBinding
         } else {
             R.color.black_30
         }
-        binding.root.setStrokeColor(ColorStateList.valueOf(strokeColor))
+        binding.root.strokeColor = ResourcesCompat.getColor(
+            binding.root.context.resources, strokeColor, null
+        )
         binding.tvNumber.text = item.number.toString()
         binding.tvContent.text = item.content
     }

@@ -10,6 +10,7 @@ import com.example.baseproject.BuildConfig
 import com.example.baseproject.base.utils.extension.isDebugMode
 import com.example.baseproject.base.utils.util.Constants
 import com.example.baseproject.databinding.LayoutNativeAds2Binding
+import com.example.baseproject.databinding.LickingAdsBinding
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdLoader
 import com.google.android.gms.ads.AdRequest
@@ -94,6 +95,43 @@ object NativeAdsUtil {
         nativeAd: NativeAd?,
         adView: NativeAdView,
         binding: LayoutNativeAds2Binding?
+    ) {
+        if (nativeAd != null) {
+            adView.mediaView = binding?.adMedia
+            adView.headlineView = binding?.adHeadLine
+            adView.bodyView = binding?.adBody
+            adView.callToActionView = binding?.adCallToAction
+            adView.iconView = binding?.adIcon
+//            adView.advertiserView = binding?.adAdvertiser
+            (adView.headlineView as TextView?)?.text = nativeAd.headline
+            if (nativeAd.body == null) {
+                adView.bodyView?.visibility = View.INVISIBLE
+            } else {
+                adView.bodyView?.visibility = View.VISIBLE
+                (adView.bodyView as TextView?)?.text = nativeAd.body
+            }
+            if (nativeAd.callToAction == null) {
+                adView.callToActionView?.visibility = View.INVISIBLE
+            } else {
+                adView.callToActionView?.visibility = View.VISIBLE
+                (adView.callToActionView as Button?)?.text = nativeAd.callToAction
+            }
+            if (nativeAd.icon == null) {
+                adView.iconView?.visibility = View.GONE
+            } else {
+                (adView.iconView as ImageView?)?.setImageDrawable(
+                    nativeAd.icon?.drawable
+                )
+                adView.iconView?.visibility = View.VISIBLE
+            }
+            adView.setNativeAd(nativeAd)
+        }
+    }
+
+    fun populateNativeAdView(
+        nativeAd: NativeAd?,
+        adView: NativeAdView,
+        binding: LickingAdsBinding?
     ) {
         if (nativeAd != null) {
             adView.mediaView = binding?.adMedia

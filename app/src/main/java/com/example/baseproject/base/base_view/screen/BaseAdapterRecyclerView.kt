@@ -39,7 +39,7 @@ abstract class BaseAdapterRecyclerView<T, VB : ViewBinding>(
         internal set
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder<VB> {
-        binding = inflateBinding(LayoutInflater.from(parent.context), parent)
+        binding = inflateBinding(LayoutInflater.from(parent.context), parent, viewType)
         return BaseViewHolder(requireNotNull(binding)).apply {
             bindViewClick(this, viewType)
         }
@@ -50,9 +50,7 @@ abstract class BaseAdapterRecyclerView<T, VB : ViewBinding>(
     }
 
     override fun onBindViewHolder(
-        holder: BaseViewHolder<VB>,
-        position: Int,
-        payloads: MutableList<Any>
+        holder: BaseViewHolder<VB>, position: Int, payloads: MutableList<Any>
     ) {
         if (payloads.isEmpty()) {
             // No payloads, use normal binding
@@ -73,7 +71,9 @@ abstract class BaseAdapterRecyclerView<T, VB : ViewBinding>(
      * @param parent parent ViewGroup
      * @return ViewBinding instance cho item
      */
-    protected abstract fun inflateBinding(inflater: LayoutInflater, parent: ViewGroup): VB
+    protected abstract fun inflateBinding(
+        inflater: LayoutInflater, parent: ViewGroup, viewType: Int
+    ): VB
 
     /**
      * Bind data vào ViewBinding
@@ -93,8 +93,7 @@ abstract class BaseAdapterRecyclerView<T, VB : ViewBinding>(
      * @param listener callback function nhận item và position khi click
      */
     fun setOnClickItem(
-        enableAnimation: Boolean = false,
-        listener: ((item: T?, position: Int) -> Unit)? = null
+        enableAnimation: Boolean = false, listener: ((item: T?, position: Int) -> Unit)? = null
     ) {
         this.enableClickAnimation = enableAnimation
         this.onClickItem = listener
@@ -106,8 +105,7 @@ abstract class BaseAdapterRecyclerView<T, VB : ViewBinding>(
      * @param listener callback function nhận item và position khi long click, return true nếu consumed
      */
     fun setOnLongClickItem(
-        enableAnimation: Boolean = false,
-        listener: ((item: T?, position: Int) -> Boolean)? = null
+        enableAnimation: Boolean = false, listener: ((item: T?, position: Int) -> Boolean)? = null
     ) {
         this.enableLongClickAnimation = enableAnimation
         this.onLongClickItem = listener
