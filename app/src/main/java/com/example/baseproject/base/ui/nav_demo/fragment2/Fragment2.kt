@@ -1,8 +1,6 @@
 package com.example.baseproject.base.ui.nav_demo.fragment2
 
 import android.annotation.SuppressLint
-import android.view.LayoutInflater
-import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import com.example.baseproject.R
 import com.example.baseproject.base.base_view.screen.BaseFragment
@@ -12,11 +10,6 @@ import com.example.baseproject.base.utils.extension.safeNavigate
 import com.example.baseproject.databinding.Fragment2Binding
 
 class Fragment2 : BaseFragment<Fragment2Binding>() {
-    override fun inflateLayout(
-        inflater: LayoutInflater, container: ViewGroup?
-    ): Fragment2Binding {
-        return Fragment2Binding.inflate(inflater, container, false)
-    }
 
     override fun onBack() {
         //disable back pressed

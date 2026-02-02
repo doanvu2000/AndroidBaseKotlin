@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import android.view.LayoutInflater
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import com.base.cameraview.CameraException
@@ -23,9 +22,6 @@ import com.example.baseproject.base.utils.util.AppLogger
 import com.example.baseproject.databinding.ActivityCameraViewLibDemoBinding
 
 class CameraViewLibDemoActivity : BaseActivity<ActivityCameraViewLibDemoBinding>() {
-    override fun inflateViewBinding(inflater: LayoutInflater): ActivityCameraViewLibDemoBinding {
-        return ActivityCameraViewLibDemoBinding.inflate(inflater)
-    }
 
     private fun getPermissionList(): MutableList<String> {
         val permission = mutableListOf<String>()

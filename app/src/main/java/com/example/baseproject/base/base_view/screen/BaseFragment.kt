@@ -9,12 +9,14 @@ import androidx.lifecycle.lifecycleScope
 import androidx.viewbinding.ViewBinding
 import com.example.baseproject.base.utils.extension.clickAnimation
 import com.example.baseproject.base.utils.extension.handleBackPressed
+import com.example.baseproject.base.utils.extension.safeViewLifecycleOwner
 import com.example.baseproject.base.utils.util.AppLogger
 import com.example.baseproject.base.utils.util.Constants
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.lang.reflect.ParameterizedType
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -41,7 +43,7 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = inflateLayout(inflater, container)
+        _binding = createViewBinding(inflater, container)
         return binding.root
     }
 
@@ -70,7 +72,14 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
      * Default behavior: delegate to activity's back press dispatcher
      */
     open fun onBack() {
-        requireActivity().onBackPressedDispatcher.onBackPressed()
+        main {
+            requireActivity().onBackPressedDispatcher.onBackPressed()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        isAvailableClick = true
     }
 
     override fun onDestroyView() {
@@ -83,9 +92,38 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
 
     /**
      * Inflate layout và tạo view binding
-     * Override method này và inflate your view binding, demo in HomeFragment
      */
-    abstract fun inflateLayout(inflater: LayoutInflater, container: ViewGroup?): VB
+    @Suppress("UNCHECKED_CAST")
+    private fun createViewBinding(inflater: LayoutInflater, container: ViewGroup?): VB {
+        return try {
+            val type = getGenericSuperclass(javaClass)
+            val vbClass = type.actualTypeArguments[0] as Class<VB>
+            val method = vbClass.getMethod(
+                "inflate",
+                LayoutInflater::class.java,
+                ViewGroup::class.java,
+                Boolean::class.java
+            )
+            method.invoke(null, inflater, container, false) as VB
+        } catch (e: Exception) {
+            logError("Failed to create ViewBinding: ${e.message}")
+            throw RuntimeException(
+                "Cannot create ViewBinding for ${javaClass.simpleName}. Make sure you extend BaseFragment with proper generic type.",
+                e
+            )
+        }
+    }
+
+    private fun getGenericSuperclass(clazz: Class<*>): ParameterizedType {
+        val genericSuperclass = clazz.genericSuperclass
+        return if (genericSuperclass is ParameterizedType) {
+            genericSuperclass
+        } else {
+            // Kế thừa nhiều tầng, tìm parent class
+            clazz.superclass?.let { getGenericSuperclass(it) }
+                ?: throw IllegalStateException("Cannot find ParameterizedType for ${clazz.simpleName}")
+        }
+    }
 
     /**
      * Initialize views - must be implemented by subclasses
@@ -110,9 +148,9 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
      * Delay click to prevent multiple rapid clicks
      */
     private fun delayClick() {
-        launchCoroutineIO {
+        safeViewLifecycleOwner()?.lifecycleScope?.launch(Dispatchers.IO) {
             isAvailableClick = false
-            delay(TIME_DELAY_CLICK)
+            delay(200)
             isAvailableClick = true
         }
     }
@@ -123,11 +161,24 @@ abstract class BaseFragment<VB : ViewBinding> : Fragment() {
      * @param action action to perform on click
      */
     fun View.clickSafe(isAnimationClick: Boolean = false, action: () -> Unit) {
-        setOnClickListener {
+        this.setOnClickListener {
             if (isAvailableClick) {
-                if (isAnimationClick) clickAnimation()
+                if (isAnimationClick) {
+                    clickAnimation()
+                }
+                delayToAction(100) {
+                    action()
+                    delayClick()
+                }
+            }
+        }
+    }
+
+    fun View.clickAnimate(action: () -> Unit) {
+        this.setOnClickListener {
+            if (isAvailableClick) {
+                clickAnimation()
                 action()
-                delayClick()
             }
         }
     }

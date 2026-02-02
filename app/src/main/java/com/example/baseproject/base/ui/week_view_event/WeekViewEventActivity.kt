@@ -3,7 +3,6 @@ package com.example.baseproject.base.ui.week_view_event
 import android.content.ClipData
 import android.graphics.Color
 import android.graphics.RectF
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.Toast
 import com.example.baseproject.base.base_view.screen.BaseActivity
@@ -28,9 +27,6 @@ class WeekViewEventActivity : BaseActivity<ActivityWeekViewEventBinding>(),
     EventClickListener, WeekViewLoader,
     EventLongPressListener, EmptyViewLongPressListener,
     EmptyViewClickListener, AddEventClickListener, DropListener {
-    override fun inflateViewBinding(inflater: LayoutInflater): ActivityWeekViewEventBinding {
-        return ActivityWeekViewEventBinding.inflate(inflater)
-    }
 
     companion object {
         private const val TYPE_DAY_VIEW = 1

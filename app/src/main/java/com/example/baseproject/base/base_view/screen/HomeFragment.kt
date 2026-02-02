@@ -1,8 +1,6 @@
 package com.example.baseproject.base.base_view.screen
 
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import com.demo.skeleton.util.hideSkeleton
@@ -96,11 +94,4 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             Toast.makeText(requireContext(), "$item - $position", Toast.LENGTH_SHORT).show()
         }
     }
-
-    override fun inflateLayout(
-        inflater: LayoutInflater, container: ViewGroup?
-    ): FragmentHomeBinding {
-        return FragmentHomeBinding.inflate(inflater, container, false)
-    }
-
 }

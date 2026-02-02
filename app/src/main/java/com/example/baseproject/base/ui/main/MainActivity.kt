@@ -2,7 +2,6 @@ package com.example.baseproject.base.ui.main
 
 import android.annotation.SuppressLint
 import android.util.Log
-import android.view.LayoutInflater
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -185,7 +184,4 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     }
 
     var rs = 0
-    override fun inflateViewBinding(inflater: LayoutInflater): ActivityMainBinding {
-        return ActivityMainBinding.inflate(inflater)
-    }
 }

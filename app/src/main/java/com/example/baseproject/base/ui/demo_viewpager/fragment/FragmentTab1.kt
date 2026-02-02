@@ -1,7 +1,5 @@
 package com.example.baseproject.base.ui.demo_viewpager.fragment
 
-import android.view.LayoutInflater
-import android.view.ViewGroup
 import com.example.baseproject.base.base_view.screen.BaseFragment
 import com.example.baseproject.base.ui.demo_viewpager.DemoViewPagerActivity
 import com.example.baseproject.base.ui.demo_viewpager.enumz.TabInfo
@@ -21,9 +19,5 @@ class FragmentTab1 : BaseFragment<FragmentTabDemoBinding>() {
 
     override fun initListener() {
 
-    }
-
-    override fun inflateLayout(inflater: LayoutInflater, container: ViewGroup?): FragmentTabDemoBinding {
-        return FragmentTabDemoBinding.inflate(inflater, container, false)
     }
 }

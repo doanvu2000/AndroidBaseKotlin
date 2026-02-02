@@ -214,5 +214,13 @@ abstract class BaseAdapterRecyclerView<T, VB : ViewBinding>(
         notifyItemRangeInserted(start, data.size)
     }
 
+    open fun addItem(item: T, index: Int) {
+        try {
+            dataList.add(index, item)
+            notifyItemInserted(index)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
     //endregion
 }

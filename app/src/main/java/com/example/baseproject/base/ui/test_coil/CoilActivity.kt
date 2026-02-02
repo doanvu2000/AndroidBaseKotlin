@@ -1,7 +1,6 @@
 package com.example.baseproject.base.ui.test_coil
 
 import android.util.Log
-import android.view.LayoutInflater
 import coil.load
 import coil.request.ErrorResult
 import coil.request.ImageRequest
@@ -59,9 +58,5 @@ class CoilActivity : BaseActivity<ActivityCoilBinding>() {
 
     override fun initListener() {
 
-    }
-
-    override fun inflateViewBinding(inflater: LayoutInflater): ActivityCoilBinding {
-        return ActivityCoilBinding.inflate(inflater)
     }
 }

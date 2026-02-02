@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.Settings
 import android.util.Log
-import android.view.LayoutInflater
 import androidx.activity.result.contract.ActivityResultContracts
 import com.example.baseproject.base.base_view.screen.BaseActivity
 import com.example.baseproject.base.dialog.DialogNeedPermission
@@ -24,10 +23,6 @@ import com.example.baseproject.databinding.ActivityTakePictureBinding
 import java.io.FileNotFoundException
 
 class TakePictureActivity : BaseActivity<ActivityTakePictureBinding>() {
-    override fun inflateViewBinding(inflater: LayoutInflater): ActivityTakePictureBinding {
-        return ActivityTakePictureBinding.inflate(inflater)
-    }
-
     //region variable
     private var uriPhoto: Uri? = null
     private var originalBitmap: Bitmap? = null

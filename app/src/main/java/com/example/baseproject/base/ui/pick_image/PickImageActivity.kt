@@ -7,7 +7,6 @@ import android.net.Uri
 import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
-import android.view.LayoutInflater
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.Companion.isPhotoPickerAvailable
@@ -27,9 +26,6 @@ import java.io.FileNotFoundException
 import java.io.InputStream
 
 class PickImageActivity : BaseActivity<ActivityPickImageBinding>() {
-    override fun inflateViewBinding(inflater: LayoutInflater): ActivityPickImageBinding {
-        return ActivityPickImageBinding.inflate(inflater)
-    }
 
     //region variable
     private var uriPhoto: Uri? = null

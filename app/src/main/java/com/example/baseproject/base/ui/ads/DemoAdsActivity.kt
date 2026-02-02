@@ -1,7 +1,6 @@
 package com.example.baseproject.base.ui.ads
 
 import android.annotation.SuppressLint
-import android.view.LayoutInflater
 import com.example.baseproject.base.base_view.screen.BaseActivity
 import com.example.baseproject.base.utils.extension.gone
 import com.example.baseproject.base.utils.extension.show
@@ -19,7 +18,8 @@ class DemoAdsActivity : BaseActivity<ActivityDemoAdsBinding>() {
 
     @SuppressLint("SetTextI18n")
     private fun initAds() {
-        AdmobUtils.getInstance(this).showBannerNormal(this, binding.banner,
+        AdmobUtils.getInstance(this).showBannerNormal(
+            this, binding.banner,
             onBannerShowSuccess = {
                 binding.tvBanner.text = "Banner ads: load success"
                 binding.loadingBanner.gone()
@@ -35,7 +35,11 @@ class DemoAdsActivity : BaseActivity<ActivityDemoAdsBinding>() {
             binding.loadingNative.gone()
             binding.layoutNativeAd.background.show()
             binding.layoutNativeAd.layoutBase.gone()
-            NativeAdsUtil.populateNativeAdView(it, binding.layoutNativeAd.root, binding.layoutNativeAd)
+            NativeAdsUtil.populateNativeAdView(
+                it,
+                binding.layoutNativeAd.root,
+                binding.layoutNativeAd
+            )
         }, loadFailed = {
             binding.tvNativeAds.text = "Native ads: load failed"
             binding.loadingNative.gone()
@@ -49,9 +53,5 @@ class DemoAdsActivity : BaseActivity<ActivityDemoAdsBinding>() {
                 showSnackBar(it ?: "Error when show inter", 3000, true)
             })
         }
-    }
-
-    override fun inflateViewBinding(inflater: LayoutInflater): ActivityDemoAdsBinding {
-        return ActivityDemoAdsBinding.inflate(inflater)
     }
 }

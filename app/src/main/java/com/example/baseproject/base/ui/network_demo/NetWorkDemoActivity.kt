@@ -2,7 +2,6 @@ package com.example.baseproject.base.ui.network_demo
 
 import android.annotation.SuppressLint
 import android.util.Log
-import android.view.LayoutInflater
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.baseproject.base.base_view.screen.BaseActivity
@@ -16,9 +15,6 @@ import com.example.baseproject.databinding.ActivityNetWorkDemoBinding
 import kotlinx.coroutines.launch
 
 class NetWorkDemoActivity : BaseActivity<ActivityNetWorkDemoBinding>() {
-    override fun inflateViewBinding(inflater: LayoutInflater): ActivityNetWorkDemoBinding {
-        return ActivityNetWorkDemoBinding.inflate(inflater)
-    }
 
     private val viewModel by viewModels<NetWorkViewModel>()
 
@@ -95,8 +91,7 @@ class NetWorkDemoActivity : BaseActivity<ActivityNetWorkDemoBinding>() {
                                 is java.net.SocketException -> "Network connection lost"
                                 is java.io.EOFException -> "Connection ended unexpectedly"
                                 is javax.net.ssl.SSLException -> "SSL/TLS connection failed"
-                                is java.security.cert.CertPathValidatorException ->
-                                    "Server certificate validation failed"
+                                is java.security.cert.CertPathValidatorException -> "Server certificate validation failed"
 
                                 else -> "Error: ${result.exception.message}"
                             }

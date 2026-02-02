@@ -1,14 +1,10 @@
 package com.example.baseproject.base.ui.jinwidget
 
-import android.view.LayoutInflater
 import androidx.core.widget.doAfterTextChanged
 import com.example.baseproject.base.base_view.screen.BaseActivity
 import com.example.baseproject.databinding.ActivityJinWidgetBinding
 
 class JinWidgetActivity : BaseActivity<ActivityJinWidgetBinding>() {
-    override fun inflateViewBinding(inflater: LayoutInflater): ActivityJinWidgetBinding {
-        return ActivityJinWidgetBinding.inflate(inflater)
-    }
 
     override fun initView() {
 

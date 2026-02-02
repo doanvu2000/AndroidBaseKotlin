@@ -1,5 +1,7 @@
 package com.example.baseproject.base.base_view.screen
 
+import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -27,6 +29,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.lang.reflect.ParameterizedType
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -64,7 +67,7 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         // Initialize view binding
-        binding = inflateViewBinding(layoutInflater)
+        binding = createViewBinding()
         setContentView(binding.root)
 
         // Setup window insets
@@ -137,7 +140,32 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
     /**
      * Inflate view binding - must be implemented by subclasses
      */
-    abstract fun inflateViewBinding(inflater: LayoutInflater): VB
+    @Suppress("UNCHECKED_CAST")
+    private fun createViewBinding(): VB {
+        return try {
+            val type = getGenericSuperclass(javaClass)
+            val vbClass = type.actualTypeArguments[0] as Class<VB>
+            val method = vbClass.getMethod("inflate", LayoutInflater::class.java)
+            method.invoke(null, layoutInflater) as VB
+        } catch (e: Exception) {
+            logError("Failed to create ViewBinding: ${e.message}")
+            throw RuntimeException(
+                "Cannot create ViewBinding for ${javaClass.simpleName}. Make sure you extend BaseActivityViewBinding with proper generic type.",
+                e
+            )
+        }
+    }
+
+    private fun getGenericSuperclass(clazz: Class<*>): ParameterizedType {
+        val genericSuperclass = clazz.genericSuperclass
+        return if (genericSuperclass is ParameterizedType) {
+            genericSuperclass
+        } else {
+            // Kế thừa nhiều tầng, tìm parent class
+            clazz.superclass?.let { getGenericSuperclass(it) }
+                ?: throw IllegalStateException("Cannot find ParameterizedType for ${clazz.simpleName}")
+        }
+    }
 
     /**
      * Initialize views - must be implemented by subclasses
@@ -155,12 +183,21 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
     abstract fun initListener()
 
     /**
+     * preventing font scaling from device settings
+     * */
+    override fun attachBaseContext(newBase: Context?) {
+        val newOverrideConfiguration =
+            Configuration(newBase?.resources?.configuration).apply { fontScale = 1.0f }
+        applyOverrideConfiguration(newOverrideConfiguration)
+        super.attachBaseContext(newBase)
+    }
+
+    /**
      * Delay click to prevent multiple rapid clicks
      */
     private fun delayClick() {
-        launchCoroutineIO {
-            isAvailableClick = false
-            delay(TIME_DELAY_CLICK)
+        isAvailableClick = false
+        delayToAction(TIME_DELAY_CLICK) {
             isAvailableClick = true
         }
     }
@@ -209,6 +246,9 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
         blockCoroutine: suspend CoroutineScope.() -> Unit
     ) {
         try {
+            if (isFinishing) {
+                return
+            }
             lifecycleScope.launch(dispatcher + coroutineExceptionHandler) {
                 blockCoroutine()
             }
@@ -228,6 +268,18 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
      */
     fun launchCoroutineIO(blockCoroutine: suspend CoroutineScope.() -> Unit) =
         launchCoroutine(Dispatchers.IO, blockCoroutine)
+
+    fun main(action: () -> Unit) {
+        launchCoroutineMain {
+            action()
+        }
+    }
+
+    fun io(action: () -> Unit) {
+        launchCoroutineIO {
+            action()
+        }
+    }
 
     /**
      * Execute action after delay
@@ -266,33 +318,22 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Reset click availability when activity is resumed
+        isAvailableClick = true
+    }
+
     override fun onPause() {
         super.onPause()
         // Reset click availability when activity is paused
         isAvailableClick = true
     }
 
-    //region Logging Utilities
-
-    /**
-     * Log debug message
-     */
-    fun logDebug(msg: String) = AppLogger.d(TAG, "${this.javaClass.simpleName}: $msg")
-
-    /**
-     * Log warning message
-     */
-    fun logWarning(msg: String) = AppLogger.w(TAG, "${this.javaClass.simpleName}: $msg")
-
-    /**
-     * Log error message
-     */
-    fun logError(msg: String) = AppLogger.e(TAG, "${this.javaClass.simpleName}: $msg")
-
-    /**
-     * Log info message
-     */
-    fun logInfo(msg: String) = AppLogger.i(TAG, "${this.javaClass.simpleName}: $msg")
-
+    //region logging
+    fun logInfo(msg: String) = AppLogger.i(TAG, "Rev[${this.javaClass.simpleName}] " + msg)
+    fun logWarn(msg: String) = AppLogger.w(TAG, "Rev[${this.javaClass.simpleName}] " + msg)
+    fun logDebug(msg: String) = AppLogger.d(TAG, "Rev[${this.javaClass.simpleName}] " + msg)
+    fun logError(msg: String) = AppLogger.e(TAG, "Rev[${this.javaClass.simpleName}] " + msg)
     //endregion
 }

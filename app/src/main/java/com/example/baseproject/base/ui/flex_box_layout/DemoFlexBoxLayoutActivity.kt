@@ -1,6 +1,5 @@
 package com.example.baseproject.base.ui.flex_box_layout
 
-import android.view.LayoutInflater
 import androidx.lifecycle.lifecycleScope
 import com.example.baseproject.base.base_view.screen.BaseActivity
 import com.example.baseproject.base.utils.extension.hide
@@ -106,9 +105,5 @@ class DemoFlexBoxLayoutActivity : BaseActivity<ActivityDemoFlexBoxLayoutBinding>
         dataAdapter.setOnClickItem { _, position ->
             dataAdapter.setSelected(position)
         }
-    }
-
-    override fun inflateViewBinding(inflater: LayoutInflater): ActivityDemoFlexBoxLayoutBinding {
-        return ActivityDemoFlexBoxLayoutBinding.inflate(inflater)
     }
 }

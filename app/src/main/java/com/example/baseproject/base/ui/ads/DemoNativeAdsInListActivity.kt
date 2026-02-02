@@ -1,14 +1,10 @@
 package com.example.baseproject.base.ui.ads
 
-import android.view.LayoutInflater
 import com.example.baseproject.base.base_view.screen.BaseActivity
 import com.example.baseproject.base.utils.extension.setGridLayoutManagerIncludeAds
 import com.example.baseproject.databinding.ActivityDemoNativeAdsInListBinding
 
 class DemoNativeAdsInListActivity : BaseActivity<ActivityDemoNativeAdsInListBinding>() {
-    override fun inflateViewBinding(inflater: LayoutInflater): ActivityDemoNativeAdsInListBinding {
-        return ActivityDemoNativeAdsInListBinding.inflate(inflater)
-    }
 
     private val lickingAdapter by lazy {
         LickingAdapter()

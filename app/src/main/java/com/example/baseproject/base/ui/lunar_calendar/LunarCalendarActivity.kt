@@ -1,7 +1,6 @@
 package com.example.baseproject.base.ui.lunar_calendar
 
 import android.annotation.SuppressLint
-import android.view.LayoutInflater
 import com.example.baseproject.base.base_view.screen.BaseActivity
 import com.example.baseproject.base.utils.extension.getCurrentYear
 import com.example.baseproject.base.utils.extension.getDay
@@ -17,10 +16,6 @@ import com.example.baseproject.databinding.ActivityLunarCalendarBinding
 import java.util.Calendar
 
 class LunarCalendarActivity : BaseActivity<ActivityLunarCalendarBinding>() {
-    override fun inflateViewBinding(inflater: LayoutInflater): ActivityLunarCalendarBinding {
-        return ActivityLunarCalendarBinding.inflate(inflater)
-    }
-
     companion object {
         const val NORMAL_DAY = 0
         const val GOOD_DAY = 1

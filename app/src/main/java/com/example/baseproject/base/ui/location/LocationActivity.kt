@@ -2,7 +2,6 @@ package com.example.baseproject.base.ui.location
 
 import android.annotation.SuppressLint
 import android.location.Location
-import android.view.LayoutInflater
 import androidx.activity.result.contract.ActivityResultContracts
 import com.example.baseproject.base.base_view.screen.BaseActivity
 import com.example.baseproject.base.utils.extension.ACCESS_COARSE_LOCATION
@@ -62,11 +61,12 @@ class LocationActivity : BaseActivity<ActivityLocationBinding>() {
         })
     }
 
-    private val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
-        if (it[ACCESS_FINE_LOCATION] == true && it[ACCESS_COARSE_LOCATION] == true) {
-            setStatus("permission ok, please retry to get location")
+    private val permissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+            if (it[ACCESS_FINE_LOCATION] == true && it[ACCESS_COARSE_LOCATION] == true) {
+                setStatus("permission ok, please retry to get location")
+            }
         }
-    }
 
     @SuppressLint("SetTextI18n")
     private fun getAddress(location: Location) {
@@ -112,9 +112,5 @@ class LocationActivity : BaseActivity<ActivityLocationBinding>() {
         binding.tvLongitude.text = "Long: "
         binding.tvAddress.text = "Address: "
         setStatus("")
-    }
-
-    override fun inflateViewBinding(inflater: LayoutInflater): ActivityLocationBinding {
-        return ActivityLocationBinding.inflate(inflater)
     }
 }
