@@ -10,7 +10,7 @@ class Fragment3ViewModel : BaseViewModel() {
         data object OnBack : EventScreen3()
     }
 
-    private val eventChannel = Channel<EventScreen3>()
+    private val eventChannel = Channel<EventScreen3>(Channel.BUFFERED)
     val event = eventChannel.receiveAsFlow()
 
     fun onBack() {

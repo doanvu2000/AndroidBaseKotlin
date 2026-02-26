@@ -11,7 +11,7 @@ class Fragment2ViewModel : BaseViewModel() {
         data object ClickGotoFragment3 : EventScreen2()
     }
 
-    private val eventChannel = Channel<EventScreen2>()
+    private val eventChannel = Channel<EventScreen2>(Channel.BUFFERED)
     val event = eventChannel.receiveAsFlow()
 
     fun clickGotoFragment3() {
